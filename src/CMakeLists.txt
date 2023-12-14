@@ -367,6 +367,10 @@ add_files(
     rail_type.h
     random_access_file.cpp
     random_access_file_type.h
+    raster_import.cpp
+    raster_import.h
+    raster_io.cpp
+    raster_io.h
     rev.h
     road.cpp
     road.h
@@ -519,6 +523,7 @@ add_files(
     transparency_gui.cpp
     transparency_gui.h
     transport_type.h
+    tree_base.h
     tree_cmd.cpp
     tree_gui.cpp
     tree_map.h

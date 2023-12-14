@@ -21,6 +21,7 @@ enum HeightmapRotation {
 	HM_CLOCKWISE,         ///< Rotate the map clockwise 45 degrees
 };
 
+bool IsValidHeightmapDimension(size_t width, size_t height);
 bool GetHeightmapDimensions(DetailedFileType dft, const char *filename, uint *x, uint *y);
 void LoadHeightmap(DetailedFileType dft, const char *filename);
 void FlatEmptyWorld(byte tile_height);

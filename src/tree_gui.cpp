@@ -8,6 +8,7 @@
 /** @file tree_gui.cpp GUIs for building trees. */
 
 #include "stdafx.h"
+#include "tree_base.h"
 #include "window_gui.h"
 #include "gfx_func.h"
 #include "tilehighlight_func.h"
@@ -18,7 +19,6 @@
 #include "sound_func.h"
 #include "strings_func.h"
 #include "zoom_func.h"
-#include "tree_map.h"
 #include "viewport_func.h"
 
 #include "widgets/tree_widget.h"
@@ -29,9 +29,6 @@
 
 #include "safeguards.h"
 
-void PlaceTreesRandomly();
-void RemoveAllTrees();
-uint PlaceTreeGroupAroundTile(TileIndex tile, TreeType treetype, uint radius, uint count, bool set_zone);
 
 /**
  * Calculate the maximum size of all tree sprites

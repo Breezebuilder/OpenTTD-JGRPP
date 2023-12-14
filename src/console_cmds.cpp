@@ -63,6 +63,8 @@
 #include "tile_cmd.h"
 #include "object_base.h"
 #include "newgrf_newsignals.h"
+#include "heightmap.h"
+#include "raster_import.h"
 #include <time.h>
 
 #include "3rdparty/cpp-btree/btree_set.h"
@@ -96,7 +98,7 @@ public:
 	void ValidateFileList(bool force_reload = false)
 	{
 		if (force_reload || !this->file_list_valid) {
-			this->BuildFileList(FT_SAVEGAME, SLO_LOAD);
+			this->BuildFileList(FT_ALL, SLO_LOAD);
 			this->file_list_valid = true;
 		}
 	}
@@ -530,7 +532,7 @@ DEF_CONSOLE_CMD(ConLoad)
 DEF_CONSOLE_CMD(ConRemove)
 {
 	if (argc == 0) {
-		IConsoleHelp("Remove a savegame by name or index. Usage: 'rm <file | number>'");
+		IConsoleHelp("Remove a file by name or index. Usage: 'rm <file | number>'");
 		return true;
 	}
 
@@ -556,7 +558,7 @@ DEF_CONSOLE_CMD(ConRemove)
 DEF_CONSOLE_CMD(ConListFiles)
 {
 	if (argc == 0) {
-		IConsoleHelp("List all loadable savegames and directories in the current dir via console. Usage: 'ls | dir'");
+		IConsoleHelp("List all recognised files and directories in the current dir via console. Usage: 'ls | dir'");
 		return true;
 	}
 
@@ -2401,6 +2403,7 @@ DEF_CONSOLE_CMD(ConListDirs)
 		{ GAME_LIBRARY_DIR, "gslib",      false },
 		{ SCENARIO_DIR,     "scenario",   false },
 		{ HEIGHTMAP_DIR,    "heightmap",  false },
+		{ GEOMAP_DIR,       "geomap",     false },
 		/* Default save locations for user data */
 		{ SAVE_DIR,         "save",       true  },
 		{ AUTOSAVE_DIR,     "autosave",   true  },
@@ -3798,6 +3801,74 @@ DEF_CONSOLE_CMD(ConDumpInfo)
 	return false;
 }
 
+DEF_CONSOLE_CMD(ConImportGeneric)
+{
+	if (argc != 3) {
+		IConsoleHelp("Import a raster layer (.bmp) from the geomap directory to the current map.");
+		IConsoleHelp("Usage: 'import terrain|fields|water|trees|snow|desert|tropics <file>'");
+		return true;
+	}
+
+	if (_game_mode != GM_EDITOR) {
+		IConsoleError("This command is only available in the editor.");
+		return true;
+	}
+
+	const char *file = argv[2];
+	FileList file_list;
+
+	FiosGetGeomapList(SLO_LOAD, file_list);
+	const FiosItem *item = file_list.FindItem(file);
+
+	if (item != nullptr) {
+		if (GetAbstractFileType(item->type) == FT_HEIGHTMAP || GetAbstractFileType(item->type) == FT_GEOMAP) {
+		} else {
+			IConsolePrintF(CC_ERROR, "%s: Not a raster file.", file);
+			return false;
+		}
+	} else {
+		IConsolePrintF(CC_ERROR, "%s: No such file or directory.", file);
+		return false;
+	}
+
+	if (StrEqualsIgnoreCase(argv[1], "terrain")) {
+		LoadRaster(GetDetailedFileType(item->type), RDT_TERRAIN, file);
+		return true;
+	}
+	if (StrEqualsIgnoreCase(argv[1], "fields")) {
+		LoadRaster(GetDetailedFileType(item->type), RDT_FIELDS, file);
+		return true;
+	}
+	if (StrEqualsIgnoreCase(argv[1], "water")) {
+		LoadRaster(GetDetailedFileType(item->type), RDT_WATER, file);
+		return true;
+	}
+	if (StrEqualsIgnoreCase(argv[1], "trees")) {
+		LoadRaster(GetDetailedFileType(item->type), RDT_TREES, file);
+		return true;
+	}
+	if (StrEqualsIgnoreCase(argv[1], "snow")) {
+		if (_settings_game.game_creation.landscape != LT_ARCTIC) {
+			IConsoleError("The snow layer is not available on this landscape type.");
+			return true;
+		}
+		LoadRaster(GetDetailedFileType(item->type), RDT_SNOW, file);
+		return true;
+	}
+	if (StrEqualsIgnoreCase(argv[1], "desert")) {
+		if (_settings_game.game_creation.landscape != LT_TROPIC) {
+			IConsoleError("The desert layer is not available on this landscape type.");
+			return true;
+		}
+		LoadRaster(GetDetailedFileType(item->type), RDT_DESERT, file);
+		return true;
+	}
+	if (StrEqualsIgnoreCase(argv[1], "tropics")) {
+		LoadRaster(GetDetailedFileType(item->type), RDT_TROPICS, file);
+		return true;
+	}
+}
+
 /*******************************
  * console command registration
  *******************************/
@@ -3871,6 +3942,8 @@ void IConsoleStdLibRegister()
 
 	IConsole::CmdRegister("companies",               ConCompanies);
 	IConsole::AliasRegister("players",               "companies");
+
+	IConsole::CmdRegister("import",					 ConImportGeneric);
 
 	/* networking functions */
 

@@ -56,6 +56,8 @@ void ShowSaveLoadDialog(AbstractFileType abstract_filetype, SaveLoadOperation fo
 void FiosGetSavegameList(SaveLoadOperation fop, FileList &file_list);
 void FiosGetScenarioList(SaveLoadOperation fop, FileList &file_list);
 void FiosGetHeightmapList(SaveLoadOperation fop, FileList &file_list);
+void FiosGetGeomapList(SaveLoadOperation fop, FileList &file_list);
+void FiosGetAllFiletypesList(SaveLoadOperation fop, FileList &file_list);
 
 bool FiosBrowseTo(const FiosItem *item);
 

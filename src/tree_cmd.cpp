@@ -8,6 +8,7 @@
 /** @file tree_cmd.cpp Handling of tree tiles. */
 
 #include "stdafx.h"
+#include "tree_base.h"
 #include "clear_map.h"
 #include "landscape.h"
 #include "tree_map.h"
@@ -65,7 +66,7 @@ static const uint16 EDITOR_TREE_DIV = 5;                   ///< Game editor tree
  * @param allow_desert Allow planting trees on CLEAR_DESERT?
  * @return true if trees can be built.
  */
-static bool CanPlantTreesOnTile(TileIndex tile, bool allow_desert)
+bool CanPlantTreesOnTile(TileIndex tile, bool allow_desert)
 {
 	if ((_settings_game.game_creation.tree_placer == TP_PERFECT) &&
 		(_settings_game.game_creation.landscape == LT_ARCTIC) &&
@@ -96,7 +97,7 @@ static bool CanPlantTreesOnTile(TileIndex tile, bool allow_desert)
  * @param count the number of trees (minus 1)
  * @param growth the growth status
  */
-static void PlantTreesOnTile(TileIndex tile, TreeType treetype, uint count, uint growth)
+void PlantTreesOnTile(TileIndex tile, TreeType treetype, uint count, uint growth)
 {
 	dbg_assert(treetype != TREE_INVALID);
 	dbg_assert_tile(CanPlantTreesOnTile(tile, true), tile);
@@ -179,7 +180,7 @@ static void RecalculateArcticTreeOccuranceArray()
  * @param seed The seed for randomness, must be less than 256
  * @return The random tree type
  */
-static TreeType GetRandomTreeType(TileIndex tile, uint seed)
+TreeType GetRandomTreeType(TileIndex tile, uint seed)
 {
 	switch (_settings_game.game_creation.landscape) {
 		case LT_TEMPERATE:
@@ -878,14 +879,14 @@ static void TileLoopTreesAlps(TileIndex tile)
 	MarkTileDirtyByTile(tile, VMDF_NOT_MAP_MODE_NON_VEG);
 }
 
-static bool CanPlantExtraTrees(TileIndex tile)
+bool CanPlantExtraTrees(TileIndex tile)
 {
 	return ((_settings_game.game_creation.landscape == LT_TROPIC && GetTropicZone(tile) == TROPICZONE_RAINFOREST) ?
 		(_settings_game.construction.extra_tree_placement == ETP_SPREAD_ALL || _settings_game.construction.extra_tree_placement == ETP_SPREAD_RAINFOREST) :
 		_settings_game.construction.extra_tree_placement == ETP_SPREAD_ALL);
 }
 
-static bool IsTemperateTreeOnSnow(TileIndex tile)
+bool IsTemperateTreeOnSnow(TileIndex tile)
 {
 	if (_settings_game.game_creation.landscape == LT_ARCTIC && IsInsideMM(GetTreeType(tile), TREE_TEMPERATE, TREE_SUB_ARCTIC)) {
 		TreeGround ground = GetTreeGround(tile);

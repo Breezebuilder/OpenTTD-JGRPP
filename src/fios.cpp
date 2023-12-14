@@ -90,6 +90,13 @@ void FileList::BuildFileList(AbstractFileType abstract_filetype, SaveLoadOperati
 			FiosGetHeightmapList(fop, *this);
 			break;
 
+		case FT_GEOMAP:
+			FiosGetGeomapList(fop, *this);
+
+		case FT_ALL:
+			FiosGetAllFiletypesList(fop, *this);
+			break;
+
 		default:
 			NOT_REACHED();
 	}
@@ -608,6 +615,74 @@ void FiosGetHeightmapList(SaveLoadOperation fop, FileList &file_list)
 	std::string base_path = FioFindDirectory(HEIGHTMAP_DIR);
 	Subdirectory subdir = base_path == *_fios_path ? HEIGHTMAP_DIR : NO_DIRECTORY;
 	FiosGetFileList(fop, &FiosGetHeightmapListCallback, subdir, file_list);
+}
+
+/**
+ * Get a list of geomap data files.
+ * @param fop Purpose of collecting the list.
+ * @param file_list Destination of the found files.
+ * @see FiosGetFileList
+ */
+void FiosGetGeomapList(SaveLoadOperation fop, FileList &file_list)
+{
+	static std::optional<std::string> fios_geomap_path;
+
+	if (!fios_geomap_path) fios_geomap_path = FioFindDirectory(GEOMAP_DIR);
+
+	_fios_path = &(*fios_geomap_path);
+
+	FiosGetFileList(fop, &FiosGetHeightmapListCallback, NO_DIRECTORY, file_list);
+}
+
+
+/**
+ * Callback for FiosGetAllFiletypesList. Returns the first valid result of all other callbacks.
+ * @param fop Purpose of collecting the list.
+ * @param file Name of the file to check.
+ * @param ext A pointer to the extension identifier inside file
+ * @param title Buffer if a callback wants to lookup the title of the file; nullptr to skip the lookup
+ * @param last Last available byte in buffer (to prevent buffer overflows); not used when title == nullptr
+ * @return a FIOS_TYPE_* type of the found file, FIOS_TYPE_INVALID if not a savegame
+ * @see FiosGetFileList
+ * @see FiosGetAllFiletypesList
+ */
+FiosType FiosGetAllFiletypesListCallback(SaveLoadOperation fop, const std::string &file, const char *ext, char *title, const char *last)
+{
+	FiosType type = FIOS_TYPE_INVALID;
+
+	/* Don't crash if we supply no extension */
+	if (ext == nullptr) return FIOS_TYPE_INVALID;
+
+	/* Aggregate results from all other callbacks, returning the first non-invalid result*/
+	fios_getlist_callback_proc *list_callbacks[] = {
+		&FiosGetSavegameListCallback,
+		&FiosGetScenarioListCallback,
+		&FiosGetHeightmapListCallback,
+	};
+
+	for (auto callback : list_callbacks) {
+		type = callback(fop, file, ext, title, last);
+		if (type != FIOS_TYPE_INVALID) break;
+	}
+
+	return type;
+}
+
+/**
+ * Get a list of all known filetypes.
+ * @param fop Purpose of collecting the list.
+ * @param file_list Destination of the found files.
+ * @see FiosGetFileList
+ */
+void FiosGetAllFiletypesList(SaveLoadOperation fop, FileList &file_list)
+{
+	static std::optional<std::string> fios_default_path;
+
+	if (!fios_default_path) fios_default_path = FioFindDirectory(SAVE_DIR);
+
+	if (_fios_path == nullptr) _fios_path = &(*fios_default_path);
+
+	FiosGetFileList(fop, &FiosGetAllFiletypesListCallback, NO_DIRECTORY, file_list);
 }
 
 /**

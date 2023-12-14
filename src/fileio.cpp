@@ -42,6 +42,7 @@ static const char * const _subdirs[] = {
 	"save" PATHSEP "autosave" PATHSEP,
 	"scenario" PATHSEP,
 	"scenario" PATHSEP "heightmap" PATHSEP,
+	"scenario" PATHSEP "geomap" PATHSEP,
 	"gm" PATHSEP,
 	"data" PATHSEP,
 	"baseset" PATHSEP,
@@ -453,6 +454,7 @@ uint TarScanner::DoScan(Subdirectory sd)
 	if (mode & TarScanner::SCENARIO) {
 		num += fs.DoScan(SCENARIO_DIR);
 		num += fs.DoScan(HEIGHTMAP_DIR);
+		num += fs.DoScan(GEOMAP_DIR);
 	}
 	DEBUG(misc, 2, "Scan complete, found %d files", num);
 	return num;
@@ -1072,7 +1074,7 @@ void DeterminePaths(const char *exe, bool only_local_path)
 	DEBUG(misc, 1, "%s found as personal directory", _personal_dir.c_str());
 
 	static const Subdirectory default_subdirs[] = {
-		SAVE_DIR, AUTOSAVE_DIR, SCENARIO_DIR, HEIGHTMAP_DIR, BASESET_DIR, NEWGRF_DIR, AI_DIR, AI_LIBRARY_DIR, GAME_DIR, GAME_LIBRARY_DIR, SCREENSHOT_DIR
+		SAVE_DIR, AUTOSAVE_DIR, SCENARIO_DIR, HEIGHTMAP_DIR, GEOMAP_DIR, BASESET_DIR, NEWGRF_DIR, AI_DIR, AI_LIBRARY_DIR, GAME_DIR, GAME_LIBRARY_DIR, SCREENSHOT_DIR
 	};
 
 	for (uint i = 0; i < lengthof(default_subdirs); i++) {
@@ -1086,7 +1088,7 @@ void DeterminePaths(const char *exe, bool only_local_path)
 	FillValidSearchPaths(only_local_path);
 
 	/* Create the directory for each of the types of content */
-	const Subdirectory dirs[] = { SCENARIO_DIR, HEIGHTMAP_DIR, BASESET_DIR, NEWGRF_DIR, AI_DIR, AI_LIBRARY_DIR, GAME_DIR, GAME_LIBRARY_DIR };
+	const Subdirectory dirs[] = { SCENARIO_DIR, HEIGHTMAP_DIR, GEOMAP_DIR, BASESET_DIR, NEWGRF_DIR, AI_DIR, AI_LIBRARY_DIR, GAME_DIR, GAME_LIBRARY_DIR };
 	for (uint i = 0; i < lengthof(dirs); i++) {
 		FioCreateDirectory(FioGetDirectory(SP_AUTODOWNLOAD_DIR, dirs[i]));
 	}

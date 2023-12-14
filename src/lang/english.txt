@@ -387,6 +387,7 @@ STR_SCENEDIT_TOOLBAR_TOWN_GENERATION                            :{BLACK}Town gen
 STR_SCENEDIT_TOOLBAR_INDUSTRY_GENERATION                        :{BLACK}Industry generation
 STR_SCENEDIT_TOOLBAR_ROAD_CONSTRUCTION                          :{BLACK}Road construction
 STR_SCENEDIT_TOOLBAR_TRAM_CONSTRUCTION                          :{BLACK}Tramway construction
+STR_SCENEDIT_TOOLBAR_WATERWAYS_CONSTRUCTION                     :{BLACK}Waterways construction
 STR_SCENEDIT_TOOLBAR_PLANT_TREES                                :{BLACK}Plant trees. Ctrl selects the area diagonally. Shift toggles building/showing cost estimate
 STR_SCENEDIT_TOOLBAR_PLACE_SIGN                                 :{BLACK}Place sign
 STR_SCENEDIT_TOOLBAR_PLACE_OBJECT                               :{BLACK}Place object. Ctrl selects the area diagonally. Shift toggles building/showing cost estimate
@@ -3145,6 +3146,8 @@ STR_SAVELOAD_SAVE_SCENARIO                                      :{WHITE}Save Sce
 STR_SAVELOAD_LOAD_SCENARIO                                      :{WHITE}Load Scenario
 STR_SAVELOAD_LOAD_HEIGHTMAP                                     :{WHITE}Load Heightmap
 STR_SAVELOAD_SAVE_HEIGHTMAP                                     :{WHITE}Save Heightmap
+STR_SAVELOAD_SAVE_LANDSCAPE									    :{WHITE}Save Landscape
+STR_SAVELOAD_LOAD_LANDSCAPE                                     :{WHITE}Load Landscape
 STR_SAVELOAD_HOME_BUTTON                                        :{BLACK}Click here to jump to the current default save/load directory
 STR_SAVELOAD_BYTES_FREE                                         :{BLACK}{BYTES} free
 STR_SAVELOAD_LIST_TOOLTIP                                       :{BLACK}List of drives, directories and saved-game files
