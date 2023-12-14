@@ -95,14 +95,14 @@ static const NWidgetPart _widgets[] = {
 	EndContainer(),
 };
 
-static WindowDesc _template_create_window_desc(
+static WindowDesc _template_create_window_desc(__FILE__, __LINE__,
 	WDP_AUTO,                       // window position
 	"template create window",       // const char* ini_key
 	456, 100,                       // window size
 	WC_CREATE_TEMPLATE,             // window class
 	WC_TEMPLATEGUI_MAIN,            // parent window class
 	WDF_CONSTRUCTION,               // window flags
-	_widgets, lengthof(_widgets)    // widgets + num widgets
+	std::begin(_widgets), std::end(_widgets)
 );
 
 void ShowTemplateTrainBuildVehicleWindow(Train **virtual_train);
@@ -166,7 +166,7 @@ public:
 		UpdateButtonState();
 	}
 
-	void Close() override
+	void Close(int data = 0) override
 	{
 		if (virtual_train != nullptr) {
 			DoCommandP(0, virtual_train->index, 0, CMD_DELETE_VIRTUAL_TRAIN);
@@ -423,9 +423,7 @@ public:
 		}
 
 		/* Build tooltipstring */
-		static char details[1024];
-		details[0] = '\0';
-		char *pos = details;
+		std::string details;
 
 		for (CargoID cargo_type = 0; cargo_type < NUM_CARGO; cargo_type++) {
 			if (capacity[cargo_type] == 0) continue;
@@ -434,14 +432,13 @@ public:
 			SetDParam(1, loaded[cargo_type]);   // {CARGO} #2
 			SetDParam(2, cargo_type);           // {SHORTCARGO} #1
 			SetDParam(3, capacity[cargo_type]); // {SHORTCARGO} #2
-			pos = GetString(pos, STR_DEPOT_VEHICLE_TOOLTIP_CARGO, lastof(details));
+			details = GetString(STR_DEPOT_VEHICLE_TOOLTIP_CARGO);
 		}
 
 		/* Show tooltip window */
-		uint64 args[2];
-		args[0] = (whole_chain ? num : v->engine_type);
-		args[1] = (uint64)(size_t)details;
-		GuiShowTooltips(this, whole_chain ? STR_DEPOT_VEHICLE_TOOLTIP_CHAIN : STR_DEPOT_VEHICLE_TOOLTIP, 2, args, TCC_RIGHT_CLICK);
+		SetDParam(0, whole_chain ? num : v->engine_type);
+		SetDParamStr(1, std::move(details));
+		GuiShowTooltips(this, whole_chain ? STR_DEPOT_VEHICLE_TOOLTIP_CHAIN : STR_DEPOT_VEHICLE_TOOLTIP, TCC_RIGHT_CLICK, 2);
 
 		return true;
 	}

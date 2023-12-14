@@ -16,7 +16,7 @@
 #include "date_func.h"
 #include "vehicle_base.h"
 #include "rail_gui.h"
-#include "linkgraph/linkgraph.h"
+#include "linkgraph/linkgraphschedule.h"
 #include "sl/saveload.h"
 #include "newgrf_profiling.h"
 #include "console_func.h"
@@ -239,16 +239,6 @@ extern void TownsYearlyLoop();
 
 extern void ShowEndGameChart();
 
-
-/** Available settings for autosave intervals. */
-static const Month _autosave_months[] = {
-	 0, ///< never
-	 1, ///< every month
-	 3, ///< every 3 months
-	 6, ///< every 6 months
-	12, ///< every 12 months
-};
-
 /**
  * Runs various procedures that have to be done yearly
  */
@@ -276,7 +266,7 @@ static void OnNewYear()
 		_cur_date_ymd.year--;
 		days_this_year = IsLeapYear(_cur_date_ymd.year) ? DAYS_IN_LEAP_YEAR : DAYS_IN_YEAR;
 		_date -= days_this_year;
-		for (LinkGraph *lg : LinkGraph::Iterate()) lg->ShiftDates(-days_this_year);
+		LinkGraphSchedule::instance.ShiftDates(-days_this_year);
 		ShiftOrderDates(-days_this_year);
 		ShiftVehicleDates(-days_this_year);
 		_scaled_date_ticks_offset += ((int64)days_this_year) * (DAY_TICKS * _settings_game.economy.day_length_factor);
@@ -297,12 +287,6 @@ static void OnNewYear()
  */
 static void OnNewMonth()
 {
-	if (_settings_client.gui.autosave != 0 && _settings_client.gui.autosave < 5 && (_cur_date_ymd.month % _autosave_months[_settings_client.gui.autosave]) == 0) {
-		_do_autosave = true;
-		_check_special_modes = true;
-		SetWindowDirty(WC_STATUS_BAR, 0);
-	}
-
 	SetWindowClassesDirty(WC_CHEATS);
 	CompaniesMonthlyLoop();
 	EnginesMonthlyLoop();
@@ -319,12 +303,6 @@ static void OnNewMonth()
  */
 static void OnNewDay()
 {
-	if (_settings_client.gui.autosave == 5 && (_date % _settings_client.gui.autosave_custom_days) == 0) {
-		_do_autosave = true;
-		_check_special_modes = true;
-		SetWindowDirty(WC_STATUS_BAR, 0);
-	}
-
 	if (_network_server) NetworkServerDailyLoop();
 
 	DisasterDailyLoop();

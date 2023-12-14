@@ -127,7 +127,7 @@ public:
 		}
 	}
 
-	void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize) override
+	void UpdateWidgetSize(int widget, Dimension *size, [[maybe_unused]] const Dimension &padding, [[maybe_unused]] Dimension *fill, [[maybe_unused]] Dimension *resize) override
 	{
 		if (widget != WID_PLT_BACKGROUND) return;
 
@@ -175,7 +175,7 @@ public:
 	 * @param data Information about the changed data.
 	 * @param gui_scope Whether the call is done from GUI scope. You may not do everything when not in GUI scope. See #InvalidateWindowData() for details.
 	 */
-	void OnInvalidateData(int data = 0, bool gui_scope = true) override
+	void OnInvalidateData([[maybe_unused]] int data = 0, [[maybe_unused]] bool gui_scope = true) override
 	{
 		if (data == 0) {
 			/* This needs to be done in command-scope to enforce rebuilding before resorting invalid data */
@@ -194,13 +194,14 @@ static const NWidgetPart _nested_performance_league_widgets[] = {
 		NWidget(WWT_STICKYBOX, COLOUR_BROWN),
 	EndContainer(),
 	NWidget(WWT_PANEL, COLOUR_BROWN, WID_PLT_BACKGROUND), SetMinimalSize(400, 0), SetMinimalTextLines(15, WidgetDimensions::unscaled.framerect.Vertical()),
+	EndContainer(),
 };
 
-static WindowDesc _performance_league_desc(
-	WDP_AUTO, "league", 0, 0,
+static WindowDesc _performance_league_desc(__FILE__, __LINE__,
+	WDP_AUTO, "performance_league", 0, 0,
 	WC_COMPANY_LEAGUE, WC_NONE,
 	0,
-	_nested_performance_league_widgets, lengthof(_nested_performance_league_widgets)
+	std::begin(_nested_performance_league_widgets), std::end(_nested_performance_league_widgets)
 );
 
 void ShowPerformanceLeagueTable()
@@ -354,7 +355,7 @@ public:
 		}
 	}
 
-	void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize) override
+	void UpdateWidgetSize(int widget, Dimension *size, [[maybe_unused]] const Dimension &padding, [[maybe_unused]] Dimension *fill, [[maybe_unused]] Dimension *resize) override
 	{
 		if (widget != WID_SLT_BACKGROUND) return;
 
@@ -394,7 +395,7 @@ public:
 		}
 	}
 
-	void OnClick(Point pt, int widget, int click_count) override
+	void OnClick([[maybe_unused]] Point pt, int widget, [[maybe_unused]] int click_count) override
 	{
 		if (widget != WID_SLT_BACKGROUND) return;
 
@@ -411,7 +412,7 @@ public:
 	 * @param data Information about the changed data.
 	 * @param gui_scope Whether the call is done from GUI scope. You may not do everything when not in GUI scope. See #InvalidateWindowData() for details.
 	 */
-	void OnInvalidateData(int data = 0, bool gui_scope = true) override
+	void OnInvalidateData([[maybe_unused]] int data = 0, [[maybe_unused]] bool gui_scope = true) override
 	{
 		this->BuildTable();
 		this->ReInit();
@@ -426,13 +427,14 @@ static const NWidgetPart _nested_script_league_widgets[] = {
 		NWidget(WWT_STICKYBOX, COLOUR_BROWN),
 	EndContainer(),
 	NWidget(WWT_PANEL, COLOUR_BROWN, WID_SLT_BACKGROUND), SetMinimalSize(400, 0), SetMinimalTextLines(15, WidgetDimensions::scaled.framerect.Vertical()),
+	EndContainer(),
 };
 
-static WindowDesc _script_league_desc(
-	WDP_AUTO, "league", 0, 0,
+static WindowDesc _script_league_desc(__FILE__, __LINE__,
+	WDP_AUTO, "script_league", 0, 0,
 	WC_COMPANY_LEAGUE, WC_NONE,
 	0,
-	_nested_script_league_widgets, lengthof(_nested_script_league_widgets)
+	std::begin(_nested_script_league_widgets), std::end(_nested_script_league_widgets)
 );
 
 void ShowScriptLeagueTable(LeagueTableID table)

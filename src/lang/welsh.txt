@@ -189,6 +189,9 @@ STR_COLOUR_BROWN                                                :Brown
 STR_COLOUR_GREY                                                 :Llwyd
 STR_COLOUR_WHITE                                                :Gwyn
 
+###length 17
+
+
 # Units used in OpenTTD
 STR_UNITS_VELOCITY_IMPERIAL                                     :{DECIMAL}{NBSP}mph
 STR_UNITS_VELOCITY_METRIC                                       :{DECIMAL}{NBSP}km/h
@@ -479,7 +482,7 @@ STR_NEWS_MENU_LAST_MESSAGE_NEWS_REPORT                          :Neges/Adroddiad
 STR_NEWS_MENU_MESSAGE_HISTORY_MENU                              :Hanes negeseuon
 
 # About menu
-###length 10
+###length 12
 STR_ABOUT_MENU_LAND_BLOCK_INFO                                  :Gwybodaeth ardal tir
 STR_ABOUT_MENU_SEPARATOR                                        :
 STR_ABOUT_MENU_TOGGLE_CONSOLE                                   :Toglu Consol
@@ -874,10 +877,6 @@ STR_NEWS_NEW_VEHICLE_TYPE                                       :{BIG_FONT}{BLAC
 STR_NEWS_NEW_VEHICLE_NOW_AVAILABLE_WITH_TYPE                    :{BLACK}Mae {STRING} newydd yn awr ar gael!  -  {ENGINE}
 
 
-STR_NEWS_STATION_NO_LONGER_ACCEPTS_CARGO                        :{WHITE}Nid yw {STATION} bellach yn derbyn {STRING}
-STR_NEWS_STATION_NO_LONGER_ACCEPTS_CARGO_OR_CARGO               :{WHITE}Nid yw {STATION} bellach yn derbyn {STRING} na {STRING}
-STR_NEWS_STATION_NOW_ACCEPTS_CARGO                              :{WHITE}Mae {STATION} nawr yn derbyn {STRING}
-STR_NEWS_STATION_NOW_ACCEPTS_CARGO_AND_CARGO                    :{WHITE}Mae {STATION} nawr yn derbyn {STRING} a {STRING}
 
 STR_NEWS_OFFER_OF_SUBSIDY_EXPIRED                               :{BIG_FONT}{BLACK}Cynnig cymhorthdal ar ben:{}{}Ni fydd cludo {STRING} o {STRING} i {STRING} yn derbyn cymhorthdal bellach
 STR_NEWS_SUBSIDY_WITHDRAWN_SERVICE                              :{BIG_FONT}{BLACK}Cymhorthdal wedi'i dynnu'n ôl:{}{}Ni fydd gwasanaeth {STRING} o {STRING} i {STRING} yn derbyn cymhorthdal bellach
@@ -1160,6 +1159,7 @@ STR_CONFIG_SETTING_HORIZONTAL_POS_LEFT                          :Chwith
 STR_CONFIG_SETTING_HORIZONTAL_POS_CENTER                        :Canol
 STR_CONFIG_SETTING_HORIZONTAL_POS_RIGHT                         :De
 
+
 STR_CONFIG_SETTING_MAXIMUM_INITIAL_LOAN                         :Benthyciad agoriadol uchafsymol: {STRING}
 STR_CONFIG_SETTING_MAXIMUM_INITIAL_LOAN_HELPTEXT                :Y swm uchaf y gall cwmni fenthyca (heb ustyried chwyddiant)
 ###setting-zero-is-special
@@ -1325,6 +1325,7 @@ STR_CONFIG_SETTING_PLANE_CRASHES_NONE                           :Dim
 STR_CONFIG_SETTING_PLANE_CRASHES_REDUCED                        :Llai
 STR_CONFIG_SETTING_PLANE_CRASHES_NORMAL                         :Arferol
 
+
 STR_CONFIG_SETTING_STOP_ON_TOWN_ROAD                            :Caniatáu arosfannau gyrru-trwodd ar ffyrdd sy'n eiddo i drefi: {STRING}
 STR_CONFIG_SETTING_STOP_ON_TOWN_ROAD_HELPTEXT                   :Caniatáu adeiladu arosfannau gyrru-trwodd ar ffyrdd sy'n eiddo i drefi
 STR_CONFIG_SETTING_STOP_ON_COMPETITOR_ROAD                      :Caniatáu arosfannau gyrru-trwodd ar ffyrdd sy'n eiddo i gystadleuwyr: {STRING}
@@ -1335,6 +1336,7 @@ STR_CONFIG_SETTING_INFRASTRUCTURE_MAINTENANCE                   :Cynnal a chadw 
 STR_CONFIG_SETTING_INFRASTRUCTURE_MAINTENANCE_HELPTEXT          :Pan fo wedi'i alluogi, mae tanadeiledd yn creu costau cynnal a chadw. Mae'r cost yn codi'n gyflymach na'i gyfradd gyda thŵf y rhwydwaith, gan effeithio'n fwy ar gwmniau mawr na rhai bychan
 
 STR_CONFIG_SETTING_COMPANY_STARTING_COLOUR_HELPTEXT             :Dewiswch liw dechreuol am y cwmni
+
 
 STR_CONFIG_SETTING_NEVER_EXPIRE_AIRPORTS                        :Maes awyr ddim yn dibennu: {STRING}
 STR_CONFIG_SETTING_NEVER_EXPIRE_AIRPORTS_HELPTEXT               :Mae galluogi'r dewis yma'n peri i bob math o faes awyr aros ar gael am byth wedi ei gyflwyniad gyntaf
@@ -1369,7 +1371,6 @@ STR_CONFIG_SETTING_AUTORENEW_MONEY_HELPTEXT                     :Lleiafswm arian
 
 STR_CONFIG_SETTING_ERRMSG_DURATION                              :Ystod neges gwall: {STRING}
 STR_CONFIG_SETTING_ERRMSG_DURATION_HELPTEXT                     :Amser i ddangos negeseuon gwall mewn ffenestr coch. Sylwer ni gaiff rhai negeseuon gwall (difrifol) eu cau'n ddiofyn
-STR_CONFIG_SETTING_ERRMSG_DURATION_VALUE                        :{COMMA} eiliad
 
 STR_CONFIG_SETTING_HOVER_DELAY                                  :Dangos cynghorion: {STRING}
 STR_CONFIG_SETTING_HOVER_DELAY_HELPTEXT                         :Oediad cyn y dangosir cynghorion wrth ddal y cyrchydd dros rhyw elfen rhyngwyneb. Fel arall rhwymir cynghorion at botwm dde'r llygoden pan fo'r gwerth yma'n 0.
@@ -1516,9 +1517,7 @@ STR_CONFIG_SETTING_RIGHT_MOUSE_BTN_EMU_OFF                      :I ffwrdd
 
 STR_CONFIG_SETTING_RIGHT_MOUSE_WND_CLOSE                        :Cau ffenest wrth dde-glicio: {STRING}
 STR_CONFIG_SETTING_RIGHT_MOUSE_WND_CLOSE_HELPTEXT               :Cau ffenest wrth dde-glicio tu fewn iddo. Mae hyn yn analluogi dangos gwybodaeth ar dde-clicio!
-
-STR_CONFIG_SETTING_AUTOSAVE                                     :Awtogadw: {STRING}
-STR_CONFIG_SETTING_AUTOSAVE_HELPTEXT                            :Dewis pa mor aml y dylid awtogadw gemau
+###length 3
 
 STR_CONFIG_SETTING_DATE_FORMAT_IN_SAVE_NAMES                    :Defnyddio'r fformat dyddiad {STRING} ar gyfer enwau gemau wedi'u cadw
 STR_CONFIG_SETTING_DATE_FORMAT_IN_SAVE_NAMES_HELPTEXT           :Fformat y dyddiad mewn enwau ffeiliau cadw
@@ -1996,6 +1995,8 @@ STR_ABANDON_GAME_CAPTION                                        :{WHITE}Rhoi'r g
 STR_ABANDON_GAME_QUERY                                          :{YELLOW}Ydych chi'n siwr eich bod chi eisiau rhoi'r gorau i'r gêm?
 STR_ABANDON_SCENARIO_QUERY                                      :{YELLOW}Ydych chi'n siwr eich bod chi eisiau gadael y senario hwn?
 
+# Help window
+
 # Cheat window
 STR_CHEATS                                                      :{WHITE}Twyllo
 STR_CHEATS_TOOLTIP                                              :{BLACK}Mae'r blychau marcio'n dangos os ydych chi wedi twyllo neu beidio, gan nodi sut
@@ -2416,7 +2417,6 @@ STR_TRANSPARENT_BUILDINGS_TOOLTIP                               :{BLACK}Toglu tr
 STR_TRANSPARENT_BRIDGES_TOOLTIP                                 :{BLACK}Toglu tryloywder ar gyfer pontydd. Ctrl+Clic i gloi
 STR_TRANSPARENT_STRUCTURES_TOOLTIP                              :{BLACK}Toglu tryloywder ar gyfer adeiledau fel goleudai ac antenau. Ctrl+Clic i gloi
 STR_TRANSPARENT_CATENARY_TOOLTIP                                :{BLACK}Toglu tryloywder ar gyfer gwifrau. Ctrl+Clic i gloi
-STR_TRANSPARENT_LOADING_TOOLTIP                                 :{BLACK}Toglu tryloywder ar gyfer dangosyddion llwytho. Ctrl+Clic i gloi
 STR_TRANSPARENT_INVISIBLE_TOOLTIP                               :{BLACK}Gosod gwrthrychau'n anweledig yn hytrach nac yn dryloyw
 
 # Linkgraph legend window
@@ -4301,7 +4301,7 @@ STR_TEXTFILE_WRAP_TEXT_TOOLTIP                                  :{BLACK}Amlapio 
 STR_TEXTFILE_VIEW_README                                        :{BLACK}Gweld dogfenyddiaeth
 STR_TEXTFILE_VIEW_CHANGELOG                                     :{BLACK}Log Newidiadau
 STR_TEXTFILE_VIEW_LICENCE                                       :{BLACK}Trwydded
-###length 4
+###length 5
 STR_TEXTFILE_README_CAPTION                                     :{WHITE}Dogfenyddiaeth {STRING} {STRING}
 STR_TEXTFILE_CHANGELOG_CAPTION                                  :{WHITE}Log newidiadau {STRING} {STRING}
 STR_TEXTFILE_LICENCE_CAPTION                                    :{WHITE}Trwydded {STRING} {STRING}
@@ -4439,7 +4439,6 @@ STR_ERROR_TOO_CLOSE_TO_EDGE_OF_MAP_SUB                          :{WHITE}... rhy 
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_TOWN                             :{WHITE}... rhy agos i dref arall
 STR_ERROR_TOO_MANY_TOWNS                                        :{WHITE}... gormod o drefi
 STR_ERROR_NO_SPACE_FOR_TOWN                                     :{WHITE}... nid oes mwy o le ar y map
-STR_ERROR_TOWN_EXPAND_WARN_NO_ROADS                             :{WHITE}Ni fydd y dref yn adeiladu ffyrdd. Gallwch alluogi adeiladu ffyrdd yn Gosodiadau->Amgylchedd->Trefi
 STR_ERROR_ROAD_WORKS_IN_PROGRESS                                :{WHITE}Mae gwaith yn cael ei wneud ar y ffordd
 STR_ERROR_TOWN_CAN_T_DELETE                                     :{WHITE}Methu dileu'r dref...{}Mae gorsaf neu depo sy'n cyfeirio i'r dref neu deil ym mherchnogaeth y dref na ellir ei ddileu
 STR_ERROR_STATUE_NO_SUITABLE_PLACE                              :{WHITE}... nid oes man addas i'r cerflun yn nghanol y ddinas yma

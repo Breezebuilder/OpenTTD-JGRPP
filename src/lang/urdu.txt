@@ -189,6 +189,9 @@ STR_COLOUR_BROWN                                                :بھورا
 STR_COLOUR_GREY                                                 :سلیٹی
 STR_COLOUR_WHITE                                                :سفید
 
+###length 17
+
+
 # Units used in OpenTTD
 STR_UNITS_VELOCITY_IMPERIAL                                     :{DECIMAL} میل فی گھنٹھ
 STR_UNITS_VELOCITY_METRIC                                       :{DECIMAL} کلو میٹر فی گھنٹھ
@@ -453,7 +456,7 @@ STR_NEWS_MENU_LAST_MESSAGE_NEWS_REPORT                          :پچھلا پی
 STR_NEWS_MENU_MESSAGE_HISTORY_MENU                              :تاریخِ پیغامات
 
 # About menu
-###length 10
+###length 12
 STR_ABOUT_MENU_LAND_BLOCK_INFO                                  :زمینی رقبہ کی معلومات
 STR_ABOUT_MENU_SEPARATOR                                        :
 STR_ABOUT_MENU_TOGGLE_CONSOLE                                   :حائطھ تدویم
@@ -834,10 +837,6 @@ STR_NEWS_NEW_VEHICLE_TYPE                                       :{BIG_FONT}{BLAC
 STR_NEWS_NEW_VEHICLE_NOW_AVAILABLE_WITH_TYPE                    :{BLACK}نئی {STRING} اب دستیاب ہے! - {ENGINE}
 
 
-STR_NEWS_STATION_NO_LONGER_ACCEPTS_CARGO                        :{WHITE}{STATION} مزید {STRING} قبول نہیں کرتا
-STR_NEWS_STATION_NO_LONGER_ACCEPTS_CARGO_OR_CARGO               :{WHITE}{STATION} مزید {STRING} یا {STRING} قبول نہیں کرتا
-STR_NEWS_STATION_NOW_ACCEPTS_CARGO                              :{WHITE}{STATION} اب قبول کرتا ہے {STRING}
-STR_NEWS_STATION_NOW_ACCEPTS_CARGO_AND_CARGO                    :{WHITE}{STATION} اب {STRING} اور {STRING} قبول کرتا ہے
 
 STR_NEWS_OFFER_OF_SUBSIDY_EXPIRED                               :{BIG_FONT}{BLACK}امداد کی پیشکش کی معیاد ختم:{}{}{STRING} {STRING} سے {STRING} تک اب کوئی امداد نہیں ملے گی
 STR_NEWS_SUBSIDY_WITHDRAWN_SERVICE                              :{BIG_FONT}{BLACK}امداد ختم:{}{}{STRING} {STRING} سے {STRING} تک کئی گئی خدمت کی اب کوئی امداد نہیں ملے گی
@@ -891,7 +890,7 @@ STR_GAME_OPTIONS_CURRENCY_TRY                                   :ٹرکش لیر
 STR_GAME_OPTIONS_CURRENCY_SKK                                   :سلواک کرونا
 STR_GAME_OPTIONS_CURRENCY_BRL                                   :برازیلین رئیل
 STR_GAME_OPTIONS_CURRENCY_EEK                                   :اِسٹونین کرونی
-STR_GAME_OPTIONS_CURRENCY_LTL                                   :لتھوینیا کے لٹاس (لٹل)
+STR_GAME_OPTIONS_CURRENCY_LTL                                   :لتھوینیا کے لٹاس
 STR_GAME_OPTIONS_CURRENCY_KRW                                   :جنوبی کوریا کے ون
 STR_GAME_OPTIONS_CURRENCY_ZAR                                   :جنوبی افریقہ کے رنڈ
 STR_GAME_OPTIONS_CURRENCY_CUSTOM                                :اپنی مرضی کی ۔۔۔
@@ -1059,6 +1058,7 @@ STR_CONFIG_SETTING_HORIZONTAL_POS_LEFT                          :بائیں
 STR_CONFIG_SETTING_HORIZONTAL_POS_CENTER                        :درمیان
 STR_CONFIG_SETTING_HORIZONTAL_POS_RIGHT                         :دائیں
 
+
 ###setting-zero-is-special
 
 
@@ -1154,11 +1154,13 @@ STR_CONFIG_SETTING_PLANE_CRASHES_NONE                           :کوئی نہی
 STR_CONFIG_SETTING_PLANE_CRASHES_REDUCED                        :کم
 STR_CONFIG_SETTING_PLANE_CRASHES_NORMAL                         :نارمل
 
+
 STR_CONFIG_SETTING_STOP_ON_TOWN_ROAD                            :شہر کی ملکیت سڑکوں پر ڈرائیو تھرو اڈے بنانے کی اجازت: {STRING}
 STR_CONFIG_SETTING_STOP_ON_COMPETITOR_ROAD                      :مد مقابلوں کی ملکیت سڑکوں پر ڈرائیو تھرو اڈے بنانے کی اجازت: {STRING}
 STR_CONFIG_SETTING_DYNAMIC_ENGINES_EXISTING_VEHICLES            :{WHITE}جب گاڑیاں موجود ہوں تو یہ سیٹنگ بدلنا ممکن نہیں
 
 STR_CONFIG_SETTING_INFRASTRUCTURE_MAINTENANCE                   :انفراسٹرکچر کی بحالی: {STRING}
+
 
 
 STR_CONFIG_SETTING_NEVER_EXPIRE_AIRPORTS                        :ہوائی اڈوں کی معیاد کبھی ختم نہ ہو: {STRING}
@@ -1276,9 +1278,7 @@ STR_CONFIG_SETTING_RIGHT_MOUSE_BTN_EMU_COMMAND                  :Command+Click
 STR_CONFIG_SETTING_RIGHT_MOUSE_BTN_EMU_CONTROL                  :Ctrl+Click
 STR_CONFIG_SETTING_RIGHT_MOUSE_BTN_EMU_OFF                      :آف
 
-
-STR_CONFIG_SETTING_AUTOSAVE                                     :Autosave: {STRING}
-STR_CONFIG_SETTING_AUTOSAVE_HELPTEXT                            :گیم بچانے کا وقفا چنیں
+###length 3
 
 STR_CONFIG_SETTING_DATE_FORMAT_IN_SAVE_NAMES                    :کھیل کو محفوظ کرنے کے لئے تاریخ کا {STRING} طریقہ استعمال کریں
 ###length 3
@@ -1561,6 +1561,8 @@ STR_QUIT_NO                                                     :{BLACK}نہیں
 STR_ABANDON_GAME_CAPTION                                        :{WHITE}کھیل چھوڑ دو
 STR_ABANDON_GAME_QUERY                                          :{YELLOW}کیا آپ کو یقین ہے کہ آپ اس کھیل کو چھوڑنا چاہ رہے ہیں؟
 STR_ABANDON_SCENARIO_QUERY                                      :{YELLOW}کیا آپ کو یقین ہے کہ آپ اس scenario کو چھوڑنا چاہ رہے ہیں؟
+
+# Help window
 
 # Cheat window
 STR_CHEATS                                                      :{WHITE}دھوکے
@@ -1952,7 +1954,6 @@ STR_TRANSPARENT_BUILDINGS_TOOLTIP                               :{BLACK}تعمی
 STR_TRANSPARENT_BRIDGES_TOOLTIP                                 :{BLACK}پلوں کی شفافیت کی تدویم کریں۔ محدوظ کرنے کے لئے Ctrl+Click دبائیں
 STR_TRANSPARENT_STRUCTURES_TOOLTIP                              :{BLACK}بنیادی ڈھانچوں کی شفافیت کی تدویم کریں۔ محدوظ کرنے کے لئے Ctrl+Click دبائیں
 STR_TRANSPARENT_CATENARY_TOOLTIP                                :{BLACK}catenary کی شفافیت کی تدویم کریں۔ محدوظ کرنے کے لئے Ctrl+Click دبائیں
-STR_TRANSPARENT_LOADING_TOOLTIP                                 :{BLACK}لوڈ کرنے کے نشانوں کی شفافیت کی تدویم کریں۔ محدوظ کرنے کے لئے Ctrl+Click دبائیں
 STR_TRANSPARENT_INVISIBLE_TOOLTIP                               :{BLACK}چیزوں کو شفاف کی بجائے غائب کر دیں
 
 # Linkgraph legend window
@@ -2733,7 +2734,7 @@ STR_AI_CONFIG_GAMESCRIPT                                        :{SILVER}کھی�
 STR_TEXTFILE_VIEW_README                                        :{BLACK}مجھے پڑھیے فائل دیکھیں
 STR_TEXTFILE_VIEW_CHANGELOG                                     :{BLACK}تبدیلیوں کا ریکارڈ
 STR_TEXTFILE_VIEW_LICENCE                                       :{BLACK}لائسنس
-###length 4
+###length 5
 STR_TEXTFILE_README_CAPTION                                     :{WHITE}{STRING} میں سے {STRING} مجھے پڑھیے
 STR_TEXTFILE_CHANGELOG_CAPTION                                  :{WHITE}{STRING} میں سے {STRING} تبدیلی کا ریکارڈ
 STR_TEXTFILE_LICENCE_CAPTION                                    :{WHITE}{STRING} میں سے {STRING} لائسنس

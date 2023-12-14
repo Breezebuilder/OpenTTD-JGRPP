@@ -202,6 +202,9 @@ STR_COLOUR_BROWN                                                :חום
 STR_COLOUR_GREY                                                 :אפור
 STR_COLOUR_WHITE                                                :לבן
 
+###length 17
+
+
 # Units used in OpenTTD
 STR_UNITS_VELOCITY_IMPERIAL                                     :{DECIMAL} מייל לשעה
 STR_UNITS_VELOCITY_METRIC                                       :{DECIMAL} קמ"ש
@@ -488,7 +491,7 @@ STR_NEWS_MENU_LAST_MESSAGE_NEWS_REPORT                          :הודעה אח
 STR_NEWS_MENU_MESSAGE_HISTORY_MENU                              :היסטורית הודעות
 
 # About menu
-###length 10
+###length 12
 STR_ABOUT_MENU_LAND_BLOCK_INFO                                  :מידע על שטח קרקע
 STR_ABOUT_MENU_SEPARATOR                                        :
 STR_ABOUT_MENU_TOGGLE_CONSOLE                                   :פתח/סגור קונסולה
@@ -884,10 +887,6 @@ STR_NEWS_NEW_VEHICLE_TYPE                                       :{BIG_FONT}{BLAC
 STR_NEWS_NEW_VEHICLE_NOW_AVAILABLE_WITH_TYPE                    :{BLACK}{STRING} חדש זמין כעת  -  {ENGINE}!
 
 
-STR_NEWS_STATION_NO_LONGER_ACCEPTS_CARGO                        :{WHITE}{STATION} אינה מקבלת יותר {STRING}
-STR_NEWS_STATION_NO_LONGER_ACCEPTS_CARGO_OR_CARGO               :{WHITE}{STATION} אינה מקבלת יותר {STRING} או {STRING}
-STR_NEWS_STATION_NOW_ACCEPTS_CARGO                              :{WHITE}{STATION} מקבלת כעת {STRING}
-STR_NEWS_STATION_NOW_ACCEPTS_CARGO_AND_CARGO                    :{WHITE}{STATION} מקבלת כעת {STRING} ו{STRING}
 
 STR_NEWS_OFFER_OF_SUBSIDY_EXPIRED                               :{BIG_FONT}{BLACK}פג תוקף הצעת סובסידיה:{}{}סובסידיה של הובלת {STRING.plural} מ{STRING} אל {STRING} לא תזכה עוד בסיבסוד.
 STR_NEWS_SUBSIDY_WITHDRAWN_SERVICE                              :{BIG_FONT}{BLACK}סובסידיה הוסרה:{}{}שירות הובלת {STRING.plural} מ{STRING} אל {STRING} אינו מסובסד יותר.
@@ -1158,6 +1157,7 @@ STR_CONFIG_SETTING_HORIZONTAL_POS_LEFT                          :שמאל
 STR_CONFIG_SETTING_HORIZONTAL_POS_CENTER                        :מרכז
 STR_CONFIG_SETTING_HORIZONTAL_POS_RIGHT                         :ימין
 
+
 STR_CONFIG_SETTING_MAXIMUM_INITIAL_LOAN                         :סכום הלוואה ראשוני: {STRING}
 STR_CONFIG_SETTING_MAXIMUM_INITIAL_LOAN_HELPTEXT                :סכום מירבי שחברה יכולה ללוות (מבלי לקחת בחשבון אינפלציה)
 ###setting-zero-is-special
@@ -1320,6 +1320,7 @@ STR_CONFIG_SETTING_PLANE_CRASHES_NONE                           :ללא
 STR_CONFIG_SETTING_PLANE_CRASHES_REDUCED                        :מופחת
 STR_CONFIG_SETTING_PLANE_CRASHES_NORMAL                         :רגיל
 
+
 STR_CONFIG_SETTING_STOP_ON_TOWN_ROAD                            :{STRING} :אפשר מעבר דרך תחנות על כבישים בבעלות עירונית
 STR_CONFIG_SETTING_STOP_ON_TOWN_ROAD_HELPTEXT                   :אפשר בנייה של תחנות "על הדרך" בכבישים בבעלות עיירות
 STR_CONFIG_SETTING_STOP_ON_COMPETITOR_ROAD                      :אפשר נסיעה דרך תמרורי-עצירה על דרכים בבעלות מתחרים: {STRING}
@@ -1330,6 +1331,7 @@ STR_CONFIG_SETTING_INFRASTRUCTURE_MAINTENANCE                   :תחזוקת ת
 STR_CONFIG_SETTING_INFRASTRUCTURE_MAINTENANCE_HELPTEXT          :כאשר מאופשר, תשתיות גורמות לעלויות תחזוקה. העלות גדלה באופן שהוא מעבר ליחסי לעומת גודל הרשת, וכך משפיע יותר על חברות גדולות מאשר על חברות קטנות
 
 STR_CONFIG_SETTING_COMPANY_STARTING_COLOUR_HELPTEXT             :בחר צבע התחלתי לחברה
+
 
 STR_CONFIG_SETTING_NEVER_EXPIRE_AIRPORTS                        :בטל התיישנות נמלי תעופה: {STRING}
 STR_CONFIG_SETTING_NEVER_EXPIRE_AIRPORTS_HELPTEXT               :אפשור הגדרה זו גורם לכל סוג נמל תעופה להישאר זמין לעד אחרי השקתו
@@ -1364,7 +1366,6 @@ STR_CONFIG_SETTING_AUTORENEW_MONEY_HELPTEXT                     :סכום כסף
 
 STR_CONFIG_SETTING_ERRMSG_DURATION                              :משך הצגת הודעת שגיאה: {STRING}
 STR_CONFIG_SETTING_ERRMSG_DURATION_HELPTEXT                     :פרק הזמן להצגת הודעות שגיאה בחלון אדום. יש לשים לב כי כמה הודעות שגיאה (קריטיות) אינן נסגרות אוטומטית אחרי פרק זמן זה, אלא יש לסגור אותן ידנית
-STR_CONFIG_SETTING_ERRMSG_DURATION_VALUE                        :{P 0 "שנייה " ""}{COMMA}{P "" " שניות"}
 
 STR_CONFIG_SETTING_HOVER_DELAY                                  :הצג רמזים צצים: {STRING}
 STR_CONFIG_SETTING_HOVER_DELAY_HELPTEXT                         :השהייה טרם הצגת רמזים צצים כאשר העכבר מרחף מעל חלק ממשק. לחלופין, ניתן לקשר רמזים צצים לכפתור העכבר הימני כאשר מוגדר 0.
@@ -1512,9 +1513,7 @@ STR_CONFIG_SETTING_RIGHT_MOUSE_BTN_EMU_OFF                      :כבוי
 
 STR_CONFIG_SETTING_RIGHT_MOUSE_WND_CLOSE                        :סגירת חלון בכפתור ימני: {STRING}
 STR_CONFIG_SETTING_RIGHT_MOUSE_WND_CLOSE_HELPTEXT               :סוגר חלון על-ידי לחיצה ימנית בתוכו. מבטל הצגת מידע בלחיצה ימנית!
-
-STR_CONFIG_SETTING_AUTOSAVE                                     :שמירה אוטומטית: {STRING}
-STR_CONFIG_SETTING_AUTOSAVE_HELPTEXT                            :בחר פרק זמן בין שמירות אוטומטיות
+###length 3
 
 STR_CONFIG_SETTING_DATE_FORMAT_IN_SAVE_NAMES                    :השתמש במבנה התאריך {STRING} בשביל שמות קבצי השמירה.
 STR_CONFIG_SETTING_DATE_FORMAT_IN_SAVE_NAMES_HELPTEXT           :פורמט התאריך בשמות קבצים של משחקים שמורים
@@ -1993,6 +1992,8 @@ STR_ABANDON_GAME_CAPTION                                        :{WHITE}עזיב
 STR_ABANDON_GAME_QUERY                                          :{YELLOW}?האם אתה בטוח שברצונך לעזוב את המשחק
 STR_ABANDON_SCENARIO_QUERY                                      :{YELLOW}האם אתה בטוח שברצונך לצאת משלב זה?
 
+# Help window
+
 # Cheat window
 STR_CHEATS                                                      :{WHITE}(cheats) טריקים
 STR_CHEATS_TOOLTIP                                              :{BLACK}תיבות הסימון מציינות האם השתמשת בטריק הנתון בעבר
@@ -2423,7 +2424,6 @@ STR_TRANSPARENT_BUILDINGS_TOOLTIP                               :{BLACK}שנה �
 STR_TRANSPARENT_BRIDGES_TOOLTIP                                 :{BLACK}שנה שקיפות עבור גשרים. Ctrl+לחיצה לנעילה
 STR_TRANSPARENT_STRUCTURES_TOOLTIP                              :{BLACK}שנה שקיפות עבור מבנים כגון מיגדלור ואנטנה. Ctrl+לחיצה לנעילה
 STR_TRANSPARENT_CATENARY_TOOLTIP                                :{BLACK}שנה שקיפות עבור עמודי חשמל. Ctrl+לחיצה לנעילה
-STR_TRANSPARENT_LOADING_TOOLTIP                                 :{BLACK}שנה שקיפות עבור מצביעי הטענה. Ctrl+לחיצה לנעילה
 STR_TRANSPARENT_INVISIBLE_TOOLTIP                               :{BLACK}הסתר במקום הפוך לשקוף
 
 # Linkgraph legend window
@@ -4328,7 +4328,7 @@ STR_TEXTFILE_WRAP_TEXT_TOOLTIP                                  :{BLACK}אפשר
 STR_TEXTFILE_VIEW_README                                        :{BLACK}צפה ב-"קרא אותי"
 STR_TEXTFILE_VIEW_CHANGELOG                                     :{BLACK}רשימת שינויים
 STR_TEXTFILE_VIEW_LICENCE                                       :{BLACK}רשיון
-###length 4
+###length 5
 STR_TEXTFILE_README_CAPTION                                     :{WHITE}{STRING} "קרא אותי" של {STRING}
 STR_TEXTFILE_CHANGELOG_CAPTION                                  :{WHITE}{STRING} רשימת שינויים של {STRING}
 STR_TEXTFILE_LICENCE_CAPTION                                    :{WHITE}{STRING} רשיון של {STRING}
@@ -4464,7 +4464,6 @@ STR_ERROR_TOO_CLOSE_TO_EDGE_OF_MAP_SUB                          :{WHITE}... קר
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_TOWN                             :{WHITE}... קרוב מידי לעיר אחרת
 STR_ERROR_TOO_MANY_TOWNS                                        :{WHITE}... יותר מידי ערים
 STR_ERROR_NO_SPACE_FOR_TOWN                                     :{WHITE}... אין יותר מקום על המפה
-STR_ERROR_TOWN_EXPAND_WARN_NO_ROADS                             :{WHITE}העיר לא תבנה כבישים. באפשרותך לאפשר בניית כבישים בעזרת תפריט הגדרות מתקמדות->כלכלה->ערים
 STR_ERROR_ROAD_WORKS_IN_PROGRESS                                :{WHITE}עבודות כביש בפעולה
 STR_ERROR_TOWN_CAN_T_DELETE                                     :{WHITE}לא ניתן למחוק עיר זו...{}תחנה או מוסך מקושר לעיר או שמשבצת בבעלות העיר לא ניתנת להסרה
 STR_ERROR_STATUE_NO_SUITABLE_PLACE                              :{WHITE}... אין אף מיקום מתאים לפסל במרכז עיירה זו

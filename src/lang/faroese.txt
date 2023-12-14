@@ -189,6 +189,9 @@ STR_COLOUR_BROWN                                                :Brúnt
 STR_COLOUR_GREY                                                 :Grátt
 STR_COLOUR_WHITE                                                :Hvítt
 
+###length 17
+
+
 # Units used in OpenTTD
 STR_UNITS_VELOCITY_IMPERIAL                                     :{DECIMAL} mph
 STR_UNITS_VELOCITY_METRIC                                       :{DECIMAL} km/t
@@ -449,7 +452,7 @@ STR_NEWS_MENU_LAST_MESSAGE_NEWS_REPORT                          :Seinastu boð/t
 STR_NEWS_MENU_MESSAGE_HISTORY_MENU                              :Boð søga
 
 # About menu
-###length 10
+###length 12
 STR_ABOUT_MENU_LAND_BLOCK_INFO                                  :Landa økis kunning
 STR_ABOUT_MENU_SEPARATOR                                        :
 STR_ABOUT_MENU_TOGGLE_CONSOLE                                   :Console opið ella lukka
@@ -835,10 +838,6 @@ STR_NEWS_NEW_VEHICLE_TYPE                                       :{BIG_FONT}{BLAC
 STR_NEWS_NEW_VEHICLE_NOW_AVAILABLE_WITH_TYPE                    :{BLACK}Nýtt {STRING} til sølu!  -  {ENGINE}
 
 
-STR_NEWS_STATION_NO_LONGER_ACCEPTS_CARGO                        :{WHITE}{STATION} tekur ikki longur ímóti {STRING}
-STR_NEWS_STATION_NO_LONGER_ACCEPTS_CARGO_OR_CARGO               :{WHITE}{STATION} tekur ikki longur ímóti hvørki {STRING} ella {STRING}
-STR_NEWS_STATION_NOW_ACCEPTS_CARGO                              :{WHITE}{STATION} tekur nú ímóti {STRING}
-STR_NEWS_STATION_NOW_ACCEPTS_CARGO_AND_CARGO                    :{WHITE}{STATION} tekur nú ímóti bæði {STRING} og {STRING}
 
 STR_NEWS_OFFER_OF_SUBSIDY_EXPIRED                               :{BIG_FONT}{BLACK}Tilboð um stuðul útgingi:{}{}{STRING} frá {STRING} til {STRING} fær nú ongan stuðul
 STR_NEWS_SUBSIDY_WITHDRAWN_SERVICE                              :{BIG_FONT}{BLACK}Stuðul tikin aftur:{}{}{STRING} flutningur frá {STRING} til {STRING} er ikki stuðla longur
@@ -1087,6 +1086,7 @@ STR_CONFIG_SETTING_HORIZONTAL_POS_LEFT                          :Vinstra
 STR_CONFIG_SETTING_HORIZONTAL_POS_CENTER                        :Miðja
 STR_CONFIG_SETTING_HORIZONTAL_POS_RIGHT                         :Høgra
 
+
 STR_CONFIG_SETTING_MAXIMUM_INITIAL_LOAN                         :Hægst loyvda byrjunar lán: {STRING}
 STR_CONFIG_SETTING_MAXIMUM_INITIAL_LOAN_HELPTEXT                :Mest loyvda upphæddin ein fyritøka kann lána (uttan at taka virðisminkan til eftirtektar)
 ###setting-zero-is-special
@@ -1242,6 +1242,7 @@ STR_CONFIG_SETTING_PLANE_CRASHES_NONE                           :Einki
 STR_CONFIG_SETTING_PLANE_CRASHES_REDUCED                        :Færri
 STR_CONFIG_SETTING_PLANE_CRASHES_NORMAL                         :Vanligt
 
+
 STR_CONFIG_SETTING_STOP_ON_TOWN_ROAD                            :Loyv gjøgnumkoyrings steðgum á vegum ið bygdir eiga: {STRING}
 STR_CONFIG_SETTING_STOP_ON_TOWN_ROAD_HELPTEXT                   :Loyv bygging av gjøgnumkoyrings steðgum á vegum ið bygdir eiga
 STR_CONFIG_SETTING_STOP_ON_COMPETITOR_ROAD                      :Loyv gjøgnumkoyrings steðgum á vegum ið kappingarneytar eiga: {STRING}
@@ -1250,6 +1251,7 @@ STR_CONFIG_SETTING_DYNAMIC_ENGINES_EXISTING_VEHICLES            :{WHITE}Ikki mø
 
 STR_CONFIG_SETTING_INFRASTRUCTURE_MAINTENANCE                   :Innakervis viðlílkahald: {STRING}
 STR_CONFIG_SETTING_INFRASTRUCTURE_MAINTENANCE_HELPTEXT          :Um gilda, innankervi elvir til viðlíkahalds kostnað. Kostnaðurin vaksur yvir-lutfalsliga við støddina á kervinum, og ávirkar harvið størri fyritøkur meira enn smærri fyritøkur
+
 
 
 STR_CONFIG_SETTING_NEVER_EXPIRE_AIRPORTS                        :Floghavnir ganga ongantíð út: {STRING}
@@ -1285,7 +1287,6 @@ STR_CONFIG_SETTING_AUTORENEW_MONEY_HELPTEXT                     :Minsta nøgd av
 
 STR_CONFIG_SETTING_ERRMSG_DURATION                              :Tíðarlongd av villuboðum: {STRING}
 STR_CONFIG_SETTING_ERRMSG_DURATION_HELPTEXT                     :Tíðarbili ið villu boð verða víst í einum reyðum vindeyga. Legg til merkis at nøkur (umráðandi) villu boð ikki verða sjálvvirkandi afturlatin eftir hetta tíðarbil, men mugu latast aftur manuelt
-STR_CONFIG_SETTING_ERRMSG_DURATION_VALUE                        :{COMMA} sekund{P 0 "" ir}
 
 STR_CONFIG_SETTING_HOVER_DELAY                                  :Vís góð ráð: {STRING}
 STR_CONFIG_SETTING_HOVER_DELAY_HELPTEXT                         :Seinking áðrenn góð ráð vera víst tá músin sveimar yvur ein lut á takførisflatuni. Í øðrum lagi kunnu góðu ráðini bindast at høgra músa knøtti
@@ -1408,7 +1409,7 @@ STR_CONFIG_SETTING_RIGHT_MOUSE_BTN_EMU_COMMAND                  :Command+trýst
 STR_CONFIG_SETTING_RIGHT_MOUSE_BTN_EMU_CONTROL                  :Ctrl+trýst
 STR_CONFIG_SETTING_RIGHT_MOUSE_BTN_EMU_OFF                      :Sløkt
 
-
+###length 3
 
 STR_CONFIG_SETTING_DATE_FORMAT_IN_SAVE_NAMES                    :Nýt {STRING} dato sniði til nøvnini á goymdum spølum
 STR_CONFIG_SETTING_DATE_FORMAT_IN_SAVE_NAMES_HELPTEXT           :Sniði fyri dato í fíla navninum á goymdum spølum
@@ -1768,6 +1769,8 @@ STR_QUIT_NO                                                     :{BLACK}Nei
 STR_ABANDON_GAME_CAPTION                                        :{WHITE}Far frá spæli
 STR_ABANDON_GAME_QUERY                                          :{YELLOW}Er tú vís/vísur í at tú vil fara frá hesum spæli?
 STR_ABANDON_SCENARIO_QUERY                                      :{YELLOW}Er tú vís/vísur í at tú vil fara frá hesum tilburði?
+
+# Help window
 
 # Cheat window
 STR_CHEATS                                                      :{WHITE}Snýt
@@ -2164,7 +2167,6 @@ STR_TRANSPARENT_INDUSTRIES_TOOLTIP                              :{BLACK}Tendra/s
 STR_TRANSPARENT_BRIDGES_TOOLTIP                                 :{BLACK}Tendra/sløkk gjøgnumskygni fyri brúgvar. Ctrl+trýst fyri at læsa
 STR_TRANSPARENT_STRUCTURES_TOOLTIP                              :{BLACK}Tendra/sløkk gjøgnumskygni fyri konstruktiónir sum vitar og antennur. Ctrl+trýst fyri at læsa
 STR_TRANSPARENT_CATENARY_TOOLTIP                                :{BLACK}Tendra/sløkk gjøgnumskygni fyri ketulinju. Ctrl+trýst fyri at læsa
-STR_TRANSPARENT_LOADING_TOOLTIP                                 :{BLACK}Tendra/sløkk gjøgnumskygni fyri lessingar vísarar. Ctrl+trýst fyri at læsa
 STR_TRANSPARENT_INVISIBLE_TOOLTIP                               :{BLACK}Ger lutir ósjónligar heldur enn gjøgnumskygdar
 
 # Linkgraph legend window
@@ -3686,7 +3688,7 @@ STR_AI_SETTINGS_SETTING                                         :{STRING}: {ORAN
 STR_TEXTFILE_VIEW_README                                        :{BLACK}Sjá readme
 STR_TEXTFILE_VIEW_CHANGELOG                                     :{BLACK}Broytingarskrá
 STR_TEXTFILE_VIEW_LICENCE                                       :{BLACK}Loyvi
-###length 4
+###length 5
 STR_TEXTFILE_README_CAPTION                                     :{WHITE}{STRING} readme fyri {STRING}
 STR_TEXTFILE_CHANGELOG_CAPTION                                  :{WHITE}{STRING} broytingarskrá fyri {STRING}
 STR_TEXTFILE_LICENCE_CAPTION                                    :{WHITE}{STRING} loyvi fyri {STRING}
@@ -3820,7 +3822,6 @@ STR_ERROR_TOO_CLOSE_TO_EDGE_OF_MAP_SUB                          :{WHITE}... ov t
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_TOWN                             :{WHITE}... ov tætt við eina aðra bygd
 STR_ERROR_TOO_MANY_TOWNS                                        :{WHITE}... ov nógvar bygdir
 STR_ERROR_NO_SPACE_FOR_TOWN                                     :{WHITE}... tað er einki pláss eftir á kortinum
-STR_ERROR_TOWN_EXPAND_WARN_NO_ROADS                             :{WHITE}Bygdin byggir ikki vegir. Tú kanst tendra vega byggjing í Víðkaðir Innstillingar->Búðskapur->Bygdir
 STR_ERROR_ROAD_WORKS_IN_PROGRESS                                :{WHITE}Veg arbeiði í gongd
 STR_ERROR_TOWN_CAN_T_DELETE                                     :{WHITE}Kann ikki strika hesa bygdina...{}Ein støð ella goymsla vísur til bygdina, ella ein puntur ið er ogn hjá bygdini kann ikki beinast burtur
 STR_ERROR_STATUE_NO_SUITABLE_PLACE                              :{WHITE}... einki hóskandi stað til eina standmynd í miðjuni av hesi bygdini

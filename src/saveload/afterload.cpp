@@ -1776,7 +1776,7 @@ bool AfterLoadGame()
 	}
 
 	for (Company *c : Company::Iterate()) {
-		c->avail_railtypes = GetCompanyRailtypes(c->index);
+		c->avail_railtypes = GetCompanyRailTypes(c->index);
 		c->avail_roadtypes = GetCompanyRoadTypes(c->index);
 	}
 
@@ -2050,9 +2050,9 @@ bool AfterLoadGame()
 
 	if (IsSavegameVersionBefore(SLV_74)) {
 		for (Station *st : Station::Iterate()) {
-			for (CargoID c = 0; c < NUM_CARGO; c++) {
-				st->goods[c].last_speed = 0;
-				if (st->goods[c].CargoAvailableCount() != 0) SetBit(st->goods[c].status, GoodsEntry::GES_RATING);
+			for (GoodsEntry &ge : st->goods) {
+				ge.last_speed = 0;
+				if (ge.CargoAvailableCount() != 0) SetBit(ge.status, GoodsEntry::GES_RATING);
 			}
 		}
 	}
@@ -3216,9 +3216,6 @@ bool AfterLoadGame()
 		}
 	}
 
-	/* The center of train vehicles was changed, fix up spacing. */
-	if (IsSavegameVersionBefore(SLV_164)) FixupTrainLengths();
-
 	if (IsSavegameVersionBefore(SLV_165)) {
 		for (Town *t : Town::Iterate()) {
 			/* Set the default cargo requirement for town growth */
@@ -4270,6 +4267,12 @@ bool AfterLoadGame()
 			v->date_of_last_service_newgrf = v->date_of_last_service;
 		}
 	}
+
+	/*
+	 * The center of train vehicles was changed, fix up spacing.
+	 * Delay this until all train and track updates have been performed.
+	 */
+	if (IsSavegameVersionBefore(SLV_164)) FixupTrainLengths();
 
 	InitializeRoadGUI();
 

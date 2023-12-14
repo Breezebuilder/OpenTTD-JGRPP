@@ -212,7 +212,7 @@ struct SchdispatchWindow : GeneralVehicleWindow {
 		this->AutoSelectSchedule();
 	}
 
-	void Close() override
+	void Close(int data = 0) override
 	{
 		if (!FocusWindowById(WC_VEHICLE_VIEW, this->window_number)) {
 			MarkDirtyFocusedRoutePaths(this->vehicle);
@@ -384,9 +384,8 @@ struct SchdispatchWindow : GeneralVehicleWindow {
 		switch (widget) {
 			case WID_SCHDISPATCH_ADD: {
 				if (_settings_time.time_in_minutes) {
-					uint64 params[1];
-					params[0] = STR_SCHDISPATCH_ADD_TOOLTIP;
-					GuiShowTooltips(this, STR_SCHDISPATCH_ADD_TOOLTIP_EXTRA, 1, params, close_cond);
+					SetDParam(0, STR_SCHDISPATCH_ADD_TOOLTIP);
+					GuiShowTooltips(this, STR_SCHDISPATCH_ADD_TOOLTIP_EXTRA, close_cond, 1);
 					return true;
 				}
 				break;
@@ -402,7 +401,7 @@ struct SchdispatchWindow : GeneralVehicleWindow {
 				add_suffix(STR_SCHDISPATCH_REMOVE_SCHEDULE_TOOLTIP);
 				add_suffix(STR_SCHDISPATCH_DUPLICATE_SCHEDULE_TOOLTIP);
 				add_suffix(STR_SCHDISPATCH_APPEND_VEHICLE_SCHEDULES_TOOLTIP);
-				GuiShowTooltips(this, SPECSTR_TEMP_START, 0, nullptr, close_cond);
+				GuiShowTooltips(this, SPECSTR_TEMP_START, close_cond);
 				return true;
 			}
 
@@ -1058,11 +1057,11 @@ static const NWidgetPart _nested_schdispatch_widgets[] = {
 	EndContainer(),
 };
 
-static WindowDesc _schdispatch_desc(
+static WindowDesc _schdispatch_desc(__FILE__, __LINE__,
 	WDP_AUTO, "scheduled_dispatch_slots", 400, 130,
 	WC_SCHDISPATCH_SLOTS, WC_VEHICLE_TIMETABLE,
 	WDF_CONSTRUCTION,
-	_nested_schdispatch_widgets, lengthof(_nested_schdispatch_widgets)
+	std::begin(_nested_schdispatch_widgets), std::end(_nested_schdispatch_widgets)
 );
 
 /**
@@ -1265,11 +1264,11 @@ static const NWidgetPart _nested_scheduled_dispatch_add_widgets[] = {
 	EndContainer()
 };
 
-static WindowDesc _scheduled_dispatch_add_desc(
+static WindowDesc _scheduled_dispatch_add_desc(__FILE__, __LINE__,
 	WDP_CENTER, nullptr, 0, 0,
 	WC_SET_DATE, WC_NONE,
 	0,
-	_nested_scheduled_dispatch_add_widgets, lengthof(_nested_scheduled_dispatch_add_widgets)
+	std::begin(_nested_scheduled_dispatch_add_widgets), std::end(_nested_scheduled_dispatch_add_widgets)
 );
 
 void ShowScheduledDispatchAddSlotsWindow(SchdispatchWindow *parent, int window_number)

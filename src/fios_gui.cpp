@@ -66,6 +66,7 @@ void LoadCheckData::Clear()
 	this->debug_config_data.clear();
 
 	this->sl_is_ext_version = false;
+	this->version_name.clear();
 }
 
 /** Load game/scenario with optional content download */
@@ -290,13 +291,13 @@ private:
 	QueryString filter_editbox; ///< Filter editbox;
 	std::vector<FiosItem *> display_list; ///< Filtered display list
 
-	static void SaveGameConfirmationCallback(Window *w, bool confirmed)
+	static void SaveGameConfirmationCallback(Window *, bool confirmed)
 	{
 		/* File name has already been written to _file_to_saveload */
 		if (confirmed) _switch_mode = SM_SAVE_GAME;
 	}
 
-	static void SaveHeightmapConfirmationCallback(Window *w, bool confirmed)
+	static void SaveHeightmapConfirmationCallback(Window *, bool confirmed)
 	{
 		/* File name has already been written to _file_to_saveload */
 		if (confirmed) _switch_mode = SM_SAVE_HEIGHTMAP;
@@ -408,7 +409,7 @@ public:
 		}
 	}
 
-	void Close() override
+	void Close([[maybe_unused]] int data = 0) override
 	{
 		/* pause is only used in single-player, non-editor mode, non menu mode */
 		if (!_networking && _game_mode != GM_EDITOR && _game_mode != GM_MENU) {
@@ -489,6 +490,11 @@ public:
 		/* Details panel */
 		tr.bottom -= FONT_HEIGHT_NORMAL - 1;
 		if (tr.top > tr.bottom) return;
+
+		if (!_load_check_data.version_name.empty()) {
+			SetDParamStr(0, _load_check_data.version_name);
+			tr.top = DrawStringMultiLine(tr, STR_JUST_RAW_STRING, TC_GREEN);
+		}
 
 		if (!_load_check_data.checkable) {
 			/* Old savegame, no information available */
@@ -581,7 +587,7 @@ public:
 		}
 	}
 
-	void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize) override
+	void UpdateWidgetSize(int widget, Dimension *size, [[maybe_unused]] const Dimension &padding, [[maybe_unused]] Dimension *fill, [[maybe_unused]] Dimension *resize) override
 	{
 		switch (widget) {
 			case WID_SL_BACKGROUND:
@@ -614,7 +620,7 @@ public:
 		this->DrawWidgets();
 	}
 
-	void OnClick(Point pt, int widget, int click_count) override
+	void OnClick([[maybe_unused]] Point pt, int widget, [[maybe_unused]] int click_count) override
 	{
 		switch (widget) {
 			case WID_SL_SORT_BYNAME: // Sort save names by name
@@ -736,7 +742,7 @@ public:
 		}
 	}
 
-	void OnMouseOver(Point pt, int widget) override
+	void OnMouseOver([[maybe_unused]] Point pt, int widget) override
 	{
 		if (widget == WID_SL_DRIVES_DIRECTORIES_LIST) {
 			auto it = this->vscroll->GetScrolledItemFromWidget(this->display_list, pt.y, this, WID_SL_DRIVES_DIRECTORIES_LIST, WidgetDimensions::scaled.inset.top);
@@ -924,27 +930,27 @@ public:
 };
 
 /** Load game/scenario */
-static WindowDesc _load_dialog_desc(
+static WindowDesc _load_dialog_desc(__FILE__, __LINE__,
 	WDP_CENTER, "load_game", 500, 294,
 	WC_SAVELOAD, WC_NONE,
 	0,
-	_nested_load_dialog_widgets, lengthof(_nested_load_dialog_widgets)
+	std::begin(_nested_load_dialog_widgets), std::end(_nested_load_dialog_widgets)
 );
 
 /** Load heightmap */
-static WindowDesc _load_heightmap_dialog_desc(
+static WindowDesc _load_heightmap_dialog_desc(__FILE__, __LINE__,
 	WDP_CENTER, "load_heightmap", 257, 320,
 	WC_SAVELOAD, WC_NONE,
 	0,
-	_nested_load_heightmap_dialog_widgets, lengthof(_nested_load_heightmap_dialog_widgets)
+	std::begin(_nested_load_heightmap_dialog_widgets), std::end(_nested_load_heightmap_dialog_widgets)
 );
 
 /** Save game/scenario */
-static WindowDesc _save_dialog_desc(
+static WindowDesc _save_dialog_desc(__FILE__, __LINE__,
 	WDP_CENTER, "save_game", 500, 294,
 	WC_SAVELOAD, WC_NONE,
 	0,
-	_nested_save_dialog_widgets, lengthof(_nested_save_dialog_widgets)
+	std::begin(_nested_save_dialog_widgets), std::end(_nested_save_dialog_widgets)
 );
 
 /**

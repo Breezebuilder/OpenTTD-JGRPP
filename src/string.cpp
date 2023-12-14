@@ -191,9 +191,40 @@ const char *str_fix_scc_encoded(char *str, const char *last)
 	return str;
 }
 
+/**
+ * Format a byte array into a continuous hex string.
+ * @param data Array to format
+ * @return Converted string.
+ */
+std::string FormatArrayAsHex(span<const byte> data)
+{
+	std::string hex_output;
+	hex_output.resize(data.size() * 2);
 
+	char txt[3];
+	for (uint i = 0; i < data.size(); ++i) {
+		seprintf(txt, lastof(txt), "%02x", data[i]);
+		hex_output[i * 2] = txt[0];
+		hex_output[(i * 2) + 1] = txt[1];
+	}
+
+	return hex_output;
+}
+
+/**
+ * Copies the valid (UTF-8) characters from \c str up to \c last to the \c dst.
+ * Depending on the \c settings invalid characters can be replaced with a
+ * question mark, as well as determining what characters are deemed invalid.
+ *
+ * It is allowed for \c dst to be the same as \c src, in which case the string
+ * is make valid in place.
+ * @param dst The destination to write to.
+ * @param str The string to validate.
+ * @param last The last valid character of str.
+ * @param settings The settings for the string validation.
+ */
 template <class T>
-static void StrMakeValidInPlace(T &dst, const char *str, const char *last, StringValidationSettings settings)
+static void StrMakeValid(T &dst, const char *str, const char *last, StringValidationSettings settings)
 {
 	/* Assume the ABSOLUTE WORST to be in str as it comes from the outside. */
 
@@ -268,7 +299,7 @@ static void StrMakeValidInPlace(T &dst, const char *str, const char *last, Strin
 char *StrMakeValidInPlace(char *str, const char *last, StringValidationSettings settings)
 {
 	char *dst = str;
-	StrMakeValidInPlace(dst, str, last, settings);
+	StrMakeValid(dst, str, last, settings);
 	*dst = '\0';
 	return dst;
 }
@@ -287,8 +318,9 @@ void StrMakeValidInPlace(char *str, StringValidationSettings settings)
 }
 
 /**
- * Scans the string for invalid characters and replaces then with a
- * question mark '?' (if not ignored).
+ * Copies the valid (UTF-8) characters from \c str to the returned string.
+ * Depending on the \c settings invalid characters can be replaced with a
+ * question mark, as well as determining what characters are deemed invalid.
  * @param str The string to validate.
  * @param settings The settings for the string validation.
  */
@@ -299,7 +331,7 @@ std::string StrMakeValid(std::string_view str, StringValidationSettings settings
 
 	std::ostringstream dst;
 	std::ostreambuf_iterator<char> dst_iter(dst);
-	StrMakeValidInPlace(dst_iter, buf, last, settings);
+	StrMakeValid(dst_iter, buf, last, settings);
 
 	return dst.str();
 }
@@ -426,12 +458,12 @@ struct CaseInsensitiveCharTraits : public std::char_traits<char> {
 		return 0;
 	}
 
-	static const char *find(const char *s, int n, char a)
+	static const char *find(const char *s, size_t n, char a)
 	{
-		while (n-- > 0 && toupper(*s) != toupper(a)) {
-			++s;
+		for (; n > 0; --n, ++s) {
+			if (toupper(*s) == toupper(a)) return s;
 		}
-		return s;
+		return nullptr;
 	}
 };
 
@@ -854,7 +886,7 @@ char *strcasestr(const char *haystack, const char *needle)
  */
 static std::string_view SkipGarbage(std::string_view str)
 {
-	while (str.size() != 0 && (str[0] < '0' || IsInsideMM(str[0], ';', '@' + 1) || IsInsideMM(str[0], '[', '`' + 1) || IsInsideMM(str[0], '{', '~' + 1))) str.remove_prefix(1);
+	while (!str.empty() && (str[0] < '0' || IsInsideMM(str[0], ';', '@' + 1) || IsInsideMM(str[0], '[', '`' + 1) || IsInsideMM(str[0], '{', '~' + 1))) str.remove_prefix(1);
 	return str;
 }
 
@@ -925,6 +957,98 @@ int StrNaturalCompare(std::string_view s1, std::string_view s2, bool ignore_garb
 	/* Do a manual natural sort comparison if ICU is missing or if we cannot create a collator. */
 	return _strnatcmpIntl(s1.data(), s2.data());
 }
+
+#ifdef WITH_ICU_I18N
+
+#include <unicode/stsearch.h>
+
+/**
+ * Search if a string is contained in another string using the current locale.
+ *
+ * @param str String to search in.
+ * @param value String to search for.
+ * @param case_insensitive Search case-insensitive.
+ * @return 1 if value was found, 0 if it was not found, or -1 if not supported by the OS.
+ */
+static int ICUStringContains(const std::string_view str, const std::string_view value, bool case_insensitive)
+{
+	if (_current_collator) {
+		std::unique_ptr<icu::RuleBasedCollator> coll(dynamic_cast<icu::RuleBasedCollator *>(_current_collator->clone()));
+		if (coll) {
+			UErrorCode status = U_ZERO_ERROR;
+			coll->setStrength(case_insensitive ? icu::Collator::SECONDARY : icu::Collator::TERTIARY);
+			coll->setAttribute(UCOL_NUMERIC_COLLATION, UCOL_OFF, status);
+
+			auto u_str = icu::UnicodeString::fromUTF8(icu::StringPiece(str.data(), str.size()));
+			auto u_value = icu::UnicodeString::fromUTF8(icu::StringPiece(value.data(), value.size()));
+			icu::StringSearch u_searcher(u_value, u_str, coll.get(), nullptr, status);
+			if (U_SUCCESS(status)) {
+				auto pos = u_searcher.first(status);
+				if (U_SUCCESS(status)) return pos != USEARCH_DONE ? 1 : 0;
+			}
+		}
+	}
+
+	return -1;
+}
+#endif /* WITH_ICU_I18N */
+
+/**
+ * Checks if a string is contained in another string with a locale-aware comparison that is case sensitive.
+ *
+ * @param str The string to search in.
+ * @param value The string to search for.
+ * @return True if a match was found.
+ */
+[[nodiscard]] bool StrNaturalContains(const std::string_view str, const std::string_view value)
+{
+#ifdef WITH_ICU_I18N
+	int res_u = ICUStringContains(str, value, false);
+	if (res_u >= 0) return res_u > 0;
+#endif /* WITH_ICU_I18N */
+
+#if defined(_WIN32) && !defined(STRGEN) && !defined(SETTINGSGEN)
+	int res = Win32StringContains(str, value, false);
+	if (res >= 0) return res > 0;
+#endif
+
+#if defined(WITH_COCOA) && !defined(STRGEN) && !defined(SETTINGSGEN)
+	int res = MacOSStringContains(str, value, false);
+	if (res >= 0) return res > 0;
+#endif
+
+	return str.find(value) != std::string_view::npos;
+}
+
+/**
+ * Checks if a string is contained in another string with a locale-aware comparison that is case insensitive.
+ *
+ * @param str The string to search in.
+ * @param value The string to search for.
+ * @return True if a match was found.
+ */
+[[nodiscard]] bool StrNaturalContainsIgnoreCase(const std::string_view str, const std::string_view value)
+{
+#ifdef WITH_ICU_I18N
+	int res_u = ICUStringContains(str, value, true);
+	if (res_u >= 0) return res_u > 0;
+#endif /* WITH_ICU_I18N */
+
+#if defined(_WIN32) && !defined(STRGEN) && !defined(SETTINGSGEN)
+	int res = Win32StringContains(str, value, true);
+	if (res >= 0) return res > 0;
+#endif
+
+#if defined(WITH_COCOA) && !defined(STRGEN) && !defined(SETTINGSGEN)
+	int res = MacOSStringContains(str, value, true);
+	if (res >= 0) return res > 0;
+#endif
+
+	CaseInsensitiveStringView ci_str{ str.data(), str.size() };
+	CaseInsensitiveStringView ci_value{ value.data(), value.size() };
+	return ci_str.find(ci_value) != CaseInsensitiveStringView::npos;
+}
+
 
 #ifdef WITH_UNISCRIBE
 
@@ -1103,14 +1227,14 @@ public:
 	{
 	}
 
-	virtual void SetString(const char *s)
+	void SetString(const char *s) override
 	{
 		this->string = s;
 		this->len = strlen(s);
 		this->cur_pos = 0;
 	}
 
-	virtual size_t SetCurPosition(size_t pos)
+	size_t SetCurPosition(size_t pos) override
 	{
 		dbg_assert(this->string != nullptr && pos <= this->len);
 		/* Sanitize in case we get a position inside an UTF-8 sequence. */
@@ -1118,7 +1242,7 @@ public:
 		return this->cur_pos = pos;
 	}
 
-	virtual size_t Next(IterType what)
+	size_t Next(IterType what) override
 	{
 		dbg_assert(this->string != nullptr);
 
@@ -1156,7 +1280,7 @@ public:
 		return END;
 	}
 
-	virtual size_t Prev(IterType what)
+	size_t Prev(IterType what) override
 	{
 		dbg_assert(this->string != nullptr);
 

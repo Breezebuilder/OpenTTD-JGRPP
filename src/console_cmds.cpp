@@ -13,7 +13,7 @@
 #include "engine_func.h"
 #include "landscape.h"
 #include "sl/saveload.h"
-#include "network/core/game_info.h"
+#include "network/core/network_game_info.h"
 #include "network/network.h"
 #include "network/network_func.h"
 #include "network/network_base.h"
@@ -109,7 +109,7 @@ public:
 static ConsoleFileList _console_file_list; ///< File storage cache for the console.
 
 /* console command defines */
-#define DEF_CONSOLE_CMD(function) static bool function(byte argc, char *argv[])
+#define DEF_CONSOLE_CMD(function) static bool function([[maybe_unused]] byte argc, [[maybe_unused]] char *argv[])
 #define DEF_CONSOLE_HOOK(function) static ConsoleHookResult function(bool echo)
 
 /****************
@@ -2107,17 +2107,17 @@ static ContentType StringToContentType(const char *str)
 
 /** Asynchronous callback */
 struct ConsoleContentCallback : public ContentCallback {
-	void OnConnect(bool success)
+	void OnConnect(bool success) override
 	{
 		IConsolePrintF(CC_DEFAULT, "Content server connection %s", success ? "established" : "failed");
 	}
 
-	void OnDisconnect()
+	void OnDisconnect() override
 	{
 		IConsolePrintF(CC_DEFAULT, "Content server connection closed");
 	}
 
-	void OnDownloadComplete(ContentID cid)
+	void OnDownloadComplete(ContentID cid) override
 	{
 		IConsolePrintF(CC_DEFAULT, "Completed download of %d", cid);
 	}
@@ -2833,7 +2833,7 @@ DEF_CONSOLE_CMD(ConDumpRailTypes)
 
 	btree::btree_map<uint32, const GRFFile *> grfs;
 	for (RailType rt = RAILTYPE_BEGIN; rt < RAILTYPE_END; rt++) {
-		const RailtypeInfo *rti = GetRailTypeInfo(rt);
+		const RailTypeInfo *rti = GetRailTypeInfo(rt);
 		if (rti->label == 0) continue;
 		uint32 grfid = 0;
 		const GRFFile *grf = rti->grffile[RTSG_GROUND];
@@ -3628,7 +3628,7 @@ DEF_CONSOLE_CMD(ConRailTypeMapColourCtl)
 	uint8 map_colour = atoi(argv[2]);
 
 	if (rt >= RAILTYPE_END) return true;
-	extern RailtypeInfo _railtypes[RAILTYPE_END];
+	extern RailTypeInfo _railtypes[RAILTYPE_END];
 
 	_railtypes[rt].map_colour = map_colour;
 	MarkAllViewportMapLandscapesDirty();

@@ -188,6 +188,9 @@ STR_COLOUR_BROWN                                                :तपकिर
 STR_COLOUR_GREY                                                 :करडा
 STR_COLOUR_WHITE                                                :पांढरा
 
+###length 17
+
+
 # Units used in OpenTTD
 STR_UNITS_VELOCITY_IMPERIAL                                     :{DECIMAL} mph
 STR_UNITS_VELOCITY_METRIC                                       :{DECIMAL} किमी / तास
@@ -439,7 +442,7 @@ STR_NEWS_MENU_LAST_MESSAGE_NEWS_REPORT                          :शेवटच
 STR_NEWS_MENU_MESSAGE_HISTORY_MENU                              :निरोपांचा इतिहास
 
 # About menu
-###length 10
+###length 12
 STR_ABOUT_MENU_LAND_BLOCK_INFO                                  :जागाची माहिती
 STR_ABOUT_MENU_SEPARATOR                                        :
 STR_ABOUT_MENU_SCREENSHOT                                       :द्श्य
@@ -798,6 +801,7 @@ STR_CONFIG_SETTING_REALISTIC                                    :खरेखु
 
 ###length 3
 
+
 ###setting-zero-is-special
 
 
@@ -852,6 +856,8 @@ STR_CONFIG_SETTING_SMOKE_AMOUNT                                 :वाहना
 
 
 ###length 3
+
+
 
 
 
@@ -918,7 +924,7 @@ STR_CONFIG_SETTING_WARN_LOST_VEHICLE                            : वाहन �
 
 ###length 3
 
-
+###length 3
 
 ###length 3
 
@@ -1054,6 +1060,8 @@ STR_INTRO_CAPTION                                               :{WHITE}ओप�
 # Quit window
 
 # Abandon game
+
+# Help window
 
 # Cheat window
 STR_CHEAT_CHANGE_DATE_QUERY_CAPT                                :{WHITE}चालू वर्ष बदला
@@ -1756,7 +1764,7 @@ STR_AI_SETTINGS_SETTING                                         :{STRING}: {ORAN
 
 
 # Textfile window
-###length 4
+###length 5
 
 
 # Vehicle loading indicators

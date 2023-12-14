@@ -52,7 +52,7 @@ static void DoSelectCompanyManagerFace(Window *parent);
 static void ShowCompanyInfrastructure(CompanyID company);
 
 /** List of revenues. */
-static ExpensesType _expenses_list_revenue[] = {
+static const std::initializer_list<ExpensesType> _expenses_list_revenue = {
 	EXPENSES_TRAIN_REVENUE,
 	EXPENSES_ROADVEH_REVENUE,
 	EXPENSES_AIRCRAFT_REVENUE,
@@ -61,7 +61,7 @@ static ExpensesType _expenses_list_revenue[] = {
 };
 
 /** List of operating expenses. */
-static ExpensesType _expenses_list_operating_costs[] = {
+static const std::initializer_list<ExpensesType> _expenses_list_operating_costs = {
 	EXPENSES_TRAIN_RUN,
 	EXPENSES_ROADVEH_RUN,
 	EXPENSES_AIRCRAFT_RUN,
@@ -72,7 +72,7 @@ static ExpensesType _expenses_list_operating_costs[] = {
 };
 
 /** List of capital expenses. */
-static ExpensesType _expenses_list_capital_costs[] = {
+static const std::initializer_list<ExpensesType> _expenses_list_capital_costs = {
 	EXPENSES_CONSTRUCTION,
 	EXPENSES_NEW_VEHICLES,
 	EXPENSES_OTHER,
@@ -80,25 +80,24 @@ static ExpensesType _expenses_list_capital_costs[] = {
 
 /** Expense list container. */
 struct ExpensesList {
-	const ExpensesType *et;   ///< Expenses items.
-	const uint length;        ///< Number of items in list.
+	const StringID title; ///< StringID of list title.
+	const std::initializer_list<ExpensesType> &items; ///< List of expenses types.
 
-	ExpensesList(ExpensesType *et, int length) : et(et), length(length)
+	ExpensesList(StringID title, const std::initializer_list<ExpensesType> &list) : title(title), items(list)
 	{
 	}
 
 	uint GetHeight() const
 	{
 		/* Add up the height of all the lines.  */
-		return this->length * FONT_HEIGHT_NORMAL;
+		return static_cast<uint>(this->items.size()) * FONT_HEIGHT_NORMAL;
 	}
 
 	/** Compute width of the expenses categories in pixels. */
 	uint GetListWidth() const
 	{
 		uint width = 0;
-		for (uint i = 0; i < this->length; i++) {
-			ExpensesType et = this->et[i];
+		for (const ExpensesType &et : this->items) {
 			width = std::max(width, GetStringBoundingBox(STR_FINANCES_SECTION_CONSTRUCTION + et).width);
 		}
 		return width;
@@ -106,10 +105,10 @@ struct ExpensesList {
 };
 
 /** Types of expense lists */
-static const ExpensesList _expenses_list_types[] = {
-	ExpensesList(_expenses_list_revenue, lengthof(_expenses_list_revenue)),
-	ExpensesList(_expenses_list_operating_costs, lengthof(_expenses_list_operating_costs)),
-	ExpensesList(_expenses_list_capital_costs, lengthof(_expenses_list_capital_costs)),
+static const std::initializer_list<ExpensesList> _expenses_list_types = {
+	{ STR_FINANCES_REVENUE_TITLE,            _expenses_list_revenue },
+	{ STR_FINANCES_OPERATING_EXPENSES_TITLE, _expenses_list_operating_costs },
+	{ STR_FINANCES_CAPITAL_EXPENSES_TITLE,   _expenses_list_capital_costs },
 };
 
 /**
@@ -121,9 +120,9 @@ static uint GetTotalCategoriesHeight()
 	/* There's an empty line and blockspace on the year row */
 	uint total_height = FONT_HEIGHT_NORMAL + WidgetDimensions::scaled.vsep_wide;
 
-	for (uint i = 0; i < lengthof(_expenses_list_types); i++) {
+	for (const ExpensesList &list : _expenses_list_types) {
 		/* Title + expense list + total line + total + blockspace after category */
-		total_height += FONT_HEIGHT_NORMAL + _expenses_list_types[i].GetHeight() + WidgetDimensions::scaled.vsep_normal + FONT_HEIGHT_NORMAL + WidgetDimensions::scaled.vsep_wide;
+		total_height += FONT_HEIGHT_NORMAL + list.GetHeight() + WidgetDimensions::scaled.vsep_normal + FONT_HEIGHT_NORMAL + WidgetDimensions::scaled.vsep_wide;
 	}
 
 	/* Total income */
@@ -141,11 +140,11 @@ static uint GetMaxCategoriesWidth()
 	uint max_width = 0;
 
 	/* Loop through categories to check max widths. */
-	for (uint i = 0; i < lengthof(_expenses_list_types); i++) {
+	for (const ExpensesList &list : _expenses_list_types) {
 		/* Title of category */
-		max_width = std::max(max_width, GetStringBoundingBox(STR_FINANCES_REVENUE_TITLE + i).width);
+		max_width = std::max(max_width, GetStringBoundingBox(list.title).width);
 		/* Entries in category */
-		max_width = std::max(max_width, _expenses_list_types[i].GetListWidth() + WidgetDimensions::scaled.hsep_indent);
+		max_width = std::max(max_width, list.GetListWidth() + WidgetDimensions::scaled.hsep_indent);
 	}
 
 	return max_width;
@@ -154,15 +153,13 @@ static uint GetMaxCategoriesWidth()
 /**
  * Draw a category of expenses (revenue, operating expenses, capital expenses).
  */
-static void DrawCategory(const Rect &r, int start_y, ExpensesList list)
+static void DrawCategory(const Rect &r, int start_y, const ExpensesList &list)
 {
 	Rect tr = r.Indent(WidgetDimensions::scaled.hsep_indent, _current_text_dir == TD_RTL);
 
 	tr.top = start_y;
-	ExpensesType et;
 
-	for (uint i = 0; i < list.length; i++) {
-		et = list.et[i];
+	for (const ExpensesType &et : list.items) {
 		DrawString(tr, STR_FINANCES_SECTION_CONSTRUCTION + et);
 		tr.top += FONT_HEIGHT_NORMAL;
 	}
@@ -178,14 +175,14 @@ static void DrawCategories(const Rect &r)
 	/* Start with an empty space in the year row, plus the blockspace under the year. */
 	int y = r.top + FONT_HEIGHT_NORMAL + WidgetDimensions::scaled.vsep_wide;
 
-	for (uint i = 0; i < lengthof(_expenses_list_types); i++) {
+	for (const ExpensesList &list : _expenses_list_types) {
 		/* Draw category title and advance y */
-		DrawString(r.left, r.right, y, (STR_FINANCES_REVENUE_TITLE + i), TC_FROMSTRING, SA_LEFT);
+		DrawString(r.left, r.right, y, list.title, TC_FROMSTRING, SA_LEFT);
 		y += FONT_HEIGHT_NORMAL;
 
 		/* Draw category items and advance y */
-		DrawCategory(r, y, _expenses_list_types[i]);
-		y += _expenses_list_types[i].GetHeight();
+		DrawCategory(r, y, list);
+		y += list.GetHeight();
 
 		/* Advance y by the height of the horizontal line between amounts and subtotal */
 		y += WidgetDimensions::scaled.vsep_normal;
@@ -228,14 +225,12 @@ static void DrawPrice(Money amount, int left, int right, int top, TextColour col
  * Draw a category of expenses/revenues in the year column.
  * @return The income sum of the category.
  */
-static Money DrawYearCategory (const Rect &r, int start_y, ExpensesList list, const Money(&tbl)[EXPENSES_END])
+static Money DrawYearCategory(const Rect &r, int start_y, const ExpensesList &list, const Expenses &tbl)
 {
 	int y = start_y;
-	ExpensesType et;
 	Money sum = 0;
 
-	for (uint i = 0; i < list.length; i++) {
-		et = list.et[i];
+	for (const ExpensesType &et : list.items) {
 		Money cost = tbl[et];
 		sum += cost;
 		if (cost != 0) DrawPrice(cost, r.left, r.right, y, TC_BLACK);
@@ -259,7 +254,7 @@ static Money DrawYearCategory (const Rect &r, int start_y, ExpensesList list, co
  * @param tbl  Reference to table of amounts for \a year.
  * @note The environment must provide padding at the left and right of \a r.
  */
-static void DrawYearColumn(const Rect &r, int year, const Money (&tbl)[EXPENSES_END])
+static void DrawYearColumn(const Rect &r, int year, const Expenses &tbl)
 {
 	int y = r.top;
 	Money sum;
@@ -270,11 +265,11 @@ static void DrawYearColumn(const Rect &r, int year, const Money (&tbl)[EXPENSES_
 	y += FONT_HEIGHT_NORMAL + WidgetDimensions::scaled.vsep_wide;
 
 	/* Categories */
-	for (uint i = 0; i < lengthof(_expenses_list_types); i++) {
+	for (const ExpensesList &list : _expenses_list_types) {
 		y += FONT_HEIGHT_NORMAL;
-		sum += DrawYearCategory(r, y, _expenses_list_types[i], tbl);
+		sum += DrawYearCategory(r, y, list, tbl);
 		/* Expense list + expense category title + expense category total + blockspace after category */
-		y += _expenses_list_types[i].GetHeight() + WidgetDimensions::scaled.vsep_normal + FONT_HEIGHT_NORMAL + WidgetDimensions::scaled.vsep_wide;
+		y += list.GetHeight() + WidgetDimensions::scaled.vsep_normal + FONT_HEIGHT_NORMAL + WidgetDimensions::scaled.vsep_wide;
 	}
 
 	/* Total income. */
@@ -398,7 +393,7 @@ struct CompanyFinancesWindow : Window {
 		}
 	}
 
-	void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize) override
+	void UpdateWidgetSize(int widget, Dimension *size, [[maybe_unused]] const Dimension &padding, [[maybe_unused]] Dimension *fill, [[maybe_unused]] Dimension *resize) override
 	{
 		switch (widget) {
 			case WID_CF_EXPS_CATEGORY:
@@ -494,7 +489,7 @@ struct CompanyFinancesWindow : Window {
 		this->DrawWidgets();
 	}
 
-	void OnClick(Point pt, int widget, int click_count) override
+	void OnClick([[maybe_unused]] Point pt, int widget, [[maybe_unused]] int click_count) override
 	{
 		switch (widget) {
 			case WID_CF_TOGGLE_SIZE: // toggle size
@@ -567,14 +562,14 @@ struct CompanyFinancesWindow : Window {
 	{
 		switch (widget) {
 			case WID_CF_INCREASE_LOAN: {
-				uint64 arg = STR_FINANCES_BORROW_TOOLTIP;
-				GuiShowTooltips(this, STR_FINANCES_BORROW_TOOLTIP_EXTRA, 1, &arg, close_cond);
+				SetDParam(0, STR_FINANCES_BORROW_TOOLTIP);
+				GuiShowTooltips(this, STR_FINANCES_BORROW_TOOLTIP_EXTRA, close_cond, 1);
 				return true;
 			}
 
 			case WID_CF_REPAY_LOAN: {
-				uint64 arg = STR_FINANCES_REPAY_TOOLTIP;
-				GuiShowTooltips(this, STR_FINANCES_REPAY_TOOLTIP_EXTRA, 1, &arg, close_cond);
+				SetDParam(0, STR_FINANCES_REPAY_TOOLTIP);
+				GuiShowTooltips(this, STR_FINANCES_REPAY_TOOLTIP_EXTRA, close_cond, 1);
 				return true;
 			}
 
@@ -584,11 +579,11 @@ struct CompanyFinancesWindow : Window {
 	}
 };
 
-static WindowDesc _company_finances_desc(
+static WindowDesc _company_finances_desc(__FILE__, __LINE__,
 	WDP_AUTO, "company_finances", 0, 0,
 	WC_FINANCES, WC_NONE,
 	0,
-	_nested_company_finances_widgets, lengthof(_nested_company_finances_widgets)
+	std::begin(_nested_company_finances_widgets), std::end(_nested_company_finances_widgets)
 );
 
 /**
@@ -643,7 +638,7 @@ public:
 		return ScaleGUITrad(28) + WidgetDimensions::scaled.hsep_normal + GetStringBoundingBox(this->String()).width + WidgetDimensions::scaled.dropdowntext.Horizontal();
 	}
 
-	uint Height(uint width) const override
+	uint Height() const override
 	{
 		return std::max(FONT_HEIGHT_NORMAL, ScaleGUITrad(12) + WidgetDimensions::scaled.vsep_normal);
 	}
@@ -653,7 +648,7 @@ public:
 		return true;
 	}
 
-	void Draw(const Rect &r, bool sel, Colours bg_colour) const override
+	void Draw(const Rect &r, bool sel, Colours) const override
 	{
 		bool rtl = _current_text_dir == TD_RTL;
 		int icon_y = CenterBounds(r.top, r.bottom, 0);
@@ -719,10 +714,10 @@ private:
 		if (default_livery != nullptr) {
 			/* Add COLOUR_END to put the colour out of range, but also allow us to show what the default is */
 			default_col = (primary ? default_livery->colour1 : default_livery->colour2) + COLOUR_END;
-			list.emplace_back(new DropDownListColourItem(default_col, false));
+			list.push_back(std::make_unique<DropDownListColourItem>(default_col, false));
 		}
 		for (uint i = 0; i < lengthof(_colour_dropdown); i++) {
-			list.emplace_back(new DropDownListColourItem(i, HasBit(used_colours, i)));
+			list.push_back(std::make_unique<DropDownListColourItem>(i, HasBit(used_colours, i)));
 		}
 
 		byte sel = (default_livery == nullptr || HasBit(livery->in_use, primary ? 0 : 1)) ? (primary ? livery->colour1 : livery->colour2) : default_col;
@@ -830,7 +825,7 @@ public:
 		}
 	}
 
-	void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize) override
+	void UpdateWidgetSize(int widget, Dimension *size, [[maybe_unused]] const Dimension &padding, [[maybe_unused]] Dimension *fill, [[maybe_unused]] Dimension *resize) override
 	{
 		switch (widget) {
 			case WID_SCL_SPACER_DROPDOWN: {
@@ -1001,7 +996,7 @@ public:
 		}
 	}
 
-	void OnClick(Point pt, int widget, int click_count) override
+	void OnClick([[maybe_unused]] Point pt, int widget, [[maybe_unused]] int click_count) override
 	{
 		switch (widget) {
 			/* Livery Class buttons */
@@ -1032,7 +1027,7 @@ public:
 					this->groups.ForceRebuild();
 					this->BuildGroupList((CompanyID)this->window_number);
 
-					if (this->groups.size() > 0) {
+					if (!this->groups.empty()) {
 						this->sel = this->groups[0]->index;
 					}
 				}
@@ -1106,7 +1101,7 @@ public:
 	 * @param data Information about the changed data.
 	 * @param gui_scope Whether the call is done from GUI scope. You may not do everything when not in GUI scope. See #InvalidateWindowData() for details.
 	 */
-	void OnInvalidateData(int data = 0, bool gui_scope = true) override
+	void OnInvalidateData([[maybe_unused]] int data = 0, [[maybe_unused]] bool gui_scope = true) override
 	{
 		if (!gui_scope) return;
 
@@ -1119,7 +1114,7 @@ public:
 
 				if (!Group::IsValidID(this->sel)) {
 					this->sel = INVALID_GROUP;
-					if (this->groups.size() > 0) this->sel = this->groups[0]->index;
+					if (!this->groups.empty()) this->sel = this->groups[0]->index;
 				}
 
 				this->SetDirty();
@@ -1127,7 +1122,7 @@ public:
 			return;
 		}
 
-		this->SetWidgetsDisabledState(true, WID_SCL_CLASS_RAIL, WID_SCL_CLASS_ROAD, WID_SCL_CLASS_SHIP, WID_SCL_CLASS_AIRCRAFT, WIDGET_LIST_END);
+		this->SetWidgetsDisabledState(true, WID_SCL_CLASS_RAIL, WID_SCL_CLASS_ROAD, WID_SCL_CLASS_SHIP, WID_SCL_CLASS_AIRCRAFT);
 
 		bool current_class_valid = this->livery_class == LC_OTHER || this->livery_class >= LC_GROUP_RAIL;
 		if (_settings_client.gui.liveries == LIT_ALL || (_settings_client.gui.liveries == LIT_COMPANY && this->window_number == _local_company)) {
@@ -1180,11 +1175,11 @@ static const NWidgetPart _nested_select_company_livery_widgets [] = {
 	EndContainer(),
 };
 
-static WindowDesc _select_company_livery_desc(
-	WDP_AUTO, "company_livery", 0, 0,
+static WindowDesc _select_company_livery_desc(__FILE__, __LINE__,
+	WDP_AUTO, nullptr, 0, 0,
 	WC_COMPANY_COLOUR, WC_NONE,
 	0,
-	_nested_select_company_livery_widgets, lengthof(_nested_select_company_livery_widgets)
+	std::begin(_nested_select_company_livery_widgets), std::end(_nested_select_company_livery_widgets)
 );
 
 void ShowCompanyLiveryWindow(CompanyID company, GroupID group)
@@ -1495,7 +1490,7 @@ public:
 		this->number_dim = number_dim;
 	}
 
-	void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize) override
+	void UpdateWidgetSize(int widget, Dimension *size, [[maybe_unused]] const Dimension &padding, [[maybe_unused]] Dimension *fill, [[maybe_unused]] Dimension *resize) override
 	{
 		switch (widget) {
 			case WID_SCMF_HAS_MOUSTACHE_EARRING_TEXT:
@@ -1543,8 +1538,8 @@ public:
 	void OnPaint() override
 	{
 		/* lower the non-selected gender button */
-		this->SetWidgetsLoweredState(!this->is_female, WID_SCMF_MALE, WID_SCMF_MALE2, WIDGET_LIST_END);
-		this->SetWidgetsLoweredState( this->is_female, WID_SCMF_FEMALE, WID_SCMF_FEMALE2, WIDGET_LIST_END);
+		this->SetWidgetsLoweredState(!this->is_female, WID_SCMF_MALE, WID_SCMF_MALE2);
+		this->SetWidgetsLoweredState( this->is_female, WID_SCMF_FEMALE, WID_SCMF_FEMALE2);
 
 		/* advanced company manager face selection window */
 
@@ -1559,44 +1554,44 @@ public:
 
 		/* Eye colour buttons */
 		this->SetWidgetsDisabledState(_cmf_info[CMFV_EYE_COLOUR].valid_values[this->ge] < 2,
-				WID_SCMF_EYECOLOUR, WID_SCMF_EYECOLOUR_L, WID_SCMF_EYECOLOUR_R, WIDGET_LIST_END);
+				WID_SCMF_EYECOLOUR, WID_SCMF_EYECOLOUR_L, WID_SCMF_EYECOLOUR_R);
 
 		/* Chin buttons */
 		this->SetWidgetsDisabledState(_cmf_info[CMFV_CHIN].valid_values[this->ge] < 2,
-				WID_SCMF_CHIN, WID_SCMF_CHIN_L, WID_SCMF_CHIN_R, WIDGET_LIST_END);
+				WID_SCMF_CHIN, WID_SCMF_CHIN_L, WID_SCMF_CHIN_R);
 
 		/* Eyebrows buttons */
 		this->SetWidgetsDisabledState(_cmf_info[CMFV_EYEBROWS].valid_values[this->ge] < 2,
-				WID_SCMF_EYEBROWS, WID_SCMF_EYEBROWS_L, WID_SCMF_EYEBROWS_R, WIDGET_LIST_END);
+				WID_SCMF_EYEBROWS, WID_SCMF_EYEBROWS_L, WID_SCMF_EYEBROWS_R);
 
 		/* Lips or (if it a male face with a moustache) moustache buttons */
 		this->SetWidgetsDisabledState(_cmf_info[this->is_moust_male ? CMFV_MOUSTACHE : CMFV_LIPS].valid_values[this->ge] < 2,
-				WID_SCMF_LIPS_MOUSTACHE, WID_SCMF_LIPS_MOUSTACHE_L, WID_SCMF_LIPS_MOUSTACHE_R, WIDGET_LIST_END);
+				WID_SCMF_LIPS_MOUSTACHE, WID_SCMF_LIPS_MOUSTACHE_L, WID_SCMF_LIPS_MOUSTACHE_R);
 
 		/* Nose buttons | male faces with moustache haven't any nose options */
 		this->SetWidgetsDisabledState(_cmf_info[CMFV_NOSE].valid_values[this->ge] < 2 || this->is_moust_male,
-				WID_SCMF_NOSE, WID_SCMF_NOSE_L, WID_SCMF_NOSE_R, WIDGET_LIST_END);
+				WID_SCMF_NOSE, WID_SCMF_NOSE_L, WID_SCMF_NOSE_R);
 
 		/* Hair buttons */
 		this->SetWidgetsDisabledState(_cmf_info[CMFV_HAIR].valid_values[this->ge] < 2,
-				WID_SCMF_HAIR, WID_SCMF_HAIR_L, WID_SCMF_HAIR_R, WIDGET_LIST_END);
+				WID_SCMF_HAIR, WID_SCMF_HAIR_L, WID_SCMF_HAIR_R);
 
 		/* Jacket buttons */
 		this->SetWidgetsDisabledState(_cmf_info[CMFV_JACKET].valid_values[this->ge] < 2,
-				WID_SCMF_JACKET, WID_SCMF_JACKET_L, WID_SCMF_JACKET_R, WIDGET_LIST_END);
+				WID_SCMF_JACKET, WID_SCMF_JACKET_L, WID_SCMF_JACKET_R);
 
 		/* Collar buttons */
 		this->SetWidgetsDisabledState(_cmf_info[CMFV_COLLAR].valid_values[this->ge] < 2,
-				WID_SCMF_COLLAR, WID_SCMF_COLLAR_L, WID_SCMF_COLLAR_R, WIDGET_LIST_END);
+				WID_SCMF_COLLAR, WID_SCMF_COLLAR_L, WID_SCMF_COLLAR_R);
 
 		/* Tie/earring buttons | female faces without earring haven't any earring options */
 		this->SetWidgetsDisabledState(_cmf_info[CMFV_TIE_EARRING].valid_values[this->ge] < 2 ||
 					(this->is_female && GetCompanyManagerFaceBits(this->face, CMFV_HAS_TIE_EARRING, this->ge) == 0),
-				WID_SCMF_TIE_EARRING, WID_SCMF_TIE_EARRING_L, WID_SCMF_TIE_EARRING_R, WIDGET_LIST_END);
+				WID_SCMF_TIE_EARRING, WID_SCMF_TIE_EARRING_L, WID_SCMF_TIE_EARRING_R);
 
 		/* Glasses buttons | faces without glasses haven't any glasses options */
 		this->SetWidgetsDisabledState(_cmf_info[CMFV_GLASSES].valid_values[this->ge] < 2 || GetCompanyManagerFaceBits(this->face, CMFV_HAS_GLASSES, this->ge) == 0,
-				WID_SCMF_GLASSES, WID_SCMF_GLASSES_L, WID_SCMF_GLASSES_R, WIDGET_LIST_END);
+				WID_SCMF_GLASSES, WID_SCMF_GLASSES_L, WID_SCMF_GLASSES_R);
 
 		this->DrawWidgets();
 	}
@@ -1671,7 +1666,7 @@ public:
 		}
 	}
 
-	void OnClick(Point pt, int widget, int click_count) override
+	void OnClick([[maybe_unused]] Point pt, int widget, [[maybe_unused]] int click_count) override
 	{
 		switch (widget) {
 			/* Toggle size, advanced/simple face selection */
@@ -1797,11 +1792,11 @@ public:
 };
 
 /** Company manager face selection window description */
-static WindowDesc _select_company_manager_face_desc(
-	WDP_AUTO, "company_face", 0, 0,
+static WindowDesc _select_company_manager_face_desc(__FILE__, __LINE__,
+	WDP_AUTO, nullptr, 0, 0,
 	WC_COMPANY_MANAGER_FACE, WC_NONE,
 	WDF_CONSTRUCTION,
-	_nested_select_company_manager_face_widgets, lengthof(_nested_select_company_manager_face_widgets)
+	std::begin(_nested_select_company_manager_face_widgets), std::end(_nested_select_company_manager_face_widgets)
 );
 
 /**
@@ -1926,7 +1921,7 @@ struct CompanyInfrastructureWindow : Window
 		}
 	}
 
-	void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize) override
+	void UpdateWidgetSize(int widget, Dimension *size, [[maybe_unused]] const Dimension &padding, [[maybe_unused]] Dimension *fill, [[maybe_unused]] Dimension *resize) override
 	{
 		const Company *c = Company::Get((CompanyID)this->window_number);
 
@@ -2192,7 +2187,7 @@ struct CompanyInfrastructureWindow : Window
 	 * @param data Information about the changed data.
 	 * @param gui_scope Whether the call is done from GUI scope. You may not do everything when not in GUI scope. See #InvalidateWindowData() for details.
 	 */
-	void OnInvalidateData(int data = 0, bool gui_scope = true) override
+	void OnInvalidateData([[maybe_unused]] int data = 0, [[maybe_unused]] bool gui_scope = true) override
 	{
 		if (!gui_scope) return;
 
@@ -2201,11 +2196,11 @@ struct CompanyInfrastructureWindow : Window
 	}
 };
 
-static WindowDesc _company_infrastructure_desc(
+static WindowDesc _company_infrastructure_desc(__FILE__, __LINE__,
 	WDP_AUTO, "company_infrastructure", 0, 0,
 	WC_COMPANY_INFRASTRUCTURE, WC_NONE,
 	0,
-	_nested_company_infrastructure_widgets, lengthof(_nested_company_infrastructure_widgets)
+	std::begin(_nested_company_infrastructure_widgets), std::end(_nested_company_infrastructure_widgets)
 );
 
 /**
@@ -2462,7 +2457,7 @@ struct CompanyWindow : Window
 		this->DrawWidgets();
 	}
 
-	void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize) override
+	void UpdateWidgetSize(int widget, Dimension *size, [[maybe_unused]] const Dimension &padding, [[maybe_unused]] Dimension *fill, [[maybe_unused]] Dimension *resize) override
 	{
 		switch (widget) {
 			case WID_C_FACE: {
@@ -2675,7 +2670,7 @@ struct CompanyWindow : Window
 		}
 	}
 
-	void OnClick(Point pt, int widget, int click_count) override
+	void OnClick([[maybe_unused]] Point pt, int widget, [[maybe_unused]] int click_count) override
 	{
 		switch (widget) {
 			case WID_C_NEW_FACE: DoSelectCompanyManagerFace(this); break;
@@ -2780,7 +2775,7 @@ struct CompanyWindow : Window
 		this->SetDirty();
 	}
 
-	void OnPlaceObject(Point pt, TileIndex tile) override
+	void OnPlaceObject([[maybe_unused]] Point pt, TileIndex tile) override
 	{
 		if (DoCommandP(tile, OBJECT_HQ, 0, CMD_BUILD_OBJECT | CMD_MSG(STR_ERROR_CAN_T_BUILD_COMPANY_HEADQUARTERS)) && !_shift_pressed) {
 			ResetObjectToPlace();
@@ -2849,11 +2844,11 @@ struct CompanyWindow : Window
 	}
 };
 
-static WindowDesc _company_desc(
+static WindowDesc _company_desc(__FILE__, __LINE__,
 	WDP_AUTO, "company", 0, 0,
 	WC_COMPANY, WC_NONE,
 	0,
-	_nested_company_widgets, lengthof(_nested_company_widgets)
+	std::begin(_nested_company_widgets), std::end(_nested_company_widgets)
 );
 
 /**
@@ -2895,7 +2890,7 @@ struct BuyCompanyWindow : Window {
 		this->company_value = hostile_takeover ? CalculateHostileTakeoverValue(c) : c->bankrupt_value;
 	}
 
-	void Close() override
+	void Close(int data = 0) override
 	{
 		const Company *c = Company::GetIfValid((CompanyID)this->window_number);
 		if (!this->hostile_takeover && c != nullptr && HasBit(c->bankrupt_asked, this->owner) && _current_company == this->owner) {
@@ -2949,7 +2944,7 @@ struct BuyCompanyWindow : Window {
 		}
 	}
 
-	void OnClick(Point pt, int widget, int click_count) override
+	void OnClick([[maybe_unused]] Point pt, int widget, [[maybe_unused]] int click_count) override
 	{
 		switch (widget) {
 			case WID_BC_NO:
@@ -2989,12 +2984,12 @@ static const NWidgetPart _nested_buy_company_widgets[] = {
 		NWidget(WWT_CAPTION, COLOUR_LIGHT_BLUE, WID_BC_CAPTION), SetDataTip(STR_ERROR_MESSAGE_CAPTION_OTHER_COMPANY, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
 	EndContainer(),
 	NWidget(WWT_PANEL, COLOUR_LIGHT_BLUE),
-		NWidget(NWID_VERTICAL), SetPIP(8, 8, 8),
-			NWidget(NWID_HORIZONTAL), SetPIP(8, 10, 8),
+		NWidget(NWID_VERTICAL), SetPIP(0, WidgetDimensions::unscaled.vsep_wide, 0), SetPadding(WidgetDimensions::unscaled.modalpopup),
+			NWidget(NWID_HORIZONTAL), SetPIP(0, WidgetDimensions::unscaled.hsep_wide, 0),
 				NWidget(WWT_EMPTY, INVALID_COLOUR, WID_BC_FACE), SetFill(0, 1),
 				NWidget(WWT_EMPTY, INVALID_COLOUR, WID_BC_QUESTION), SetMinimalSize(240, 0), SetFill(1, 1),
 			EndContainer(),
-			NWidget(NWID_HORIZONTAL, NC_EQUALSIZE), SetPIP(100, 10, 100),
+			NWidget(NWID_HORIZONTAL, NC_EQUALSIZE), SetPIP(100, WidgetDimensions::unscaled.hsep_wide, 100),
 				NWidget(WWT_TEXTBTN, COLOUR_LIGHT_BLUE, WID_BC_NO), SetMinimalSize(60, 12), SetDataTip(STR_QUIT_NO, STR_NULL), SetFill(1, 0),
 				NWidget(WWT_TEXTBTN, COLOUR_LIGHT_BLUE, WID_BC_YES), SetMinimalSize(60, 12), SetDataTip(STR_QUIT_YES, STR_NULL), SetFill(1, 0),
 			EndContainer(),
@@ -3002,11 +2997,11 @@ static const NWidgetPart _nested_buy_company_widgets[] = {
 	EndContainer(),
 };
 
-static WindowDesc _buy_company_desc(
+static WindowDesc _buy_company_desc(__FILE__, __LINE__,
 	WDP_AUTO, nullptr, 0, 0,
 	WC_BUY_COMPANY, WC_NONE,
 	WDF_CONSTRUCTION,
-	_nested_buy_company_widgets, lengthof(_nested_buy_company_widgets)
+	std::begin(_nested_buy_company_widgets), std::end(_nested_buy_company_widgets)
 );
 
 /**

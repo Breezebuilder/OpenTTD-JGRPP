@@ -66,10 +66,6 @@
 #include "../thread.h"
 #include <mutex>
 #include <condition_variable>
-#if defined(__MINGW32__)
-#include "../3rdparty/mingw-std-threads/mingw.mutex.h"
-#include "../3rdparty/mingw-std-threads/mingw.condition_variable.h"
-#endif
 
 #include "../safeguards.h"
 
@@ -387,6 +383,9 @@ static void SlNullPointers()
 	SlXvSetCurrentState();
 
 	for (auto &ch : ChunkHandlers()) {
+		if (ch.special_proc != nullptr) {
+			if (ch.special_proc(ch.id, CSLSO_PRE_PTRS) == CSLSOR_LOAD_CHUNK_CONSUMED) continue;
+		}
 		if (ch.ptrs_proc != nullptr) {
 			DEBUG(sl, 3, "Nulling pointers for %c%c%c%c", ch.id >> 24, ch.id >> 16, ch.id >> 8, ch.id);
 			ch.ptrs_proc();
@@ -2312,24 +2311,24 @@ static void SlLoadCheckChunk(const ChunkHandler *ch)
  */
 static void SlSaveChunk(const ChunkHandler &ch)
 {
-	if (ch.type == CH_UPSTREAM_SAVE) {
-		SaveLoadVersion old_ver = _sl_version;
-		_sl_version = MAX_LOAD_SAVEGAME_VERSION;
-		auto guard = scope_guard([&]() {
-			_sl_version = old_ver;
-		});
-		upstream_sl::SlSaveChunkChunkByID(ch.id);
-		return;
+	if (ch.special_proc != nullptr) {
+		ChunkSaveLoadSpecialOpResult result = ch.special_proc(ch.id, CSLSO_SHOULD_SAVE_CHUNK);
+		if (result == CSLSOR_DONT_SAVE_CHUNK) return;
+		if (result == CSLSOR_UPSTREAM_SAVE_CHUNK) {
+			SaveLoadVersion old_ver = _sl_version;
+			_sl_version = MAX_LOAD_SAVEGAME_VERSION;
+			auto guard = scope_guard([&]() {
+				_sl_version = old_ver;
+			});
+			upstream_sl::SlSaveChunkChunkByID(ch.id);
+			return;
+		}
 	}
 
 	ChunkSaveLoadProc *proc = ch.save_proc;
 
 	/* Don't save any chunk information if there is no save handler. */
 	if (proc == nullptr) return;
-
-	if (ch.special_proc != nullptr) {
-		if (ch.special_proc(ch.id, CSLSO_SHOULD_SAVE_CHUNK) == CSLSOR_DONT_SAVE_CHUNK) return;
-	}
 
 	SlWriteUint32(ch.id);
 	DEBUG(sl, 2, "Saving chunk %c%c%c%c", ch.id >> 24, ch.id >> 16, ch.id >> 8, ch.id);
@@ -2449,6 +2448,9 @@ static void SlFixPointers()
 	_sl.action = SLA_PTRS;
 
 	for (auto &ch : ChunkHandlers()) {
+		if (ch.special_proc != nullptr) {
+			if (ch.special_proc(ch.id, CSLSO_PRE_PTRS) == CSLSOR_LOAD_CHUNK_CONSUMED) continue;
+		}
 		if (ch.ptrs_proc != nullptr) {
 			DEBUG(sl, 3, "Fixing pointers for %c%c%c%c", ch.id >> 24, ch.id >> 16, ch.id >> 8, ch.id);
 			ch.ptrs_proc();
@@ -3472,6 +3474,8 @@ static SaveOrLoadResult DoLoad(LoadFilter *reader, bool load_check)
 	uint32 hdr[2];
 	if (_sl.lf->Read((byte*)hdr, sizeof(hdr)) != sizeof(hdr)) SlError(STR_GAME_SAVELOAD_ERROR_FILE_NOT_READABLE);
 
+	SaveLoadVersion original_sl_version = SL_MIN_VERSION;
+
 	/* see if we have any loader for this type. */
 	const SaveLoadFormat *fmt = _saveload_formats;
 	for (;;) {
@@ -3511,6 +3515,8 @@ static SaveOrLoadResult DoLoad(LoadFilter *reader, bool load_check)
 			} else {
 				special_version = SlXvCheckSpecialSavegameVersions();
 			}
+
+			original_sl_version = _sl_version;
 
 			if (_sl_version >= SLV_SAVELOAD_LIST_LENGTH) {
 				if (_sl_is_ext_version) {
@@ -3603,6 +3609,62 @@ static SaveOrLoadResult DoLoad(LoadFilter *reader, bool load_check)
 		/* The only part from AfterLoadGame() we need */
 		if (_load_check_data.want_grf_compatibility) _load_check_data.grf_compatibility = IsGoodGRFConfigList(_load_check_data.grfconfig);
 		_load_check_data.sl_is_ext_version = _sl_is_ext_version;
+
+		if (_debug_sl_level > 0) {
+			_load_check_data.version_name = stdstr_fmt("Version %d%s%s", original_sl_version, _sl_is_ext_version ? ", extended" : "", _sl_upstream_mode ? ", upstream mode" : "");
+			if (_sl_version != original_sl_version) {
+				_load_check_data.version_name += stdstr_fmt(" as %d", _sl_version);
+			}
+			if (_sl_xv_feature_versions[XSLFI_CHILLPP] >= SL_CHILLPP_232) {
+				_load_check_data.version_name += ", ChillPP v14.7";
+			} else if (_sl_xv_feature_versions[XSLFI_CHILLPP] > 0) {
+				_load_check_data.version_name += ", ChillPP v8";
+			}
+			if (_sl_xv_feature_versions[XSLFI_SPRINGPP] > 0) {
+				_load_check_data.version_name += ", SpringPP 2013 ";
+				switch (_sl_xv_feature_versions[XSLFI_SPRINGPP]) {
+					case 1:
+						_load_check_data.version_name += "v2.0.102";
+						break;
+					case 2:
+						_load_check_data.version_name += "v2.0.108";
+						break;
+					case 3:
+						_load_check_data.version_name += "v2.3.xxx"; // Note that this break in numbering is deliberate
+						break;
+					case 4:
+						_load_check_data.version_name += "v2.1.147"; // Note that this break in numbering is deliberate
+						break;
+					case 5:
+						_load_check_data.version_name += "v2.3.b3";
+						break;
+					case 6:
+						_load_check_data.version_name += "v2.3.b4";
+						break;
+					case 7:
+						_load_check_data.version_name += "v2.3.b5";
+						break;
+					case 8:
+						_load_check_data.version_name += "v2.4";
+						break;
+					default:
+						_load_check_data.version_name += "???";
+						break;
+				}
+			}
+			if (_sl_xv_feature_versions[XSLFI_JOKERPP] > 0) {
+				_load_check_data.version_name += ", JokerPP";
+			}
+
+			extern std::string _sl_xv_version_label;
+			extern SaveLoadVersion _sl_xv_upstream_version;
+			if (!_sl_xv_version_label.empty()) {
+				_load_check_data.version_name += stdstr_fmt(", labelled: %s", _sl_xv_version_label.c_str());
+			}
+			if (_sl_xv_upstream_version > 0) {
+				_load_check_data.version_name += stdstr_fmt(", upstream version: %d", _sl_xv_upstream_version);
+			}
+		}
 	} else {
 		GamelogStartAction(GLAT_LOAD);
 

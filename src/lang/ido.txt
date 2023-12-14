@@ -187,6 +187,9 @@ STR_COLOUR_BROWN                                                :Bruna
 STR_COLOUR_GREY                                                 :Griza
 STR_COLOUR_WHITE                                                :Blanka
 
+###length 17
+
+
 # Units used in OpenTTD
 STR_UNITS_VELOCITY_IMPERIAL                                     :{DECIMAL} mph
 STR_UNITS_VELOCITY_METRIC                                       :{DECIMAL} km/h
@@ -343,7 +346,7 @@ STR_GRAPH_MENU_DELIVERED_CARGO_GRAPH                            :Livrita kargajo
 ###length 3
 
 # About menu
-###length 10
+###length 12
 
 # Place in highscore window
 ###length 15
@@ -558,6 +561,7 @@ STR_CONFIG_SETTING_NONE                                         :Nulo
 
 ###length 3
 
+
 ###setting-zero-is-special
 
 
@@ -613,6 +617,8 @@ STR_CONFIG_SETTING_NONE                                         :Nulo
 ###length 3
 STR_CONFIG_SETTING_PLANE_CRASHES_NONE                           :nulo
 STR_CONFIG_SETTING_PLANE_CRASHES_NORMAL                         :normala
+
+
 
 
 
@@ -681,7 +687,7 @@ STR_CONFIG_SETTING_SMALLMAP_LAND_COLOUR_VIOLET                  :Violkolora
 
 ###length 3
 
-
+###length 3
 
 ###length 3
 
@@ -820,6 +826,8 @@ STR_QUIT_YES                                                    :{BLACK}Yes
 STR_QUIT_NO                                                     :{BLACK}Ne
 
 # Abandon game
+
+# Help window
 
 # Cheat window
 
@@ -1462,7 +1470,7 @@ STR_AI_SETTINGS_SETTING                                         :{STRING}: {ORAN
 
 
 # Textfile window
-###length 4
+###length 5
 
 
 # Vehicle loading indicators

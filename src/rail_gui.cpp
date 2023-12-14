@@ -510,12 +510,12 @@ struct BuildRailToolbarWindow : Window {
 		this->InitNested(TRANSPORT_RAIL);
 		this->SetupRailToolbar(railtype);
 		this->DisableWidget(WID_RAT_REMOVE);
-		this->last_user_action = WIDGET_LIST_END;
+		this->last_user_action = INVALID_WID_RAT;
 
 		if (_settings_client.gui.link_terraform_toolbar) ShowTerraformToolbar(this);
 	}
 
-	void Close() override
+	void Close([[maybe_unused]] int data = 0) override
 	{
 		if (this->IsWidgetLowered(WID_RAT_BUILD_STATION)) SetViewportCatchmentStation(nullptr, true);
 		if (this->IsWidgetLowered(WID_RAT_BUILD_WAYPOINT)) SetViewportCatchmentWaypoint(nullptr, true);
@@ -531,7 +531,7 @@ struct BuildRailToolbarWindow : Window {
 	void SetupRailToolbar(RailType railtype)
 	{
 		this->railtype = railtype;
-		const RailtypeInfo *rti = GetRailTypeInfo(railtype);
+		const RailTypeInfo *rti = GetRailTypeInfo(railtype);
 
 		assert(railtype < RAILTYPE_END);
 		this->GetWidget<NWidgetCore>(WID_RAT_BUILD_NS)->widget_data     = rti->gui_sprites.build_ns_rail;
@@ -589,7 +589,7 @@ struct BuildRailToolbarWindow : Window {
 	void SetStringParameters(int widget) const override
 	{
 		if (widget == WID_RAT_CAPTION) {
-			const RailtypeInfo *rti = GetRailTypeInfo(this->railtype);
+			const RailTypeInfo *rti = GetRailTypeInfo(this->railtype);
 			if (rti->max_speed > 0) {
 				SetDParam(0, STR_TOOLBAR_RAILTYPE_VELOCITY);
 				SetDParam(1, rti->strings.toolbar_caption);
@@ -743,8 +743,8 @@ struct BuildRailToolbarWindow : Window {
 	virtual bool OnTooltip(Point pt, int widget, TooltipCloseCondition close_cond) override
 	{
 		if (widget == WID_RAT_CONVERT_RAIL) {
-			uint64 args[] = { STR_RAIL_TOOLBAR_TOOLTIP_CONVERT_RAIL };
-			GuiShowTooltips(this, STR_RAIL_TOOLBAR_TOOLTIP_CONVERT_RAIL_EXTRA, lengthof(args), args, close_cond);
+			SetDParam(0, STR_RAIL_TOOLBAR_TOOLTIP_CONVERT_RAIL);
+			GuiShowTooltips(this, STR_RAIL_TOOLBAR_TOOLTIP_CONVERT_RAIL_EXTRA, close_cond, 1);
 			return true;
 		}
 		return false;
@@ -785,7 +785,7 @@ struct BuildRailToolbarWindow : Window {
 		}
 	}
 
-	void OnPlaceObject(Point pt, TileIndex tile) override
+	void OnPlaceObject([[maybe_unused]] Point pt, TileIndex tile) override
 	{
 		switch (this->last_user_action) {
 			case WID_RAT_BUILD_NS:
@@ -851,7 +851,7 @@ struct BuildRailToolbarWindow : Window {
 		}
 	}
 
-	void OnPlaceDrag(ViewportPlaceMethod select_method, ViewportDragDropSelectionProcess select_proc, Point pt) override
+	void OnPlaceDrag(ViewportPlaceMethod select_method, [[maybe_unused]] ViewportDragDropSelectionProcess select_proc, [[maybe_unused]] Point pt) override
 	{
 		/* no dragging if you have pressed the convert button */
 		if (FindWindowById(WC_BUILD_SIGNAL, 0) != nullptr && _convert_signal_button && this->IsWidgetLowered(WID_RAT_BUILD_SIGNALS)) return;
@@ -859,7 +859,7 @@ struct BuildRailToolbarWindow : Window {
 		VpSelectTilesWithMethod(pt.x, pt.y, select_method);
 	}
 
-	void OnPlaceMouseUp(ViewportPlaceMethod select_method, ViewportDragDropSelectionProcess select_proc, Point pt, TileIndex start_tile, TileIndex end_tile) override
+	void OnPlaceMouseUp([[maybe_unused]] ViewportPlaceMethod select_method, ViewportDragDropSelectionProcess select_proc, [[maybe_unused]] Point pt, TileIndex start_tile, TileIndex end_tile) override
 	{
 		if (pt.x != -1) {
 			switch (select_proc) {
@@ -939,7 +939,7 @@ struct BuildRailToolbarWindow : Window {
 		CloseWindowByClass(WC_BUILD_BRIDGE);
 	}
 
-	void OnPlacePresize(Point pt, TileIndex tile) override
+	void OnPlacePresize([[maybe_unused]] Point pt, TileIndex tile) override
 	{
 		DoCommand(tile, _cur_railtype | (TRANSPORT_RAIL << 8), 0, DC_AUTO, CMD_BUILD_TUNNEL);
 		VpSetPresizeRange(tile, _build_tunnel_endtile == 0 ? tile : _build_tunnel_endtile);
@@ -952,7 +952,7 @@ struct BuildRailToolbarWindow : Window {
 		return ES_NOT_HANDLED;
 	}
 
-	void OnRealtimeTick(uint delta_ms) override
+	void OnRealtimeTick([[maybe_unused]] uint delta_ms) override
 	{
 		if (this->IsWidgetLowered(WID_RAT_BUILD_WAYPOINT)) CheckRedrawWaypointCoverage(this, false);
 	}
@@ -1043,11 +1043,11 @@ static const NWidgetPart _nested_build_rail_widgets[] = {
 	EndContainer(),
 };
 
-static WindowDesc _build_rail_desc(
+static WindowDesc _build_rail_desc(__FILE__, __LINE__,
 	WDP_ALIGN_TOOLBAR, "toolbar_rail", 0, 0,
 	WC_BUILD_TOOLBAR, WC_NONE,
 	WDF_CONSTRUCTION,
-	_nested_build_rail_widgets, lengthof(_nested_build_rail_widgets),
+	std::begin(_nested_build_rail_widgets), std::end(_nested_build_rail_widgets),
 	&BuildRailToolbarWindow::hotkeys
 );
 
@@ -1063,7 +1063,7 @@ static WindowDesc _build_rail_desc(
 Window *ShowBuildRailToolbar(RailType railtype)
 {
 	if (!Company::IsValidID(_local_company)) return nullptr;
-	if (!ValParamRailtype(railtype)) return nullptr;
+	if (!ValParamRailType(railtype)) return nullptr;
 
 	CloseWindowByClass(WC_BUILD_TOOLBAR);
 	_cur_railtype = railtype;
@@ -1250,7 +1250,7 @@ public:
 		this->InvalidateData();
 	}
 
-	void Close() override
+	void Close([[maybe_unused]] int data = 0) override
 	{
 		CloseWindowById(WC_SELECT_STATION, 0);
 		this->PickerWindowBase::Close();
@@ -1324,7 +1324,7 @@ public:
 		_railstation.station_class = station_class;
 	}
 
-	void OnInvalidateData(int data = 0, bool gui_scope = true) override
+	void OnInvalidateData([[maybe_unused]] int data = 0, [[maybe_unused]] bool gui_scope = true) override
 	{
 		if (!gui_scope) return;
 
@@ -1346,12 +1346,14 @@ public:
 		return ES_HANDLED;
 	}
 
-	void OnEditboxChanged(int wid) override
+	void OnEditboxChanged(int widget) override
 	{
-		string_filter.SetFilterTerm(this->filter_editbox.text.buf);
-		this->station_classes.SetFilterState(!string_filter.IsEmpty());
-		this->station_classes.ForceRebuild();
-		this->InvalidateData();
+		if (widget == WID_BRAS_FILTER_EDITBOX) {
+			string_filter.SetFilterTerm(this->filter_editbox.text.buf);
+			this->station_classes.SetFilterState(!string_filter.IsEmpty());
+			this->station_classes.ForceRebuild();
+			this->InvalidateData();
+		}
 	}
 
 	void OnPaint() override
@@ -1403,7 +1405,7 @@ public:
 		}
 	}
 
-	void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize) override
+	void UpdateWidgetSize(int widget, Dimension *size, [[maybe_unused]] const Dimension &padding, [[maybe_unused]] Dimension *fill, [[maybe_unused]] Dimension *resize) override
 	{
 		switch (widget) {
 			case WID_BRAS_NEWST_LIST: {
@@ -1541,7 +1543,7 @@ public:
 		}
 	}
 
-	void OnClick(Point pt, int widget, int click_count) override
+	void OnClick([[maybe_unused]] Point pt, int widget, [[maybe_unused]] int click_count) override
 	{
 		switch (GB(widget, 0, 16)) {
 			case WID_BRAS_PLATFORM_DIR_X:
@@ -1697,7 +1699,7 @@ public:
 		}
 	}
 
-	void OnRealtimeTick(uint delta_ms) override
+	void OnRealtimeTick([[maybe_unused]] uint delta_ms) override
 	{
 		CheckRedrawStationCoverage(this);
 	}
@@ -1821,7 +1823,7 @@ static const NWidgetPart _nested_station_builder_widgets[] = {
 				/* We need an additional background for the matrix, as the matrix cannot handle the scrollbar due to not being an NWidgetCore. */
 				NWidget(WWT_PANEL, COLOUR_DARK_GREEN), SetScrollbar(WID_BRAS_MATRIX_SCROLL),
 					NWidget(NWID_HORIZONTAL),
-						NWidget(NWID_MATRIX, COLOUR_DARK_GREEN, WID_BRAS_MATRIX), SetScrollbar(WID_BRAS_MATRIX_SCROLL), SetPIP(0, 2, 0),
+						NWidget(NWID_MATRIX, COLOUR_DARK_GREEN, WID_BRAS_MATRIX), SetPIP(0, 2, 0),
 							NWidget(WWT_PANEL, COLOUR_DARK_GREEN, WID_BRAS_IMAGE), SetMinimalSize(66, 60),
 									SetFill(0, 0), SetResize(0, 0), SetDataTip(0x0, STR_STATION_BUILD_STATION_TYPE_TOOLTIP), SetScrollbar(WID_BRAS_MATRIX_SCROLL),
 							EndContainer(),
@@ -1844,11 +1846,11 @@ static const NWidgetPart _nested_station_builder_widgets[] = {
 };
 
 /** High level window description of the station-build window (default & newGRF) */
-static WindowDesc _station_builder_desc(
+static WindowDesc _station_builder_desc(__FILE__, __LINE__,
 	WDP_AUTO, "build_station_rail", 350, 0,
 	WC_BUILD_STATION, WC_BUILD_TOOLBAR,
 	WDF_CONSTRUCTION,
-	_nested_station_builder_widgets, lengthof(_nested_station_builder_widgets),
+	std::begin(_nested_station_builder_widgets), std::end(_nested_station_builder_widgets),
 	&BuildRailStationWindow::hotkeys
 );
 
@@ -1950,11 +1952,11 @@ private:
 		this->GetWidget<NWidgetStacked>(WID_BS_ELECTRIC_NOEN_SEL)->SetDisplayedPlane(this->noentry_ui_shown ? 0 : SZSP_NONE);
 		this->GetWidget<NWidgetStacked>(WID_BS_PROGRAM_SEL)->SetDisplayedPlane(show_progsig ? 0 : 1);
 		this->SetWidgetDisabledState(WID_BS_PROGRAM, !show_progsig);
-		this->SetWidgetsDisabledState(!show_norm, WID_BS_SEMAPHORE_NORM, WID_BS_ELECTRIC_NORM, WIDGET_LIST_END);
+		this->SetWidgetsDisabledState(!show_norm, WID_BS_SEMAPHORE_NORM, WID_BS_ELECTRIC_NORM);
 		this->SetWidgetsDisabledState(!show_presig, WID_BS_SEMAPHORE_ENTRY, WID_BS_ELECTRIC_ENTRY, WID_BS_SEMAPHORE_EXIT,
-				WID_BS_ELECTRIC_EXIT, WID_BS_SEMAPHORE_COMBO, WID_BS_ELECTRIC_COMBO, WIDGET_LIST_END);
-		this->SetWidgetsDisabledState(!show_progsig, WID_BS_SEMAPHORE_PROG, WID_BS_ELECTRIC_PROG, WIDGET_LIST_END);
-		this->SetWidgetsDisabledState(!this->noentry_ui_shown, WID_BS_SEMAPHORE_NO_ENTRY, WID_BS_ELECTRIC_NO_ENTRY, WIDGET_LIST_END);
+				WID_BS_ELECTRIC_EXIT, WID_BS_SEMAPHORE_COMBO, WID_BS_ELECTRIC_COMBO);
+		this->SetWidgetsDisabledState(!show_progsig, WID_BS_SEMAPHORE_PROG, WID_BS_ELECTRIC_PROG);
+		this->SetWidgetsDisabledState(!this->noentry_ui_shown, WID_BS_SEMAPHORE_NO_ENTRY, WID_BS_ELECTRIC_NO_ENTRY);
 
 		this->GetWidget<NWidgetStacked>(WID_BS_TOGGLE_SIZE_SEL)->SetDisplayedPlane(!this->realistic_braking_mode ? 0 : SZSP_NONE);
 		this->SetWidgetDisabledState(WID_BS_TOGGLE_SIZE, this->realistic_braking_mode);
@@ -1981,7 +1983,7 @@ public:
 		this->OnInvalidateData();
 	}
 
-	void Close() override
+	void Close([[maybe_unused]] int data = 0) override
 	{
 		_convert_signal_button = false;
 		_trace_restrict_button = false;
@@ -2017,7 +2019,7 @@ public:
 		}
 	}
 
-	void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize) override
+	void UpdateWidgetSize(int widget, Dimension *size, [[maybe_unused]] const Dimension &padding, [[maybe_unused]] Dimension *fill, [[maybe_unused]] Dimension *resize) override
 	{
 		if (widget == WID_BS_DRAG_SIGNALS_DENSITY_LABEL) {
 			/* Two digits for signals density. */
@@ -2210,7 +2212,7 @@ public:
 	 * @param data Information about the changed data.
 	 * @param gui_scope Whether the call is done from GUI scope. You may not do everything when not in GUI scope. See #InvalidateWindowData() for details.
 	 */
-	void OnInvalidateData(int data = 0, bool gui_scope = true) override
+	void OnInvalidateData([[maybe_unused]] int data = 0, [[maybe_unused]] bool gui_scope = true) override
 	{
 		if (!gui_scope) return;
 		this->LowerWidget((_cur_signal_variant == SIG_ELECTRIC ? WID_BS_ELECTRIC_NORM : WID_BS_SEMAPHORE_NORM) + _cur_signal_button);
@@ -2272,16 +2274,16 @@ static const NWidgetPart _nested_signal_builder_widgets[] = {
 	NWidget(NWID_VERTICAL, NC_EQUALSIZE),
 		NWidget(NWID_HORIZONTAL, NC_EQUALSIZE),
 			NWidget(NWID_SELECTION, INVALID_COLOUR, WID_BS_SEMAPHORE_NORM_SEL),
-				NWidget(WWT_PANEL, COLOUR_DARK_GREEN, WID_BS_SEMAPHORE_NORM), SetDataTip(STR_NULL, STR_BUILD_SIGNAL_SEMAPHORE_NORM_TOOLTIP), EndContainer(), SetFill(1, 1),
+				NWidget(WWT_PANEL, COLOUR_DARK_GREEN, WID_BS_SEMAPHORE_NORM), SetDataTip(STR_NULL, STR_BUILD_SIGNAL_SEMAPHORE_NORM_TOOLTIP), EndContainer(),
 			EndContainer(),
 			NWidget(NWID_SELECTION, INVALID_COLOUR, WID_BS_SEMAPHORE_ENTRY_SEL),
-				NWidget(WWT_PANEL, COLOUR_DARK_GREEN, WID_BS_SEMAPHORE_ENTRY), SetDataTip(STR_NULL, STR_BUILD_SIGNAL_SEMAPHORE_ENTRY_TOOLTIP), EndContainer(), SetFill(1, 1),
+				NWidget(WWT_PANEL, COLOUR_DARK_GREEN, WID_BS_SEMAPHORE_ENTRY), SetDataTip(STR_NULL, STR_BUILD_SIGNAL_SEMAPHORE_ENTRY_TOOLTIP), EndContainer(),
 			EndContainer(),
 			NWidget(NWID_SELECTION, INVALID_COLOUR, WID_BS_SEMAPHORE_EXIT_SEL),
-				NWidget(WWT_PANEL, COLOUR_DARK_GREEN, WID_BS_SEMAPHORE_EXIT), SetDataTip(STR_NULL, STR_BUILD_SIGNAL_SEMAPHORE_EXIT_TOOLTIP), EndContainer(), SetFill(1, 1),
+				NWidget(WWT_PANEL, COLOUR_DARK_GREEN, WID_BS_SEMAPHORE_EXIT), SetDataTip(STR_NULL, STR_BUILD_SIGNAL_SEMAPHORE_EXIT_TOOLTIP), EndContainer(),
 			EndContainer(),
 			NWidget(NWID_SELECTION, INVALID_COLOUR, WID_BS_SEMAPHORE_COMBO_SEL),
-				NWidget(WWT_PANEL, COLOUR_DARK_GREEN, WID_BS_SEMAPHORE_COMBO), SetDataTip(STR_NULL, STR_BUILD_SIGNAL_SEMAPHORE_COMBO_TOOLTIP), EndContainer(), SetFill(1, 1),
+				NWidget(WWT_PANEL, COLOUR_DARK_GREEN, WID_BS_SEMAPHORE_COMBO), SetDataTip(STR_NULL, STR_BUILD_SIGNAL_SEMAPHORE_COMBO_TOOLTIP), EndContainer(),
 			EndContainer(),
 			NWidget(NWID_SELECTION, INVALID_COLOUR, WID_BS_SEMAPHORE_PROG_SEL),
 				NWidget(WWT_PANEL, COLOUR_DARK_GREEN, WID_BS_SEMAPHORE_PROG), SetDataTip(STR_NULL, STR_BUILD_SIGNAL_SEMAPHORE_PROG_TOOLTIP), EndContainer(), SetFill(1, 1),
@@ -2296,16 +2298,16 @@ static const NWidgetPart _nested_signal_builder_widgets[] = {
 		EndContainer(),
 		NWidget(NWID_HORIZONTAL, NC_EQUALSIZE),
 			NWidget(NWID_SELECTION, INVALID_COLOUR, WID_BS_ELECTRIC_NORM_SEL),
-				NWidget(WWT_PANEL, COLOUR_DARK_GREEN, WID_BS_ELECTRIC_NORM), SetDataTip(STR_NULL, STR_BUILD_SIGNAL_ELECTRIC_NORM_TOOLTIP), EndContainer(), SetFill(1, 1),
+				NWidget(WWT_PANEL, COLOUR_DARK_GREEN, WID_BS_ELECTRIC_NORM), SetDataTip(STR_NULL, STR_BUILD_SIGNAL_ELECTRIC_NORM_TOOLTIP), EndContainer(),
 			EndContainer(),
 			NWidget(NWID_SELECTION, INVALID_COLOUR, WID_BS_ELECTRIC_ENTRY_SEL),
-				NWidget(WWT_PANEL, COLOUR_DARK_GREEN, WID_BS_ELECTRIC_ENTRY), SetDataTip(STR_NULL, STR_BUILD_SIGNAL_ELECTRIC_ENTRY_TOOLTIP), EndContainer(), SetFill(1, 1),
+				NWidget(WWT_PANEL, COLOUR_DARK_GREEN, WID_BS_ELECTRIC_ENTRY), SetDataTip(STR_NULL, STR_BUILD_SIGNAL_ELECTRIC_ENTRY_TOOLTIP), EndContainer(),
 			EndContainer(),
 			NWidget(NWID_SELECTION, INVALID_COLOUR, WID_BS_ELECTRIC_EXIT_SEL),
-				NWidget(WWT_PANEL, COLOUR_DARK_GREEN, WID_BS_ELECTRIC_EXIT), SetDataTip(STR_NULL, STR_BUILD_SIGNAL_ELECTRIC_EXIT_TOOLTIP), EndContainer(), SetFill(1, 1),
+				NWidget(WWT_PANEL, COLOUR_DARK_GREEN, WID_BS_ELECTRIC_EXIT), SetDataTip(STR_NULL, STR_BUILD_SIGNAL_ELECTRIC_EXIT_TOOLTIP), EndContainer(),
 			EndContainer(),
 			NWidget(NWID_SELECTION, INVALID_COLOUR, WID_BS_ELECTRIC_COMBO_SEL),
-				NWidget(WWT_PANEL, COLOUR_DARK_GREEN, WID_BS_ELECTRIC_COMBO), SetDataTip(STR_NULL, STR_BUILD_SIGNAL_ELECTRIC_COMBO_TOOLTIP), EndContainer(), SetFill(1, 1),
+				NWidget(WWT_PANEL, COLOUR_DARK_GREEN, WID_BS_ELECTRIC_COMBO), SetDataTip(STR_NULL, STR_BUILD_SIGNAL_ELECTRIC_COMBO_TOOLTIP), EndContainer(),
 			EndContainer(),
 			NWidget(NWID_SELECTION, INVALID_COLOUR, WID_BS_ELECTRIC_PROG_SEL),
 				NWidget(WWT_PANEL, COLOUR_DARK_GREEN, WID_BS_ELECTRIC_PROG), SetDataTip(STR_NULL, STR_BUILD_SIGNAL_ELECTRIC_PROG_TOOLTIP), EndContainer(), SetFill(1, 1),
@@ -2337,11 +2339,11 @@ static const NWidgetPart _nested_signal_builder_widgets[] = {
 };
 
 /** Signal selection window description */
-static WindowDesc _signal_builder_desc(
-	WDP_AUTO, "build_signal", 0, 0,
+static WindowDesc _signal_builder_desc(__FILE__, __LINE__,
+	WDP_AUTO, nullptr, 0, 0,
 	WC_BUILD_SIGNAL, WC_BUILD_TOOLBAR,
 	WDF_CONSTRUCTION,
-	_nested_signal_builder_widgets, lengthof(_nested_signal_builder_widgets),
+	std::begin(_nested_signal_builder_widgets), std::end(_nested_signal_builder_widgets),
 	&BuildSignalWindow::hotkeys
 );
 
@@ -2360,7 +2362,7 @@ struct BuildRailDepotWindow : public PickerWindowBase {
 		this->LowerWidget(_build_depot_direction + WID_BRAD_DEPOT_NE);
 	}
 
-	void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize) override
+	void UpdateWidgetSize(int widget, Dimension *size, [[maybe_unused]] const Dimension &padding, [[maybe_unused]] Dimension *fill, [[maybe_unused]] Dimension *resize) override
 	{
 		if (!IsInsideMM(widget, WID_BRAD_DEPOT_NE, WID_BRAD_DEPOT_NW + 1)) return;
 
@@ -2381,7 +2383,7 @@ struct BuildRailDepotWindow : public PickerWindowBase {
 		}
 	}
 
-	void OnClick(Point pt, int widget, int click_count) override
+	void OnClick([[maybe_unused]] Point pt, int widget, [[maybe_unused]] int click_count) override
 	{
 		switch (widget) {
 			case WID_BRAD_DEPOT_NE:
@@ -2405,35 +2407,24 @@ static const NWidgetPart _nested_build_depot_widgets[] = {
 		NWidget(WWT_CAPTION, COLOUR_DARK_GREEN), SetDataTip(STR_BUILD_DEPOT_TRAIN_ORIENTATION_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
 	EndContainer(),
 	NWidget(WWT_PANEL, COLOUR_DARK_GREEN),
-		NWidget(NWID_SPACER), SetMinimalSize(0, 3),
-		NWidget(NWID_HORIZONTAL_LTR),
-			NWidget(NWID_SPACER), SetMinimalSize(3, 0), SetFill(1, 0),
-			NWidget(NWID_VERTICAL),
-				NWidget(WWT_PANEL, COLOUR_GREY, WID_BRAD_DEPOT_NW), SetMinimalSize(66, 50), SetDataTip(0x0, STR_BUILD_DEPOT_TRAIN_ORIENTATION_TOOLTIP),
-				EndContainer(),
-				NWidget(NWID_SPACER), SetMinimalSize(0, 2),
-				NWidget(WWT_PANEL, COLOUR_GREY, WID_BRAD_DEPOT_SW), SetMinimalSize(66, 50), SetDataTip(0x0, STR_BUILD_DEPOT_TRAIN_ORIENTATION_TOOLTIP),
-				EndContainer(),
+		NWidget(NWID_HORIZONTAL_LTR), SetPIP(0, WidgetDimensions::unscaled.hsep_normal, 0), SetPIPRatio(1, 0, 1), SetPadding(WidgetDimensions::unscaled.picker),
+			NWidget(NWID_VERTICAL), SetPIP(0, WidgetDimensions::unscaled.vsep_normal, 0),
+				NWidget(WWT_TEXTBTN, COLOUR_GREY, WID_BRAD_DEPOT_NW), SetMinimalSize(66, 50), SetDataTip(0x0, STR_BUILD_DEPOT_TRAIN_ORIENTATION_TOOLTIP),
+				NWidget(WWT_TEXTBTN, COLOUR_GREY, WID_BRAD_DEPOT_SW), SetMinimalSize(66, 50), SetDataTip(0x0, STR_BUILD_DEPOT_TRAIN_ORIENTATION_TOOLTIP),
 			EndContainer(),
-			NWidget(NWID_SPACER), SetMinimalSize(2, 0),
-			NWidget(NWID_VERTICAL),
-				NWidget(WWT_PANEL, COLOUR_GREY, WID_BRAD_DEPOT_NE), SetMinimalSize(66, 50), SetDataTip(0x0, STR_BUILD_DEPOT_TRAIN_ORIENTATION_TOOLTIP),
-				EndContainer(),
-				NWidget(NWID_SPACER), SetMinimalSize(0, 2),
-				NWidget(WWT_PANEL, COLOUR_GREY, WID_BRAD_DEPOT_SE), SetMinimalSize(66, 50), SetDataTip(0x0, STR_BUILD_DEPOT_TRAIN_ORIENTATION_TOOLTIP),
-				EndContainer(),
+			NWidget(NWID_VERTICAL), SetPIP(0, WidgetDimensions::unscaled.vsep_normal, 0),
+				NWidget(WWT_TEXTBTN, COLOUR_GREY, WID_BRAD_DEPOT_NE), SetMinimalSize(66, 50), SetDataTip(0x0, STR_BUILD_DEPOT_TRAIN_ORIENTATION_TOOLTIP),
+				NWidget(WWT_TEXTBTN, COLOUR_GREY, WID_BRAD_DEPOT_SE), SetMinimalSize(66, 50), SetDataTip(0x0, STR_BUILD_DEPOT_TRAIN_ORIENTATION_TOOLTIP),
 			EndContainer(),
-			NWidget(NWID_SPACER), SetMinimalSize(3, 0), SetFill(1, 0),
 		EndContainer(),
-		NWidget(NWID_SPACER), SetMinimalSize(0, 3),
 	EndContainer(),
 };
 
-static WindowDesc _build_depot_desc(
+static WindowDesc _build_depot_desc(__FILE__, __LINE__,
 	WDP_AUTO, nullptr, 0, 0,
 	WC_BUILD_DEPOT, WC_BUILD_TOOLBAR,
 	WDF_CONSTRUCTION,
-	_nested_build_depot_widgets, lengthof(_nested_build_depot_widgets)
+	std::begin(_nested_build_depot_widgets), std::end(_nested_build_depot_widgets)
 );
 
 static void ShowBuildTrainDepotPicker(Window *parent)
@@ -2519,10 +2510,10 @@ struct BuildRailWaypointWindow : PickerWindowBase {
 		}
 	}
 
-	void Close() override
+	void Close(int data = 0) override
 	{
 		CloseWindowById(WC_SELECT_STATION, 0);
-		this->PickerWindowBase::Close();
+		this->PickerWindowBase::Close(data);
 	}
 
 	void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize) override
@@ -2588,7 +2579,7 @@ struct BuildRailWaypointWindow : PickerWindowBase {
 		}
 	}
 
-	void OnClick(Point pt, int widget, int click_count) override
+	void OnClick([[maybe_unused]] Point pt, int widget, [[maybe_unused]] int click_count) override
 	{
 		switch (GB(widget, 0, 16)) {
 			case WID_BRW_WAYPOINT: {
@@ -2653,7 +2644,7 @@ static const NWidgetPart _nested_build_waypoint_widgets[] = {
 	EndContainer(),
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_PANEL, COLOUR_DARK_GREEN), SetScrollbar(WID_BRW_SCROLL),
-			NWidget(NWID_MATRIX, COLOUR_DARK_GREEN, WID_BRW_WAYPOINT_MATRIX), SetPIP(0, 2, 0),  SetPadding(3), SetScrollbar(WID_BRW_SCROLL),
+			NWidget(NWID_MATRIX, COLOUR_DARK_GREEN, WID_BRW_WAYPOINT_MATRIX), SetPIP(0, 2, 0),  SetPadding(3),
 				NWidget(WWT_PANEL, COLOUR_GREY, WID_BRW_WAYPOINT), SetDataTip(0x0, STR_WAYPOINT_GRAPHICS_TOOLTIP), SetScrollbar(WID_BRW_SCROLL), EndContainer(),
 			EndContainer(),
 		EndContainer(),
@@ -2667,11 +2658,11 @@ static const NWidgetPart _nested_build_waypoint_widgets[] = {
 	EndContainer(),
 };
 
-static WindowDesc _build_waypoint_desc(
+static WindowDesc _build_waypoint_desc(__FILE__, __LINE__,
 	WDP_AUTO, "build_waypoint", 0, 0,
 	WC_BUILD_WAYPOINT, WC_BUILD_TOOLBAR,
 	WDF_CONSTRUCTION,
-	_nested_build_waypoint_widgets, lengthof(_nested_build_waypoint_widgets)
+	std::begin(_nested_build_waypoint_widgets), std::end(_nested_build_waypoint_widgets)
 );
 
 static void ShowBuildWaypointPicker(Window *parent)
@@ -2731,14 +2722,14 @@ static void SetDefaultRailGui()
 		case 0: {
 			/* Use first available type */
 			std::vector<RailType>::const_iterator it = std::find_if(_sorted_railtypes.begin(), _sorted_railtypes.end(),
-					[](RailType r){ return HasRailtypeAvail(_local_company, r); });
+					[](RailType r){ return HasRailTypeAvail(_local_company, r); });
 			rt = it != _sorted_railtypes.end() ? *it : RAILTYPE_BEGIN;
 			break;
 		}
 		case 1: {
 			/* Use last available type */
 			std::vector<RailType>::const_reverse_iterator it = std::find_if(_sorted_railtypes.rbegin(), _sorted_railtypes.rend(),
-					[](RailType r){ return HasRailtypeAvail(_local_company, r); });
+					[](RailType r){ return HasRailTypeAvail(_local_company, r); });
 			rt = it != _sorted_railtypes.rend() ? *it : RAILTYPE_BEGIN;
 			break;
 		}
@@ -2754,7 +2745,6 @@ static void SetDefaultRailGui()
 /**
  * Updates the current signal variant used in the signal GUI
  * to the one adequate to current year.
- * @param new_value needed to be called when a setting changes
  */
 void ResetSignalVariant(int32 new_value)
 {
@@ -2805,7 +2795,7 @@ DropDownList GetRailTypeDropDownList(bool for_replacement, bool all_option)
 
 	/* Find the used railtypes. */
 	if (for_replacement) {
-		avail_railtypes = GetCompanyRailtypes(c->index, false);
+		avail_railtypes = GetCompanyRailTypes(c->index, false);
 		used_railtypes  = GetRailTypes(false);
 	} else {
 		avail_railtypes = c->avail_railtypes;
@@ -2815,7 +2805,7 @@ DropDownList GetRailTypeDropDownList(bool for_replacement, bool all_option)
 	DropDownList list;
 
 	if (all_option) {
-		list.emplace_back(new DropDownListStringItem(STR_REPLACE_ALL_RAILTYPE, INVALID_RAILTYPE, false));
+		list.push_back(std::make_unique<DropDownListStringItem>(STR_REPLACE_ALL_RAILTYPE, INVALID_RAILTYPE, false));
 	}
 
 	Dimension d = { 0, 0 };
@@ -2823,7 +2813,7 @@ DropDownList GetRailTypeDropDownList(bool for_replacement, bool all_option)
 	if (!for_replacement) {
 		for (const auto &rt : _sorted_railtypes) {
 			if (!HasBit(used_railtypes, rt)) continue;
-			const RailtypeInfo *rti = GetRailTypeInfo(rt);
+			const RailTypeInfo *rti = GetRailTypeInfo(rt);
 			d = maxdim(d, GetSpriteSize(rti->gui_sprites.build_x_rail));
 		}
 	}
@@ -2832,23 +2822,23 @@ DropDownList GetRailTypeDropDownList(bool for_replacement, bool all_option)
 		/* If it's not used ever, don't show it to the user. */
 		if (!HasBit(used_railtypes, rt)) continue;
 
-		const RailtypeInfo *rti = GetRailTypeInfo(rt);
+		const RailTypeInfo *rti = GetRailTypeInfo(rt);
 
 		SetDParam(0, rti->strings.menu_text);
 		SetDParam(1, rti->max_speed);
 		if (for_replacement) {
-			list.emplace_back(new DropDownListStringItem(rti->strings.replace_text, rt, !HasBit(avail_railtypes, rt)));
+			list.push_back(std::make_unique<DropDownListStringItem>(rti->strings.replace_text, rt, !HasBit(avail_railtypes, rt)));
 		} else {
 			StringID str = rti->max_speed > 0 ? STR_TOOLBAR_RAILTYPE_VELOCITY : STR_JUST_STRING;
-			DropDownListIconItem *iconitem = new DropDownListIconItem(rti->gui_sprites.build_x_rail, PAL_NONE, str, rt, !HasBit(avail_railtypes, rt));
+			auto iconitem = std::make_unique<DropDownListIconItem>(rti->gui_sprites.build_x_rail, PAL_NONE, str, rt, !HasBit(avail_railtypes, rt));
 			iconitem->SetDimension(d);
-			list.emplace_back(iconitem);
+			list.push_back(std::move(iconitem));
 		}
 	}
 
-	if (list.size() == 0) {
+	if (list.empty()) {
 		/* Empty dropdowns are not allowed */
-		list.emplace_back(new DropDownListStringItem(STR_NONE, INVALID_RAILTYPE, true));
+		list.push_back(std::make_unique<DropDownListStringItem>(STR_NONE, INVALID_RAILTYPE, true));
 	}
 
 	return list;

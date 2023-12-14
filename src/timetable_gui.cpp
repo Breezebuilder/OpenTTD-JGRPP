@@ -370,7 +370,7 @@ struct TimetableWindow : GeneralVehicleWindow {
 		this->owner = this->vehicle->owner;
 	}
 
-	void Close() override
+	void Close(int data = 0) override
 	{
 		if (!FocusWindowById(WC_VEHICLE_VIEW, this->window_number)) {
 			MarkDirtyFocusedRoutePaths(this->vehicle);
@@ -403,7 +403,7 @@ struct TimetableWindow : GeneralVehicleWindow {
 		return (travelling && v->lateness_counter < 0);
 	}
 
-	void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize) override
+	void UpdateWidgetSize(int widget, Dimension *size, [[maybe_unused]] const Dimension &padding, [[maybe_unused]] Dimension *fill, [[maybe_unused]] Dimension *resize) override
 	{
 		switch (widget) {
 			case WID_VT_ARRIVAL_DEPARTURE_PANEL:
@@ -427,7 +427,7 @@ struct TimetableWindow : GeneralVehicleWindow {
 		}
 	}
 
-	int GetOrderFromTimetableWndPt(int y, const Vehicle *v)
+	int GetOrderFromTimetableWndPt(int y, [[maybe_unused]] const Vehicle *v)
 	{
 		int sel = this->vscroll->GetScrolledRowFromWidget(y, this, WID_VT_TIMETABLE_PANEL, WidgetDimensions::scaled.framerect.top);
 		if (sel == INT_MAX) return INVALID_ORDER;
@@ -440,7 +440,7 @@ struct TimetableWindow : GeneralVehicleWindow {
 	 * @param data Information about the changed data.
 	 * @param gui_scope Whether the call is done from GUI scope. You may not do everything when not in GUI scope. See #InvalidateWindowData() for details.
 	 */
-	void OnInvalidateData(int data = 0, bool gui_scope = true) override
+	void OnInvalidateData([[maybe_unused]] int data = 0, [[maybe_unused]] bool gui_scope = true) override
 	{
 		switch (data) {
 			case VIWD_AUTOREPLACE:
@@ -624,25 +624,25 @@ struct TimetableWindow : GeneralVehicleWindow {
 	{
 		switch (widget) {
 			case WID_VT_CHANGE_TIME: {
-				GuiShowTooltips(this, STR_TIMETABLE_WAIT_TIME_TOOLTIP, 0, nullptr, close_cond);
+				GuiShowTooltips(this, STR_TIMETABLE_WAIT_TIME_TOOLTIP, close_cond);
 				return true;
 			}
 			case WID_VT_CLEAR_TIME: {
-				GuiShowTooltips(this, STR_TIMETABLE_CLEAR_TIME_TOOLTIP, 0, nullptr, close_cond);
+				GuiShowTooltips(this, STR_TIMETABLE_CLEAR_TIME_TOOLTIP, close_cond);
 				return true;
 			}
 			case WID_VT_CHANGE_SPEED: {
-				GuiShowTooltips(this, STR_TIMETABLE_CHANGE_SPEED_TOOLTIP, 0, nullptr, close_cond);
+				GuiShowTooltips(this, STR_TIMETABLE_CHANGE_SPEED_TOOLTIP, close_cond);
 				return true;
 			}
 			case WID_VT_CLEAR_SPEED: {
-				GuiShowTooltips(this, STR_TIMETABLE_CLEAR_SPEED_TOOLTIP, 0, nullptr, close_cond);
+				GuiShowTooltips(this, STR_TIMETABLE_CLEAR_SPEED_TOOLTIP, close_cond);
 				return true;
 			}
 			case WID_VT_SHARED_ORDER_LIST: {
 				if (this->vehicle->owner == _local_company) {
-					uint64 args[] = { STR_ORDERS_VEH_WITH_SHARED_ORDERS_LIST_TOOLTIP };
-					GuiShowTooltips(this, STR_ORDERS_VEH_WITH_SHARED_ORDERS_LIST_TOOLTIP_EXTRA, lengthof(args), args, close_cond);
+					SetDParam(0, STR_ORDERS_VEH_WITH_SHARED_ORDERS_LIST_TOOLTIP);
+					GuiShowTooltips(this, STR_ORDERS_VEH_WITH_SHARED_ORDERS_LIST_TOOLTIP_EXTRA, close_cond, 1);
 					return true;
 				}
 				return false;
@@ -874,7 +874,7 @@ struct TimetableWindow : GeneralVehicleWindow {
 		}
 	}
 
-	void OnClick(Point pt, int widget, int click_count) override
+	void OnClick([[maybe_unused]] Point pt, int widget, [[maybe_unused]] int click_count) override
 	{
 		const Vehicle *v = this->vehicle;
 
@@ -1236,11 +1236,11 @@ static const NWidgetPart _nested_timetable_widgets[] = {
 	EndContainer(),
 };
 
-static WindowDesc _timetable_desc(
+static WindowDesc _timetable_desc(__FILE__, __LINE__,
 	WDP_AUTO, "view_vehicle_timetable", 400, 130,
 	WC_VEHICLE_TIMETABLE, WC_VEHICLE_VIEW,
 	WDF_CONSTRUCTION,
-	_nested_timetable_widgets, lengthof(_nested_timetable_widgets)
+	std::begin(_nested_timetable_widgets), std::end(_nested_timetable_widgets)
 );
 
 /**

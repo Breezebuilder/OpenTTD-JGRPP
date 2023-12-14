@@ -190,6 +190,26 @@ STR_COLOUR_GREY                                                 :Grå
 STR_COLOUR_WHITE                                                :Hvid
 STR_COLOUR_RANDOM                                               :Tilfældig
 
+###length 17
+STR_COLOUR_SECONDARY_DARK_BLUE                                  :Mørkblå
+STR_COLOUR_SECONDARY_PALE_GREEN                                 :Lysegrøn
+STR_COLOUR_SECONDARY_SECONDARY_PINK                             :Lyserød
+STR_COLOUR_SECONDARY_YELLOW                                     :Gul
+STR_COLOUR_SECONDARY_RED                                        :Rød
+STR_COLOUR_SECONDARY_LIGHT_BLUE                                 :Lyseblå
+STR_COLOUR_SECONDARY_GREEN                                      :Grøn
+STR_COLOUR_SECONDARY_DARK_GREEN                                 :Mørkegrøn
+STR_COLOUR_SECONDARY_BLUE                                       :Blå
+STR_COLOUR_SECONDARY_CREAM                                      :Fløde
+STR_COLOUR_SECONDARY_MAUVE                                      :Lilla
+STR_COLOUR_SECONDARY_PURPLE                                     :Violet
+STR_COLOUR_SECONDARY_ORANGE                                     :Orange
+STR_COLOUR_SECONDARY_BROWN                                      :Brun
+STR_COLOUR_SECONDARY_GREY                                       :Grå
+STR_COLOUR_SECONDARY_WHITE                                      :Hvid
+STR_COLOUR_SECONDARY_SAME_AS_PRIMARY                            :Samme som Primær
+
+
 # Units used in OpenTTD
 STR_UNITS_VELOCITY_IMPERIAL                                     :{DECIMAL} miles/t
 STR_UNITS_VELOCITY_METRIC                                       :{DECIMAL} km/t
@@ -501,8 +521,9 @@ STR_NEWS_MENU_MESSAGE_HISTORY_MENU                              :Tidligere beske
 STR_NEWS_MENU_DELETE_ALL_MESSAGES                               :Slet alle beskeder
 
 # About menu
-###length 10
+###length 12
 STR_ABOUT_MENU_LAND_BLOCK_INFO                                  :Landområde information
+STR_ABOUT_MENU_HELP                                             :Hjælp & manualer
 STR_ABOUT_MENU_SEPARATOR                                        :
 STR_ABOUT_MENU_TOGGLE_CONSOLE                                   :Tænd/Sluk konsol
 STR_ABOUT_MENU_AI_DEBUG                                         :Computerspiller/spilscript debug
@@ -512,6 +533,7 @@ STR_ABOUT_MENU_ABOUT_OPENTTD                                    :Om 'OpenTTD'
 STR_ABOUT_MENU_SPRITE_ALIGNER                                   :Sprite justering
 STR_ABOUT_MENU_TOGGLE_BOUNDING_BOXES                            :Slå afgrænsningsrammerne til/fra
 STR_ABOUT_MENU_TOGGLE_DIRTY_BLOCKS                              :Slå farvning af beskidte blokke til/fra
+STR_ABOUT_MENU_TOGGLE_WIDGET_OUTLINES                           :Skift widget konturer
 
 # Place in highscore window
 ###length 15
@@ -903,10 +925,8 @@ STR_NEWS_NEW_VEHICLE_NOW_AVAILABLE_WITH_TYPE                    :{BLACK}Ny {STRI
 
 STR_NEWS_SHOW_VEHICLE_GROUP_TOOLTIP                             :{BLACK}Åbn gruppevinduet med fokus på dette fartøjs gruppe
 
-STR_NEWS_STATION_NO_LONGER_ACCEPTS_CARGO                        :{WHITE}{STATION} accepterer ikke længere {STRING}
-STR_NEWS_STATION_NO_LONGER_ACCEPTS_CARGO_OR_CARGO               :{WHITE}{STATION} accepterer ikke længere {STRING} eller {STRING}
-STR_NEWS_STATION_NOW_ACCEPTS_CARGO                              :{WHITE}{STATION} accepterer nu {STRING}
-STR_NEWS_STATION_NOW_ACCEPTS_CARGO_AND_CARGO                    :{WHITE}{STATION} accepterer nu {STRING} og {STRING}
+STR_NEWS_STATION_NO_LONGER_ACCEPTS_CARGO_LIST                   :{WHITE}{STATION} accepterer ikke længere: {CARGO_LIST}
+STR_NEWS_STATION_NOW_ACCEPTS_CARGO_LIST                         :{WHITE}{STATION} accepterer nu: {CARGO_LIST}
 
 STR_NEWS_OFFER_OF_SUBSIDY_EXPIRED                               :{BIG_FONT}{BLACK}Licitation af tilskudsordning udløbet:{}{}{STRING} fra {STRING} til {STRING} vil ikke længere udløse tilskud.
 STR_NEWS_SUBSIDY_WITHDRAWN_SERVICE                              :{BIG_FONT}{BLACK}Tilskudsordning tilbagetrukket:{}{}{STRING} fra {STRING} til {STRING} modtager ikke længere tilskud.
@@ -1059,12 +1079,12 @@ STR_GAME_OPTIONS_REFRESH_RATE_ITEM                              :{NUM}Hz
 STR_GAME_OPTIONS_REFRESH_RATE_WARNING                           :{WHITE}Opdateringshastigheder over 60Hz kan påvirke ydeevnen.
 
 STR_GAME_OPTIONS_BASE_GRF                                       :{BLACK}Basis-grafiksæt
-STR_GAME_OPTIONS_BASE_GRF_TOOLTIP                               :{BLACK}Vælg det basis-grafiksæt der skal bruges
+STR_GAME_OPTIONS_BASE_GRF_TOOLTIP                               :{BLACK}Vælg det grundlæggende grafiksæt, der skal bruges
 STR_GAME_OPTIONS_BASE_GRF_STATUS                                :{RED}{NUM} forsvund{P en ne}/ødelagt{P "" e} fil{P "" er}
 STR_GAME_OPTIONS_BASE_GRF_DESCRIPTION_TOOLTIP                   :{BLACK}Yderligere information om basis-grafiksættet
 
 STR_GAME_OPTIONS_BASE_SFX                                       :{BLACK}Basis-lydsæt
-STR_GAME_OPTIONS_BASE_SFX_TOOLTIP                               :{BLACK}Vælg basis-lydsættet der skal bruges
+STR_GAME_OPTIONS_BASE_SFX_TOOLTIP                               :{BLACK}Vælg det grundlæggende lyd sæt, der skal bruges
 STR_GAME_OPTIONS_BASE_SFX_DESCRIPTION_TOOLTIP                   :{BLACK}Mere information om basis-lydsættet
 
 STR_GAME_OPTIONS_BASE_MUSIC                                     :{BLACK}Basis-musiksæt
@@ -1234,6 +1254,8 @@ STR_CONFIG_SETTING_HORIZONTAL_POS_LEFT                          :Venstre
 STR_CONFIG_SETTING_HORIZONTAL_POS_CENTER                        :Center
 STR_CONFIG_SETTING_HORIZONTAL_POS_RIGHT                         :Højre
 
+STR_CONFIG_SETTING_SECONDS_VALUE                                :{COMMA}{NBSP}sekund{P 0 "" er}
+
 STR_CONFIG_SETTING_MAXIMUM_INITIAL_LOAN                         :Maksimum startlån: {STRING}
 STR_CONFIG_SETTING_MAXIMUM_INITIAL_LOAN_HELPTEXT                :Maksimumbeløb et selskab kan låne (uden at tage inflation i betragtning)
 STR_CONFIG_SETTING_MAXIMUM_INITIAL_LOAN_VALUE                   :{CURRENCY_LONG}
@@ -1361,7 +1383,7 @@ STR_CONFIG_SETTING_NONSTOP_BY_DEFAULT                           :Nye ordrer er '
 STR_CONFIG_SETTING_NONSTOP_BY_DEFAULT_HELPTEXT                  :Normalt vil et køretøj stoppe ved hver station den passerer. Ved at aktivere denne indstilling, vil det passere alle stationer på vej til sin endelige destination uden at stoppe. Bemærk, at denne indstilling kun definerer en standardværdi for nye ordrer. Individuelle ordrer kan indstilles udtrykkeligt til en specific adfærd alligevel
 
 STR_CONFIG_SETTING_STOP_LOCATION                                :Nye togordrer stopper som standard ved {STRING} af perronen
-STR_CONFIG_SETTING_STOP_LOCATION_HELPTEXT                       :Stedet hvor et tog vil standse ved perronen som standard. Den "nærmeste ende" forstås tæt på indgangen, 'midten' betyder i midten af platformen, og "fjerneste ende" forstås længest væk fra indgang. Bemærk, at denne indstilling kun definerer en standardværdi for nye ordrer. Individuelle ordrer kan indstilles udtrykkeligt til anden adfærd alligevel
+STR_CONFIG_SETTING_STOP_LOCATION_HELPTEXT                       :Der hvor et tog vil standse ved perronen som standard. Den "nærmeste ende" forstås tæt på indgangen, 'midten' betyder i midten af platformen, og "fjerneste ende" forstås længest væk fra indgang. Bemærk, at denne indstilling kun definerer en standardværdi for nye ordrer. Individuelle ordrer kan indstilles udtrykkeligt til anden adfærd alligevel
 ###length 3
 STR_CONFIG_SETTING_STOP_LOCATION_NEAR_END                       :den nærmeste ende
 STR_CONFIG_SETTING_STOP_LOCATION_MIDDLE                         :midten
@@ -1404,6 +1426,9 @@ STR_CONFIG_SETTING_PLANE_CRASHES_NONE                           :Ingen*
 STR_CONFIG_SETTING_PLANE_CRASHES_REDUCED                        :reduceret
 STR_CONFIG_SETTING_PLANE_CRASHES_NORMAL                         :Normal
 
+STR_CONFIG_SETTING_CROSSING_WITH_COMPETITOR                     :Tillad vejkryds - jernbaneoverskæringer med veje eller skinner ejet af konkurrenter: {STRING}
+STR_CONFIG_SETTING_CROSSING_WITH_COMPETITOR_HELPTEXT            :Tillad konstruktion af overkørsler på veje eller skinner ejet af konkurrenter
+
 STR_CONFIG_SETTING_STOP_ON_TOWN_ROAD                            :Tillad gennemkørsels-stop på veje ejet af en by: {STRING}
 STR_CONFIG_SETTING_STOP_ON_TOWN_ROAD_HELPTEXT                   :Tillad konstruktion af gennemkørsels-stop på by-ejede veje
 STR_CONFIG_SETTING_STOP_ON_COMPETITOR_ROAD                      :Tillad gennemkørsels-stoppesteder på veje ejet af konkurrenter: {STRING}
@@ -1415,6 +1440,9 @@ STR_CONFIG_SETTING_INFRASTRUCTURE_MAINTENANCE_HELPTEXT          :Når aktiveret,
 
 STR_CONFIG_SETTING_COMPANY_STARTING_COLOUR                      :Foretrukken selskabsfarve: {STRING}
 STR_CONFIG_SETTING_COMPANY_STARTING_COLOUR_HELPTEXT             :Vælg den foretrukne farve egne selskaber skal starte med
+
+STR_CONFIG_SETTING_COMPANY_STARTING_COLOUR_SECONDARY            :Startfirma sekundær farve: {STRING}
+STR_CONFIG_SETTING_COMPANY_STARTING_COLOUR_SECONDARY_HELPTEXT   :Vælg startende sekundær farve for virksomheden, hvis du bruger en NewGRF, der aktiverer det.
 
 STR_CONFIG_SETTING_NEVER_EXPIRE_AIRPORTS                        :Lufthavnenes levealder udløber aldrig: {STRING}
 STR_CONFIG_SETTING_NEVER_EXPIRE_AIRPORTS_HELPTEXT               :Aktiveres denne indstilling gøres at hver lufthavnstype forbliver tilgængelig for evigt efter dens indførelse
@@ -1449,7 +1477,6 @@ STR_CONFIG_SETTING_AUTORENEW_MONEY_HELPTEXT                     :Minimal mængde
 
 STR_CONFIG_SETTING_ERRMSG_DURATION                              :Varighed af fejlmeddelelse: {STRING}
 STR_CONFIG_SETTING_ERRMSG_DURATION_HELPTEXT                     :Varighed for visning fejlmeddelelser i en rød vindue. Bemærk, at nogle (kritisk) fejlmeddelelser ikke lukkes automatisk efter dette tidspunkt, men skal lukkes manuelt
-STR_CONFIG_SETTING_ERRMSG_DURATION_VALUE                        :{COMMA} sekund{P 0 "" er}
 
 STR_CONFIG_SETTING_HOVER_DELAY                                  :Vis værktøjstip: {STRING}
 STR_CONFIG_SETTING_HOVER_DELAY_HELPTEXT                         :Forsinkelse inden tooltips vises, når musen føres over nogle den grænseflade . Alternativt tooltips er bundet til den højre museknap, når denne værdi er sat til 0.
@@ -1617,9 +1644,10 @@ STR_CONFIG_SETTING_RIGHT_MOUSE_BTN_EMU_OFF                      :Fra
 
 STR_CONFIG_SETTING_RIGHT_MOUSE_WND_CLOSE                        :Luk vindue ved højre-klik: {STRING}
 STR_CONFIG_SETTING_RIGHT_MOUSE_WND_CLOSE_HELPTEXT               :Lukker vinduet ved at højreklikke inde i det. Deaktiverer værktøjstip ved at højreklikke!
-
-STR_CONFIG_SETTING_AUTOSAVE                                     :Auto gem: {STRING}
-STR_CONFIG_SETTING_AUTOSAVE_HELPTEXT                            :Vælg interval mellem automatisk gemte spil
+###length 3
+STR_CONFIG_SETTING_RIGHT_MOUSE_WND_CLOSE_NO                     :Nej
+STR_CONFIG_SETTING_RIGHT_MOUSE_WND_CLOSE_YES                    :Ja
+STR_CONFIG_SETTING_RIGHT_MOUSE_WND_CLOSE_YES_EXCEPT_STICKY      :Ja, undtagen klistret
 
 STR_CONFIG_SETTING_DATE_FORMAT_IN_SAVE_NAMES                    :Brug {STRING} datoformat til navne på gemte spil.
 STR_CONFIG_SETTING_DATE_FORMAT_IN_SAVE_NAMES_HELPTEXT           :Formatet af datoen i gemte spil filnavne
@@ -2096,6 +2124,7 @@ STR_INTRO_MULTIPLAYER                                           :{BLACK}Netværk
 
 STR_INTRO_GAME_OPTIONS                                          :{BLACK}Opsætning
 STR_INTRO_HIGHSCORE                                             :{BLACK} Topresultater
+STR_INTRO_HELP                                                  :{BLACK}Hjælp og manualer
 STR_INTRO_CONFIG_SETTINGS_TREE                                  :{BLACK}Indstillinger
 STR_INTRO_NEWGRF_SETTINGS                                       :{BLACK}NewGRF indstillinger
 STR_INTRO_ONLINE_CONTENT                                        :{BLACK}Tjek Online Indhold
@@ -2117,6 +2146,7 @@ STR_INTRO_TOOLTIP_TOYLAND_LANDSCAPE                             :{BLACK}Vælg 'l
 
 STR_INTRO_TOOLTIP_GAME_OPTIONS                                  :{BLACK}Sæt spillet op
 STR_INTRO_TOOLTIP_HIGHSCORE                                     :{BLACK}Hvis topscoreliste
+STR_INTRO_TOOLTIP_HELP                                          :{BLACK}Få adgang til dokumentation og online ressourcer
 STR_INTRO_TOOLTIP_CONFIG_SETTINGS_TREE                          :{BLACK}Skærm indstillinger
 STR_INTRO_TOOLTIP_NEWGRF_SETTINGS                               :{BLACK}Vis NewGRF-indstillinger
 STR_INTRO_TOOLTIP_ONLINE_CONTENT                                :{BLACK}Tjek for nyt og opdateret indhold til download
@@ -2138,6 +2168,19 @@ STR_ABANDON_GAME_CAPTION                                        :{WHITE}Forlad s
 STR_ABANDON_GAME_QUERY                                          :{YELLOW}Er du sikker på du vil forlade dette spil ?
 STR_ABANDON_SCENARIO_QUERY                                      :{YELLOW}Er du sikker på, at du vil afslutte dette scenarie ?
 
+# Help window
+STR_HELP_WINDOW_CAPTION                                         :{WHITE}Hjælp og manualer
+STR_HELP_WINDOW_WEBSITES                                        :{BLACK}Hjemmesider
+STR_HELP_WINDOW_DOCUMENTS                                       :{BLACK}Dokumenter
+STR_HELP_WINDOW_README                                          :{BLACK}Læs mig
+STR_HELP_WINDOW_CHANGELOG                                       :{BLACK}Ændringslog
+STR_HELP_WINDOW_KNOWN_BUGS                                      :{BLACK}Kendte Bugs
+STR_HELP_WINDOW_LICENSE                                         :{BLACK}Licens
+STR_HELP_WINDOW_MAIN_WEBSITE                                    :{BLACK}OpenTTD
+STR_HELP_WINDOW_MANUAL_WIKI                                     :{BLACK}Manual / Wiki
+STR_HELP_WINDOW_BUGTRACKER                                      :{BLACK}Anmeld en fejl
+STR_HELP_WINDOW_COMMUNITY                                       :{BLACK}Fællesskab
+
 # Cheat window
 STR_CHEATS                                                      :{WHITE}Snydefunktioner
 STR_CHEATS_TOOLTIP                                              :{BLACK}Checkbokse viser, om du har brugt denne snydefunktion før
@@ -2152,6 +2195,7 @@ STR_CHEAT_EDIT_MAX_HL_QUERY_CAPT                                :{WHITE}Rediger 
 STR_CHEAT_CHANGE_DATE                                           :{LTBLUE}Ændre dato: {ORANGE}{DATE_SHORT}
 STR_CHEAT_CHANGE_DATE_QUERY_CAPT                                :{WHITE}Skift år
 STR_CHEAT_SETUP_PROD                                            :{LTBLUE}Aktiver modifikation af produktion: {ORANGE}{STRING}
+STR_CHEAT_STATION_RATING                                        :{LTBLUE}Ret stationsvurderinger til 100 %: {ORANGE}{STRING}
 
 # Livery window
 STR_LIVERY_CAPTION                                              :{WHITE}{COMPANY} - Farvetema
@@ -2625,7 +2669,7 @@ STR_TRANSPARENT_BUILDINGS_TOOLTIP                               :{BLACK}Skift ge
 STR_TRANSPARENT_BRIDGES_TOOLTIP                                 :{BLACK}Skift gennemsigtighed for broer. CTRL+Klik for at låse værdi.
 STR_TRANSPARENT_STRUCTURES_TOOLTIP                              :{BLACK}Skift gennemsigtighed for strukturer som fyrtårne og antenner. CTRL+Klik for at låse værdi.
 STR_TRANSPARENT_CATENARY_TOOLTIP                                :{BLACK}Slå transparens til/fra for køreledninger. CTRL+klik for at låse.
-STR_TRANSPARENT_LOADING_TOOLTIP                                 :{BLACK}Slå gennemsigtighed til/fra for laste-indikatorer. CTRL+Klik for at låse værdi.
+STR_TRANSPARENT_TEXT_TOOLTIP                                    :{BLACK}Skift gennemsigtighed for indlæsning og pris/indtægtstekst. Ctrl+klik for at låse
 STR_TRANSPARENT_INVISIBLE_TOOLTIP                               :{BLACK}Gør objekter usynlige i stedet for gennemsigtige
 
 # Linkgraph legend window
@@ -2944,7 +2988,7 @@ STR_INDUSTRY_CARGOES_CUSTOMERS                                  :{WHITE}Accepter
 STR_INDUSTRY_CARGOES_HOUSES                                     :{WHITE}Huse
 STR_INDUSTRY_CARGOES_INDUSTRY_TOOLTIP                           :{BLACK}Klik på industrien for at se dens leverandører og kunder
 STR_INDUSTRY_CARGOES_CARGO_TOOLTIP                              :{BLACK}{STRING}{}Klik på godset for at se dens leverandører og kunder
-STR_INDUSTRY_DISPLAY_CHAIN                                      :{BLACK}Vis kæde
+STR_INDUSTRY_DISPLAY_CHAIN                                      :{BLACK}Vis Industrikæde
 STR_INDUSTRY_DISPLAY_CHAIN_TOOLTIP                              :{BLACK}Vis godsforsynende og -accepterende industrier
 STR_INDUSTRY_CARGOES_NOTIFY_SMALLMAP                            :{BLACK}Link til lille kort
 STR_INDUSTRY_CARGOES_NOTIFY_SMALLMAP_TOOLTIP                    :{BLACK}Vælg også de viste industrier på lille kort
@@ -3081,7 +3125,7 @@ STR_ABOUT_VERSION                                               :{BLACK}OpenTTD 
 STR_ABOUT_COPYRIGHT_OPENTTD                                     :{BLACK}OpenTTD {COPYRIGHT} 2002-{STRING} OpenTTD teamet
 
 # Framerate display window
-STR_FRAMERATE_CAPTION                                           :{WHITE}Spilhastighed
+STR_FRAMERATE_CAPTION                                           :{WHITE}Billedhastighed
 STR_FRAMERATE_CAPTION_SMALL                                     :{STRING}{WHITE} ({DECIMAL}x)
 STR_FRAMERATE_RATE_GAMELOOP                                     :{BLACK}Simulationshastighed: {STRING}
 STR_FRAMERATE_RATE_GAMELOOP_TOOLTIP                             :{BLACK}Antal spil-trin simuleret i sekundet.
@@ -3340,6 +3384,7 @@ STR_SAVE_PRESET_SAVE                                            :{BLACK}Gem
 STR_SAVE_PRESET_SAVE_TOOLTIP                                    :{BLACK}Gem forudindstilling til det valgte navn
 
 # NewGRF parameters window
+STR_BASEGRF_PARAMETERS_CAPTION                                  :{WHITE}Skift grundlæggende grafiske parametre
 STR_NEWGRF_PARAMETERS_CAPTION                                   :{WHITE}Ændre NewGRF parameterne
 STR_NEWGRF_PARAMETERS_CLOSE                                     :{BLACK}Luk
 STR_NEWGRF_PARAMETERS_RESET                                     :{BLACK}Nulstil
@@ -3356,6 +3401,7 @@ STR_NEWGRF_INSPECT_PARENT_TOOLTIP                               :{BLACK}Inspicer
 STR_NEWGRF_INSPECT_CAPTION_OBJECT_AT                            :{STRING} ved {HEX}
 STR_NEWGRF_INSPECT_CAPTION_OBJECT_AT_OBJECT                     :Objekt
 STR_NEWGRF_INSPECT_CAPTION_OBJECT_AT_RAIL_TYPE                  :Jernbanetype
+STR_NEWGRF_INSPECT_CAPTION_OBJECT_AT_ROAD_TYPE                  :Vej type
 
 STR_NEWGRF_INSPECT_QUERY_CAPTION                                :{WHITE}NewGRF variabel 60+x parameter (hexadecimal)
 
@@ -4671,16 +4717,22 @@ STR_AI_SETTINGS_SETTING                                         :{STRING}: {ORAN
 
 
 # Textfile window
+STR_TEXTFILE_JUMPLIST                                           :{WHITE}Indholdsfortegnelse
+STR_TEXTFILE_JUMPLIST_TOOLTIP                                   :{BLACK}Spring hurtigt til en sektion i den viste fil via denne liste
+STR_TEXTFILE_JUMPLIST_ITEM                                      :{WHITE}{STRING}
+STR_TEXTFILE_NAVBACK_TOOLTIP                                    :{BLACK}Gå tilbage i navigationshistorikken
+STR_TEXTFILE_NAVFORWARD_TOOLTIP                                 :{BLACK}Vend tilbage i navigationshistorikken
 STR_TEXTFILE_WRAP_TEXT                                          :{WHITE}Ombryd tekst
 STR_TEXTFILE_WRAP_TEXT_TOOLTIP                                  :{BLACK}Ombryd teksten i vinduet, så det hele passer uden at skulle rulle
 STR_TEXTFILE_VIEW_README                                        :{BLACK}Se readme
 STR_TEXTFILE_VIEW_CHANGELOG                                     :{BLACK}Ændringslog
 STR_TEXTFILE_VIEW_LICENCE                                       :{BLACK}Licens
-###length 4
+###length 5
 STR_TEXTFILE_README_CAPTION                                     :{WHITE}{STRING} readme for {STRING}
 STR_TEXTFILE_CHANGELOG_CAPTION                                  :{WHITE}{STRING} ændringslog for {STRING}
 STR_TEXTFILE_LICENCE_CAPTION                                    :{WHITE}{STRING} licens for {STRING}
 STR_TEXTFILE_SURVEY_RESULT_CAPTION                              :Forhåndsvisning af undersøgelsesresultat
+STR_TEXTFILE_GAME_MANUAL_CAPTION                                :{WHITE}OpenTTD dokument '{STRING}'
 
 
 # Vehicle loading indicators
@@ -4815,7 +4867,6 @@ STR_ERROR_TOO_CLOSE_TO_EDGE_OF_MAP_SUB                          :{WHITE}... for 
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_TOWN                             :{WHITE}... for tæt på en anden by
 STR_ERROR_TOO_MANY_TOWNS                                        :{WHITE}... for mange byer
 STR_ERROR_NO_SPACE_FOR_TOWN                                     :{WHITE}... der er ikke mere plads på kortet
-STR_ERROR_TOWN_EXPAND_WARN_NO_ROADS                             :{WHITE}Byen vil ikke kunne bygge veje. Du kan tillade byer at bygge veje via Avancerede indstillinger->Økonomi->Byer.
 STR_ERROR_ROAD_WORKS_IN_PROGRESS                                :{WHITE}Vejarbejde i gang
 STR_ERROR_TOWN_CAN_T_DELETE                                     :{WHITE}Kan ikke slette denne by...{}En station eller et depot refererer til byen, eller en brik der er ejet a byen kan ikke fjernes
 STR_ERROR_STATUE_NO_SUITABLE_PLACE                              :{WHITE}... Der er ingen egnede steder at placere en statue

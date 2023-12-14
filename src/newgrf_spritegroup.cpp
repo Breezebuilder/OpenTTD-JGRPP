@@ -142,8 +142,6 @@ static inline uint32 GetVariable(const ResolverObject &object, ScopeResolver *sc
 
 /**
  * Store a value into the persistent storage area (PSA). Default implementation does nothing (for newgrf classes without storage).
- * @param reg Position to store into.
- * @param value Value to store.
  */
 /* virtual */ void ScopeResolver::StorePSA(uint reg, int32 value) {}
 
@@ -162,8 +160,6 @@ static inline uint32 GetVariable(const ResolverObject &object, ScopeResolver *sc
 
 /**
  * Get a resolver for the \a scope.
- * @param scope Scope to return.
- * @param relative Additional parameter for #VSG_SCOPE_RELATIVE.
  * @return The resolver for the requested scope.
  */
 /* virtual */ ScopeResolver *ResolverObject::GetScope(VarSpriteGroupScope scope, VarSpriteGroupScopeOffset relative)
@@ -257,6 +253,11 @@ static bool RangeHighComparator(const DeterministicSpriteGroupRange& range, uint
 
 const SpriteGroup *DeterministicSpriteGroup::Resolve(ResolverObject &object) const
 {
+	if ((this->sg_flags & SGF_SKIP_CB) != 0 && object.callback > 1) {
+		static CallbackResultSpriteGroup cbfail(CALLBACK_FAILED);
+		return &cbfail;
+	}
+
 	uint32 last_value = 0;
 	uint32 value = 0;
 
@@ -619,6 +620,7 @@ void SpriteGroupDumper::DumpSpriteGroup(const SpriteGroup *sg, const char *paddi
 
 	char extra_info[64] = "";
 	if (sg->sg_flags & SGF_ACTION6) strecat(extra_info, " (action 6 modified)", lastof(extra_info));
+	if (sg->sg_flags & SGF_SKIP_CB) strecat(extra_info, " (skip CB)", lastof(extra_info));
 	if (HasBit(_misc_debug_flags, MDF_NEWGRF_SG_DUMP_MORE_DETAIL)) {
 		if (sg->sg_flags & SGF_INLINING) strecat(extra_info, " (inlining)", lastof(extra_info));
 	}

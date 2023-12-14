@@ -173,11 +173,15 @@ class ReplaceVehicleWindow : public Window {
 				if (!CheckAutoreplaceValidity(this->sel_engine[0], eid, _local_company)) continue;
 			}
 
-			EngineDisplayFlags flags = (side == 0) ? EngineDisplayFlags::None : e->display_flags;
-			if (side == 1 && eid == this->sel_engine[0]) flags |= EngineDisplayFlags::Shaded;
-			list.emplace_back(eid, e->info.variant_id, flags, 0);
+			list.emplace_back(eid, e->info.variant_id, (side == 0) ? EngineDisplayFlags::None : e->display_flags, 0);
 
-			if (side == 1 && e->info.variant_id != INVALID_ENGINE) variants.push_back(e->info.variant_id);
+			if (side == 1) {
+				EngineID parent = e->info.variant_id;
+				while (parent != INVALID_ENGINE) {
+					variants.push_back(parent);
+					parent = Engine::Get(parent)->info.variant_id;
+				}
+			}
 			if (eid == this->sel_engine[side]) selected_engine = eid; // The selected engine is still in the list
 		}
 
@@ -216,7 +220,7 @@ class ReplaceVehicleWindow : public Window {
 			/* We need to rebuild the left engines list */
 			this->GenerateReplaceVehList(true);
 			this->vscroll[0]->SetCount(this->engines[0].size());
-			if (this->reset_sel_engine && this->sel_engine[0] == INVALID_ENGINE && this->engines[0].size() != 0) {
+			if (this->reset_sel_engine && this->sel_engine[0] == INVALID_ENGINE && !this->engines[0].empty()) {
 				this->sel_engine[0] = this->engines[0][0].engine_id;
 			}
 		}
@@ -301,7 +305,7 @@ public:
 		this->sel_group = id_g;
 	}
 
-	void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize) override
+	void UpdateWidgetSize(int widget, Dimension *size, [[maybe_unused]] const Dimension &padding, [[maybe_unused]] Dimension *fill, [[maybe_unused]] Dimension *resize) override
 	{
 		switch (widget) {
 			case WID_RV_SORT_ASCENDING_DESCENDING: {
@@ -358,7 +362,7 @@ public:
 				switch (this->window_number) {
 					case VEH_TRAIN:
 						for (RailType rt = RAILTYPE_BEGIN; rt != RAILTYPE_END; rt++) {
-							const RailtypeInfo *rti = GetRailTypeInfo(rt);
+							const RailTypeInfo *rti = GetRailTypeInfo(rt);
 							/* Skip rail type if it has no label */
 							if (rti->label == 0) continue;
 							d = maxdim(d, GetStringBoundingBox(rti->strings.replace_text));
@@ -540,7 +544,7 @@ public:
 		}
 	}
 
-	void OnClick(Point pt, int widget, int click_count) override
+	void OnClick([[maybe_unused]] Point pt, int widget, [[maybe_unused]] int click_count) override
 	{
 		switch (widget) {
 			case WID_RV_SORT_ASCENDING_DESCENDING:
@@ -564,8 +568,8 @@ public:
 
 			case WID_RV_TRAIN_ENGINEWAGON_DROPDOWN: {
 				DropDownList list;
-				list.emplace_back(new DropDownListStringItem(STR_REPLACE_ENGINES, 1, false));
-				list.emplace_back(new DropDownListStringItem(STR_REPLACE_WAGONS, 0, false));
+				list.push_back(std::make_unique<DropDownListStringItem>(STR_REPLACE_ENGINES, 1, false));
+				list.push_back(std::make_unique<DropDownListStringItem>(STR_REPLACE_WAGONS, 0, false));
 				ShowDropDownList(this, std::move(list), this->replace_engines ? 1 : 0, WID_RV_TRAIN_ENGINEWAGON_DROPDOWN);
 				break;
 			}
@@ -714,16 +718,15 @@ public:
 		}
 	}
 
-	bool OnTooltip(Point pt, int widget, TooltipCloseCondition close_cond) override
+	bool OnTooltip([[maybe_unused]] Point pt, int widget, TooltipCloseCondition close_cond) override
 	{
 		if (widget != WID_RV_TRAIN_WAGONREMOVE_TOGGLE) return false;
 
 		if (Group::IsValidID(this->sel_group)) {
-			uint64 params[1];
-			params[0] = STR_REPLACE_REMOVE_WAGON_HELP;
-			GuiShowTooltips(this, STR_REPLACE_REMOVE_WAGON_GROUP_HELP, 1, params, close_cond);
+			SetDParam(0, STR_REPLACE_REMOVE_WAGON_HELP);
+			GuiShowTooltips(this, STR_REPLACE_REMOVE_WAGON_GROUP_HELP, close_cond, 1);
 		} else {
-			GuiShowTooltips(this, STR_REPLACE_REMOVE_WAGON_HELP, 0, nullptr, close_cond);
+			GuiShowTooltips(this, STR_REPLACE_REMOVE_WAGON_HELP, close_cond);
 		}
 		return true;
 	}
@@ -739,7 +742,7 @@ public:
 	 * @param data Information about the changed data.
 	 * @param gui_scope Whether the call is done from GUI scope. You may not do everything when not in GUI scope. See #InvalidateWindowData() for details.
 	 */
-	void OnInvalidateData(int data = 0, bool gui_scope = true) override
+	void OnInvalidateData([[maybe_unused]] int data = 0, [[maybe_unused]] bool gui_scope = true) override
 	{
 		if (data != 0) {
 			/* This needs to be done in command-scope to enforce rebuilding before resorting invalid data */
@@ -807,11 +810,11 @@ static const NWidgetPart _nested_replace_rail_vehicle_widgets[] = {
 	EndContainer(),
 };
 
-static WindowDesc _replace_rail_vehicle_desc(
+static WindowDesc _replace_rail_vehicle_desc(__FILE__, __LINE__,
 	WDP_AUTO, "replace_vehicle_train", 500, 140,
 	WC_REPLACE_VEHICLE, WC_NONE,
 	WDF_CONSTRUCTION,
-	_nested_replace_rail_vehicle_widgets, lengthof(_nested_replace_rail_vehicle_widgets)
+	std::begin(_nested_replace_rail_vehicle_widgets), std::end(_nested_replace_rail_vehicle_widgets)
 );
 
 static const NWidgetPart _nested_replace_road_vehicle_widgets[] = {
@@ -865,11 +868,11 @@ static const NWidgetPart _nested_replace_road_vehicle_widgets[] = {
 	EndContainer(),
 };
 
-static WindowDesc _replace_road_vehicle_desc(
+static WindowDesc _replace_road_vehicle_desc(__FILE__, __LINE__,
 	WDP_AUTO, "replace_vehicle_road", 500, 140,
 	WC_REPLACE_VEHICLE, WC_NONE,
 	WDF_CONSTRUCTION,
-	_nested_replace_road_vehicle_widgets, lengthof(_nested_replace_road_vehicle_widgets)
+	std::begin(_nested_replace_road_vehicle_widgets), std::end(_nested_replace_road_vehicle_widgets)
 );
 
 static const NWidgetPart _nested_replace_vehicle_widgets[] = {
@@ -919,11 +922,11 @@ static const NWidgetPart _nested_replace_vehicle_widgets[] = {
 	EndContainer(),
 };
 
-static WindowDesc _replace_vehicle_desc(
+static WindowDesc _replace_vehicle_desc(__FILE__, __LINE__,
 	WDP_AUTO, "replace_vehicle", 456, 118,
 	WC_REPLACE_VEHICLE, WC_NONE,
 	WDF_CONSTRUCTION,
-	_nested_replace_vehicle_widgets, lengthof(_nested_replace_vehicle_widgets)
+	std::begin(_nested_replace_vehicle_widgets), std::end(_nested_replace_vehicle_widgets)
 );
 
 /**

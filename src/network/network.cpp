@@ -36,6 +36,7 @@
 #include "../gfx_func.h"
 #include "../error.h"
 #include "../core/checksum_func.hpp"
+#include "../string_func.h"
 #include "../string_func_extra.h"
 #include "../core/serialisation.hpp"
 #include "../3rdparty/randombytes/randombytes.h"
@@ -215,7 +216,7 @@ std::string GenerateCompanyPasswordHash(const std::string &password, const std::
 	checksum.Append(salted_password_string.data(), salted_password_string.size());
 	checksum.Finish(digest);
 
-	return BytesToHexString(digest.data(), digest.size());
+	return FormatArrayAsHex(digest);
 }
 
 /**
@@ -776,7 +777,7 @@ void GetBindAddresses(NetworkAddressList *addresses, uint16 port)
 	}
 
 	/* No address, so bind to everything. */
-	if (addresses->size() == 0) {
+	if (addresses->empty()) {
 		addresses->emplace_back("", port);
 	}
 }
@@ -943,7 +944,7 @@ bool NetworkServerStart()
 	/* Check for the client and server names to be set, but only after the scripts had a chance to set them.*/
 	if (_network_dedicated) CheckClientAndServerName();
 
-	NetworkDisconnect(false, false);
+	NetworkDisconnect(false);
 	NetworkInitialize(false);
 	NetworkUDPInitialize();
 	DEBUG(net, 5, "Starting listeners for clients");
@@ -1016,10 +1017,9 @@ void NetworkReboot()
 
 /**
  * We want to disconnect from the host/clients.
- * @param blocking whether to wait till everything has been closed.
  * @param close_admins Whether the admin sockets need to be closed as well.
  */
-void NetworkDisconnect(bool blocking, bool close_admins)
+void NetworkDisconnect(bool close_admins)
 {
 	if (_network_server) {
 		for (NetworkClientSocket *cs : NetworkClientSocket::Iterate()) {
@@ -1340,27 +1340,12 @@ static void NetworkGenerateServerId()
 	_settings_client.network.network_id = GenerateUid("OpenTTD Server ID");
 }
 
-std::string BytesToHexString(const byte *data, size_t length)
-{
-	std::string hex_output;
-	hex_output.resize(length * 2);
-
-	char txt[3];
-	for (uint i = 0; i < length; ++i) {
-		seprintf(txt, lastof(txt), "%02x", data[i]);
-		hex_output[i * 2] = txt[0];
-		hex_output[(i * 2) + 1] = txt[1];
-	}
-
-	return hex_output;
-}
-
 std::string NetworkGenerateRandomKeyString(uint bytes)
 {
 	uint8 *key = AllocaM(uint8, bytes);
 	NetworkRandomBytesWithFallback(key, bytes);
 
-	return BytesToHexString(key, bytes);
+	return FormatArrayAsHex({key, bytes});
 }
 
 class TCPNetworkDebugConnecter : TCPConnecter {
@@ -1418,7 +1403,7 @@ void NetworkStartUp()
 /** This shuts the network down */
 void NetworkShutDown()
 {
-	NetworkDisconnect(true);
+	NetworkDisconnect();
 	NetworkHTTPUninitialize();
 	NetworkUDPClose();
 

@@ -17,6 +17,7 @@
 #include "depot_base.h"
 #include "town.h"
 #include "signal_func.h"
+#include "road.h"
 
 #include "safeguards.h"
 
@@ -39,6 +40,7 @@
 			case A2VRI_RAILTYPE_SIGNAL_CONTEXT: return this->signal_context;
 			case A2VRI_RAILTYPE_SIGNAL_SIDE: return GetNewSignalsSideVariable();
 			case A2VRI_RAILTYPE_SIGNAL_VERTICAL_CLEARANCE: return 0xFF;
+			case A2VRI_RAILTYPE_ADJACENT_CROSSING: return 0;
 		}
 	}
 
@@ -66,6 +68,31 @@
 			return GetNewSignalsSideVariable();
 		case A2VRI_RAILTYPE_SIGNAL_VERTICAL_CLEARANCE:
 			return GetNewSignalsVerticalClearanceInfo(this->tile, this->z);
+		case A2VRI_RAILTYPE_ADJACENT_CROSSING: {
+			if (!IsLevelCrossingTile(this->tile) || !_settings_game.vehicle.adjacent_crossings) return 0;
+
+			auto is_usable_crossing = [&](TileIndex t) -> bool {
+				if (HasRoadTypeRoad(t) && !HasBit(_roadtypes_non_train_colliding, GetRoadTypeRoad(t))) return true;
+				if (HasRoadTypeTram(t) && !HasBit(_roadtypes_non_train_colliding, GetRoadTypeTram(t))) return true;
+				return false;
+			};
+			if (!is_usable_crossing(this->tile)) return 0;
+
+			const Axis axis = GetCrossingRoadAxis(this->tile);
+			const DiagDirection dir_s = AxisToDiagDir(axis);
+			const DiagDirection dir_n = ReverseDiagDir(dir_s);
+
+			uint32 result = 0;
+			auto test_dir = [&](DiagDirection dir, uint bit) {
+				const TileIndex t = TileAddByDiagDir(this->tile, dir);
+				if (t < MapSize() && IsLevelCrossingTile(t) && GetCrossingRoadAxis(t) == axis && is_usable_crossing(t)) {
+					SetBit(result, bit);
+				}
+			};
+			test_dir(dir_s, 0);
+			test_dir(dir_n, 1);
+			return result;
+		}
 	}
 
 	DEBUG(grf, 1, "Unhandled rail type tile variable 0x%X", variable);
@@ -96,7 +123,7 @@ uint32 RailTypeResolverObject::GetDebugID() const
  * @param z Signal pixel z.
  * @param prog Routing restriction program.
  */
-RailTypeResolverObject::RailTypeResolverObject(const RailtypeInfo *rti, TileIndex tile, TileContext context, RailTypeSpriteGroup rtsg, uint32 param1, uint32 param2,
+RailTypeResolverObject::RailTypeResolverObject(const RailTypeInfo *rti, TileIndex tile, TileContext context, RailTypeSpriteGroup rtsg, uint32 param1, uint32 param2,
 		CustomSignalSpriteContext signal_context, const TraceRestrictProgram *prog, uint z)
 	: ResolverObject(rti != nullptr ? rti->grffile[rtsg] : nullptr, CBID_NO_CALLBACK, param1, param2), railtype_scope(*this, rti, tile, context, signal_context, prog, z)
 {
@@ -112,7 +139,7 @@ RailTypeResolverObject::RailTypeResolverObject(const RailtypeInfo *rti, TileInde
  * @param[out] num_results If not nullptr, return the number of sprites in the spriteset.
  * @return The sprite to draw.
  */
-SpriteID GetCustomRailSprite(const RailtypeInfo *rti, TileIndex tile, RailTypeSpriteGroup rtsg, TileContext context, uint *num_results)
+SpriteID GetCustomRailSprite(const RailTypeInfo *rti, TileIndex tile, RailTypeSpriteGroup rtsg, TileContext context, uint *num_results)
 {
 	assert(rtsg < RTSG_END);
 
@@ -141,7 +168,7 @@ inline uint8 RemapAspect(uint8 aspect, uint8 extra_aspects, uint8 style)
 	return aspect + 1;
 }
 
-static PalSpriteID GetRailTypeCustomSignalSprite(const RailtypeInfo *rti, TileIndex tile, SignalType type, SignalVariant var, uint8 aspect,
+static PalSpriteID GetRailTypeCustomSignalSprite(const RailTypeInfo *rti, TileIndex tile, SignalType type, SignalVariant var, uint8 aspect,
 		CustomSignalSpriteContext context, const TraceRestrictProgram *prog, uint z)
 {
 	if (rti->group[RTSG_SIGNALS] == nullptr) return { 0, PAL_NONE };
@@ -170,10 +197,10 @@ static PalSpriteID GetRailTypeCustomSignalSprite(const RailtypeInfo *rti, TileIn
  * @param gui Is the sprite being used on the map or in the GUI?
  * @return The sprite to draw.
  */
-CustomSignalSpriteResult GetCustomSignalSprite(const RailtypeInfo *rti, TileIndex tile, SignalType type, SignalVariant var, uint8 aspect,
+CustomSignalSpriteResult GetCustomSignalSprite(const RailTypeInfo *rti, TileIndex tile, SignalType type, SignalVariant var, uint8 aspect,
 		CustomSignalSpriteContext context, uint8 style, const TraceRestrictProgram *prog, uint z)
 {
-	if (_settings_client.gui.show_all_signal_default && style == 0) return { { 0, PAL_NONE }, false };
+	if (_settings_client.gui.show_all_signal_default == SSDM_ON && style == 0) return { { 0, PAL_NONE }, false };
 
 	if (style == 0) {
 		PalSpriteID spr = GetRailTypeCustomSignalSprite(rti, tile, type, var, aspect, context, prog, z);
@@ -210,7 +237,7 @@ CustomSignalSpriteResult GetCustomSignalSprite(const RailtypeInfo *rti, TileInde
  */
 RailType GetRailTypeTranslation(uint8 railtype, const GRFFile *grffile)
 {
-	if (grffile == nullptr || grffile->railtype_list.size() == 0) {
+	if (grffile == nullptr || grffile->railtype_list.empty()) {
 		/* No railtype table present. Return railtype as-is (if valid), so it works for original railtypes. */
 		if (railtype >= RAILTYPE_END || GetRailTypeInfo(static_cast<RailType>(railtype))->label == 0) return INVALID_RAILTYPE;
 
@@ -233,7 +260,7 @@ RailType GetRailTypeTranslation(uint8 railtype, const GRFFile *grffile)
 uint8 GetReverseRailTypeTranslation(RailType railtype, const GRFFile *grffile)
 {
 	/* No rail type table present, return rail type as-is */
-	if (grffile == nullptr || grffile->railtype_list.size() == 0) return railtype;
+	if (grffile == nullptr || grffile->railtype_list.empty()) return railtype;
 
 	/* Look for a matching rail type label in the table */
 	RailTypeLabel label = GetRailTypeInfo(railtype)->label;
@@ -248,7 +275,7 @@ uint8 GetReverseRailTypeTranslation(RailType railtype, const GRFFile *grffile)
 void DumpRailTypeSpriteGroup(RailType rt, DumpSpriteGroupPrinter print)
 {
 	char buffer[64];
-	const RailtypeInfo *rti = GetRailTypeInfo(rt);
+	const RailTypeInfo *rti = GetRailTypeInfo(rt);
 
 	static const char *sprite_group_names[] =  {
 		"RTSG_CURSORS",

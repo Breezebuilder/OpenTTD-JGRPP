@@ -418,7 +418,7 @@ struct NewGRFInspectWindow : Window {
 		GetFeatureHelper(this->window_number)->SetStringParameters(this->GetFeatureIndex());
 	}
 
-	void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize) override
+	void UpdateWidgetSize(int widget, Dimension *size, [[maybe_unused]] const Dimension &padding, [[maybe_unused]] Dimension *fill, [[maybe_unused]] Dimension *resize) override
 	{
 		switch (widget) {
 			case WID_NGRFI_VEH_CHAIN: {
@@ -763,7 +763,7 @@ struct NewGRFInspectWindow : Window {
 						break;
 
 					case NIT_CARGO:
-						string = value != INVALID_CARGO ? CargoSpec::Get(value)->name : STR_QUANTITY_N_A;
+						string = value != CT_INVALID ? CargoSpec::Get(value)->name : STR_QUANTITY_N_A;
 						break;
 
 					default:
@@ -829,7 +829,7 @@ struct NewGRFInspectWindow : Window {
 		this->selected_highlight_tags[lengthof(this->selected_highlight_tags) - 1] = tag;
 	}
 
-	void OnClick(Point pt, int widget, int click_count) override
+	void OnClick([[maybe_unused]] Point pt, int widget, [[maybe_unused]] int click_count) override
 	{
 		switch (widget) {
 			case WID_NGRFI_PARENT: {
@@ -1015,7 +1015,7 @@ struct NewGRFInspectWindow : Window {
 	 * @param data Information about the changed data.
 	 * @param gui_scope Whether the call is done from GUI scope. You may not do everything when not in GUI scope. See #InvalidateWindowData() for details.
 	 */
-	void OnInvalidateData(int data = 0, bool gui_scope = true) override
+	void OnInvalidateData([[maybe_unused]] int data = 0, [[maybe_unused]] bool gui_scope = true) override
 	{
 		if (!gui_scope) return;
 		if (this->HasChainIndex()) {
@@ -1105,18 +1105,18 @@ static const NWidgetPart _nested_newgrf_inspect_widgets[] = {
 	EndContainer(),
 };
 
-static WindowDesc _newgrf_inspect_chain_desc(
+static WindowDesc _newgrf_inspect_chain_desc(__FILE__, __LINE__,
 	WDP_AUTO, "newgrf_inspect_chain", 400, 300,
 	WC_NEWGRF_INSPECT, WC_NONE,
 	0,
-	_nested_newgrf_inspect_chain_widgets, lengthof(_nested_newgrf_inspect_chain_widgets)
+	std::begin(_nested_newgrf_inspect_chain_widgets), std::end(_nested_newgrf_inspect_chain_widgets)
 );
 
-static WindowDesc _newgrf_inspect_desc(
+static WindowDesc _newgrf_inspect_desc(__FILE__, __LINE__,
 	WDP_AUTO, "newgrf_inspect", 400, 300,
 	WC_NEWGRF_INSPECT, WC_NONE,
 	0,
-	_nested_newgrf_inspect_widgets, lengthof(_nested_newgrf_inspect_widgets)
+	std::begin(_nested_newgrf_inspect_widgets), std::end(_nested_newgrf_inspect_widgets)
 );
 
 /**
@@ -1276,6 +1276,7 @@ struct SpriteAlignerWindow : Window {
 	{
 		this->CreateNestedTree();
 		this->vscroll = this->GetScrollbar(WID_SA_SCROLLBAR);
+		this->vscroll->SetCount(_newgrf_debug_sprite_picker.sprites.size());
 		this->FinishInitNested(wno);
 
 		this->SetWidgetLoweredState(WID_SA_CENTRE, SpriteAlignerWindow::centre);
@@ -1319,7 +1320,7 @@ struct SpriteAlignerWindow : Window {
 		}
 	}
 
-	void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize) override
+	void UpdateWidgetSize(int widget, Dimension *size, [[maybe_unused]] const Dimension &padding, [[maybe_unused]] Dimension *fill, [[maybe_unused]] Dimension *resize) override
 	{
 		switch (widget) {
 			case WID_SA_SPRITE:
@@ -1384,7 +1385,7 @@ struct SpriteAlignerWindow : Window {
 		}
 	}
 
-	void OnClick(Point pt, int widget, int click_count) override
+	void OnClick([[maybe_unused]] Point pt, int widget, [[maybe_unused]] int click_count) override
 	{
 		switch (widget) {
 			case WID_SA_PREVIOUS:
@@ -1494,7 +1495,7 @@ struct SpriteAlignerWindow : Window {
 	 * @param data Information about the changed data.
 	 * @param gui_scope Whether the call is done from GUI scope. You may not do everything when not in GUI scope. See #InvalidateWindowData() for details.
 	 */
-	void OnInvalidateData(int data = 0, bool gui_scope = true) override
+	void OnInvalidateData([[maybe_unused]] int data = 0, [[maybe_unused]] bool gui_scope = true) override
 	{
 		if (!gui_scope) return;
 		if (data == 1) {
@@ -1571,11 +1572,11 @@ static const NWidgetPart _nested_sprite_aligner_widgets[] = {
 	EndContainer(),
 };
 
-static WindowDesc _sprite_aligner_desc(
+static WindowDesc _sprite_aligner_desc(__FILE__, __LINE__,
 	WDP_AUTO, "sprite_aligner", 400, 300,
 	WC_SPRITE_ALIGNER, WC_NONE,
 	0,
-	_nested_sprite_aligner_widgets, lengthof(_nested_sprite_aligner_widgets)
+	std::begin(_nested_sprite_aligner_widgets), std::end(_nested_sprite_aligner_widgets)
 );
 
 /**

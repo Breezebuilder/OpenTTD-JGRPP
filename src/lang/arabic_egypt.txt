@@ -189,6 +189,9 @@ STR_COLOUR_BROWN                                                :بني
 STR_COLOUR_GREY                                                 :رمادي
 STR_COLOUR_WHITE                                                :ابيض
 
+###length 17
+
+
 # Units used in OpenTTD
 STR_UNITS_VELOCITY_IMPERIAL                                     :{DECIMAL}{NBSP}ميل/س
 STR_UNITS_VELOCITY_METRIC                                       :{DECIMAL}{NBSP}كم/س
@@ -480,7 +483,7 @@ STR_NEWS_MENU_MESSAGE_HISTORY_MENU                              :الرسائل 
 STR_NEWS_MENU_DELETE_ALL_MESSAGES                               :احذف كل الرسائل
 
 # About menu
-###length 10
+###length 12
 STR_ABOUT_MENU_LAND_BLOCK_INFO                                  :معلومات مربع في الخريطة
 STR_ABOUT_MENU_SEPARATOR                                        :
 STR_ABOUT_MENU_TOGGLE_CONSOLE                                   :توقل كونسول
@@ -869,10 +872,6 @@ STR_NEWS_NEW_VEHICLE_TYPE                                       :{BIG_FONT}{BLAC
 STR_NEWS_NEW_VEHICLE_NOW_AVAILABLE_WITH_TYPE                    :{BLACK}جديد {STRING} الآن متاح ! - {ENGINE}
 
 
-STR_NEWS_STATION_NO_LONGER_ACCEPTS_CARGO                        :{WHITE}{STATION} لم تعد تقبل {STRING}
-STR_NEWS_STATION_NO_LONGER_ACCEPTS_CARGO_OR_CARGO               :{WHITE}{STATION}لم تعد تقبل {STRING} او {STRING}
-STR_NEWS_STATION_NOW_ACCEPTS_CARGO                              :{WHITE}{STATION} الآن تقبل {STRING}
-STR_NEWS_STATION_NOW_ACCEPTS_CARGO_AND_CARGO                    :{WHITE}{STATION}الآن تقبل {STRING} و {STRING}
 
 STR_NEWS_OFFER_OF_SUBSIDY_EXPIRED                               :{BIG_FONT}{BLACK} اعلان عن انتهاء عرض{}{} نقل {STRING} من {STRING} الى {STRING} لن يعطي ارباح اضافية بعد الآن .
 STR_NEWS_SUBSIDY_WITHDRAWN_SERVICE                              :{BIG_FONT}{BLACK} تم سحب العرض{}{} نقل {STRING} من {STRING} الى {STRING} لم يعد معروض
@@ -1139,6 +1138,7 @@ STR_CONFIG_SETTING_HORIZONTAL_POS_LEFT                          :يسار
 STR_CONFIG_SETTING_HORIZONTAL_POS_CENTER                        :متوسط
 STR_CONFIG_SETTING_HORIZONTAL_POS_RIGHT                         :يمين
 
+
 ###setting-zero-is-special
 
 STR_CONFIG_SETTING_INTEREST_RATE_HELPTEXT                       :سعر الفائدة على القرض يتحكم أيضًا في التضخم ، إذا تم تمكينه
@@ -1248,6 +1248,7 @@ STR_CONFIG_SETTING_PLANE_CRASHES_NONE                           :بدون
 STR_CONFIG_SETTING_PLANE_CRASHES_REDUCED                        :منخفض
 STR_CONFIG_SETTING_PLANE_CRASHES_NORMAL                         :طبيعي
 
+
 STR_CONFIG_SETTING_STOP_ON_TOWN_ROAD                            :السماح للعربات بالعبور خلال المواقف المملوكة داخل المدن: {STRING}
 STR_CONFIG_SETTING_STOP_ON_COMPETITOR_ROAD                      :السماح بمرور العربات خلال المحطات المملوكة للمنافسين: {STRING}
 STR_CONFIG_SETTING_STOP_ON_COMPETITOR_ROAD_HELPTEXT             :السماح ببناء مواقف السيارات على الطرق المملوكة لشركات أخرى
@@ -1257,6 +1258,7 @@ STR_CONFIG_SETTING_INFRASTRUCTURE_MAINTENANCE                   :صيانة ال
 
 STR_CONFIG_SETTING_COMPANY_STARTING_COLOUR                      :لون الشركة البدائي: {STRING}
 STR_CONFIG_SETTING_COMPANY_STARTING_COLOUR_HELPTEXT             :اختر اللون البدائي للشركة
+
 
 STR_CONFIG_SETTING_NEVER_EXPIRE_AIRPORTS                        :المطارات لا تنتهي صلاحيتها {STRING}
 
@@ -1279,7 +1281,6 @@ STR_CONFIG_SETTING_AUTORENEW_VEHICLE_HELPTEXT                   :عند التم
 
 STR_CONFIG_SETTING_AUTORENEW_MONEY                              :التجديد التلقائي عند توفر السيولة الدنيا للتجديد: {STRING}
 
-STR_CONFIG_SETTING_ERRMSG_DURATION_VALUE                        :{COMMA} ثانية
 
 ###setting-zero-is-special
 
@@ -1402,9 +1403,7 @@ STR_CONFIG_SETTING_RIGHT_MOUSE_BTN_EMU_CONTROL                  :للتحكم
 STR_CONFIG_SETTING_RIGHT_MOUSE_BTN_EMU_OFF                      :عدم استخدام
 
 STR_CONFIG_SETTING_RIGHT_MOUSE_WND_CLOSE_HELPTEXT               :تغلق النافذة عن طريق الطغط على الزر الأيمن في الماوس داخل النافذة. يعطل الملحوظة عند الطغط على الزر الأيمن في الماوس!
-
-STR_CONFIG_SETTING_AUTOSAVE                                     :حفظ تلقائي : {STRING}
-STR_CONFIG_SETTING_AUTOSAVE_HELPTEXT                            :اختر الوقت بين كل عملية حفظ اتوماتيكية
+###length 3
 
 STR_CONFIG_SETTING_DATE_FORMAT_IN_SAVE_NAMES                    :استخدم {STRING} نمط التاريخ لاسم اللعبة المحفوظة
 ###length 3
@@ -1775,6 +1774,8 @@ STR_QUIT_NO                                                     :{BLACK}لا
 STR_ABANDON_GAME_CAPTION                                        :{WHITE}إغلاق اللعبه
 STR_ABANDON_GAME_QUERY                                          :{YELLOW}أمتأكد من رغبتك فى إغلاق اللعبه؟
 STR_ABANDON_SCENARIO_QUERY                                      :{YELLOW}هل تريد الخروج من انشاء الخريطة
+
+# Help window
 
 # Cheat window
 STR_CHEATS                                                      :{WHITE}اسرار
@@ -2184,7 +2185,6 @@ STR_TRANSPARENT_BUILDINGS_TOOLTIP                               :{BLACK}بدل �
 STR_TRANSPARENT_BRIDGES_TOOLTIP                                 :{BLACK} بدل الشفافية للجسور. مفتاح كنترول للاغلاق.
 STR_TRANSPARENT_STRUCTURES_TOOLTIP                              :{BLACK}بدل بين الشفافية للعلامات مثل المنارات الضوئية و هواائيات الارسال. مفتاح كنترول لالغلاق.
 STR_TRANSPARENT_CATENARY_TOOLTIP                                :{BLACK} غير شفافية سكك الحديد. مفتاح كنترول للاغلاق.
-STR_TRANSPARENT_LOADING_TOOLTIP                                 :{BLACK}غير الشفافية لنسبة التحميل. مفتاح كنترول للاغلاق.
 STR_TRANSPARENT_INVISIBLE_TOOLTIP                               :{BLACK}اخفاء الاجرام تماما بدلا من الشفافية
 
 # Linkgraph legend window
@@ -4003,7 +4003,7 @@ STR_TEXTFILE_WRAP_TEXT                                          :{WHITE}التف
 STR_TEXTFILE_VIEW_README                                        :{BLACK}اعرض ملف التعليمات ريدمي
 STR_TEXTFILE_VIEW_CHANGELOG                                     :{BLACK}اعرض سجل التغييرات
 STR_TEXTFILE_VIEW_LICENCE                                       :{BLACK}الرخصة
-###length 4
+###length 5
 STR_TEXTFILE_README_CAPTION                                     :{WHITE}{STRING}اقراني {STRING}
 STR_TEXTFILE_CHANGELOG_CAPTION                                  :{WHITE}{STRING} سجل التغيير ل{STRING}
 STR_TEXTFILE_LICENCE_CAPTION                                    :{WHITE}{STRING}رخصة {STRING}
@@ -4133,7 +4133,6 @@ STR_ERROR_TOO_CLOSE_TO_EDGE_OF_MAP_SUB                          :{WHITE}... قر
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_TOWN                             :{WHITE}... قريبة جدا من مدينة أخرى
 STR_ERROR_TOO_MANY_TOWNS                                        :{WHITE}... المدن كثيرة جدا
 STR_ERROR_NO_SPACE_FOR_TOWN                                     :{WHITE}... لا يوجد فراغ في الخريطة
-STR_ERROR_TOWN_EXPAND_WARN_NO_ROADS                             :{WHITE}لن تبني البلدية طرق جديدة. بإمكانك تمكين بناء الطرق الجديدة عن طريق الاعدادات --> البيئة--> المدن
 STR_ERROR_ROAD_WORKS_IN_PROGRESS                                :{WHITE}اعمال الطرق قيد التنفيذ
 STR_ERROR_TOWN_CAN_T_DELETE                                     :{WHITE}لا يمكن ازالة هذه المدينة{}محطة او ورشة مرتبطة بالمدينة او هناك مربع مملوك للمدينة لا يمكن لزالته
 STR_ERROR_STATUE_NO_SUITABLE_PLACE                              :{WHITE}... لا يوجد مكان مناسب للمجسم بداخل هذة المدينة/البلدة

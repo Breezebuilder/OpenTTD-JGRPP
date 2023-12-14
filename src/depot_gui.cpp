@@ -84,32 +84,32 @@ static const NWidgetPart _nested_train_depot_widgets[] = {
 	EndContainer(),
 };
 
-static WindowDesc _train_depot_desc(
+static WindowDesc _train_depot_desc(__FILE__, __LINE__,
 	WDP_AUTO, "depot_train", 362, 123,
 	WC_VEHICLE_DEPOT, WC_NONE,
 	0,
-	_nested_train_depot_widgets, lengthof(_nested_train_depot_widgets)
+	std::begin(_nested_train_depot_widgets), std::end(_nested_train_depot_widgets)
 );
 
-static WindowDesc _road_depot_desc(
+static WindowDesc _road_depot_desc(__FILE__, __LINE__,
 	WDP_AUTO, "depot_roadveh", 316, 97,
 	WC_VEHICLE_DEPOT, WC_NONE,
 	0,
-	_nested_train_depot_widgets, lengthof(_nested_train_depot_widgets)
+	std::begin(_nested_train_depot_widgets), std::end(_nested_train_depot_widgets)
 );
 
-static WindowDesc _ship_depot_desc(
+static WindowDesc _ship_depot_desc(__FILE__, __LINE__,
 	WDP_AUTO, "depot_ship", 306, 99,
 	WC_VEHICLE_DEPOT, WC_NONE,
 	0,
-	_nested_train_depot_widgets, lengthof(_nested_train_depot_widgets)
+	std::begin(_nested_train_depot_widgets), std::end(_nested_train_depot_widgets)
 );
 
-static WindowDesc _aircraft_depot_desc(
+static WindowDesc _aircraft_depot_desc(__FILE__, __LINE__,
 	WDP_AUTO, "depot_aircraft", 332, 99,
 	WC_VEHICLE_DEPOT, WC_NONE,
 	0,
-	_nested_train_depot_widgets, lengthof(_nested_train_depot_widgets)
+	std::begin(_nested_train_depot_widgets), std::end(_nested_train_depot_widgets)
 );
 
 extern void DepotSortList(VehicleList *list);
@@ -296,7 +296,7 @@ struct DepotWindow : Window {
 		OrderBackup::Reset();
 	}
 
-	void Close() override
+	void Close([[maybe_unused]] int data = 0) override
 	{
 		CloseWindowById(WC_BUILD_VEHICLE, this->window_number);
 		CloseWindowById(GetWindowClassForVehicleType(this->type), VehicleListIdentifier(VL_DEPOT_LIST, this->type, this->owner, this->GetDepotIndex()).Pack(), false);
@@ -657,7 +657,7 @@ struct DepotWindow : Window {
 		this->flag_size = maxdim(GetScaledSpriteSize(SPR_FLAG_VEH_STOPPED), GetScaledSpriteSize(SPR_FLAG_VEH_RUNNING));
 	}
 
-	void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize) override
+	void UpdateWidgetSize(int widget, Dimension *size, [[maybe_unused]] const Dimension &padding, [[maybe_unused]] Dimension *fill, [[maybe_unused]] Dimension *resize) override
 	{
 		switch (widget) {
 			case WID_D_MATRIX: {
@@ -705,7 +705,7 @@ struct DepotWindow : Window {
 	 * @param data Information about the changed data.
 	 * @param gui_scope Whether the call is done from GUI scope. You may not do everything when not in GUI scope. See #InvalidateWindowData() for details.
 	 */
-	void OnInvalidateData(int data = 0, bool gui_scope = true) override
+	void OnInvalidateData([[maybe_unused]] int data = 0, [[maybe_unused]] bool gui_scope = true) override
 	{
 		this->generate_list = true;
 	}
@@ -756,13 +756,12 @@ struct DepotWindow : Window {
 			WID_D_BUILD,
 			WID_D_CLONE,
 			WID_D_RENAME,
-			WID_D_AUTOREPLACE,
-			WIDGET_LIST_END);
+			WID_D_AUTOREPLACE);
 
 		this->DrawWidgets();
 	}
 
-	void OnClick(Point pt, int widget, int click_count) override
+	void OnClick([[maybe_unused]] Point pt, int widget, [[maybe_unused]] int click_count) override
 	{
 		switch (widget) {
 			case WID_D_MATRIX: // List
@@ -813,7 +812,7 @@ struct DepotWindow : Window {
 
 			case WID_D_SELL_ALL:
 				/* Only open the confirmation window if there are anything to sell */
-				if (this->vehicle_list.size() != 0 || this->wagon_list.size() != 0) {
+				if (!this->vehicle_list.empty() || !this->wagon_list.empty()) {
 					SetDParam(0, this->type);
 					SetDParam(1, this->GetDepotIndex());
 					ShowQuery(
@@ -844,7 +843,7 @@ struct DepotWindow : Window {
 		DoCommandP(0, this->GetDepotIndex(), 0, CMD_RENAME_DEPOT | CMD_MSG(STR_ERROR_CAN_T_RENAME_DEPOT), nullptr, str);
 	}
 
-	bool OnRightClick(Point pt, int widget) override
+	bool OnRightClick([[maybe_unused]] Point pt, int widget) override
 	{
 		if (widget != WID_D_MATRIX) return false;
 
@@ -875,26 +874,24 @@ struct DepotWindow : Window {
 			}
 		}
 
-		/* Build tooltipstring */
-		static char details[1024];
-		details[0] = '\0';
-		char *pos = details;
+		/* Build tooltip string */
+		std::string details;
 
-		for (CargoID cargo_type = 0; cargo_type < NUM_CARGO; cargo_type++) {
+		for (const CargoSpec *cs : _sorted_cargo_specs) {
+			CargoID cargo_type = cs->Index();
 			if (capacity[cargo_type] == 0) continue;
 
 			SetDParam(0, cargo_type);           // {CARGO} #1
 			SetDParam(1, loaded[cargo_type]);   // {CARGO} #2
 			SetDParam(2, cargo_type);           // {SHORTCARGO} #1
 			SetDParam(3, capacity[cargo_type]); // {SHORTCARGO} #2
-			pos = GetString(pos, STR_DEPOT_VEHICLE_TOOLTIP_CARGO, lastof(details));
+			details += GetString(STR_DEPOT_VEHICLE_TOOLTIP_CARGO);
 		}
 
 		/* Show tooltip window */
-		uint64 args[2];
-		args[0] = (whole_chain ? num : v->engine_type);
-		args[1] = (uint64)(size_t)details;
-		GuiShowTooltips(this, whole_chain ? STR_DEPOT_VEHICLE_TOOLTIP_CHAIN : STR_DEPOT_VEHICLE_TOOLTIP, 2, args, TCC_RIGHT_CLICK);
+		SetDParam(0, whole_chain ? num : v->engine_type);
+		SetDParamStr(1, std::move(details));
+		GuiShowTooltips(this, whole_chain ? STR_DEPOT_VEHICLE_TOOLTIP_CHAIN : STR_DEPOT_VEHICLE_TOOLTIP, TCC_RIGHT_CLICK, 2);
 
 		return true;
 	}
@@ -1239,7 +1236,7 @@ void ShowDepotTooltip(Window *w, const TileIndex tile)
 	if (totals.total_vehicle_count == 0) {
 		if (totals.free_wagon_count > 0) {
 			SetDParam(0, totals.free_wagon_count);
-			GuiShowTooltips(w, STR_DEPOT_VIEW_FREE_WAGONS_TOOLTIP, 0, nullptr, TCC_HOVER_VIEWPORT);
+			GuiShowTooltips(w, STR_DEPOT_VIEW_FREE_WAGONS_TOOLTIP, TCC_HOVER_VIEWPORT);
 		}
 		return;
 	}
@@ -1274,5 +1271,5 @@ void ShowDepotTooltip(Window *w, const TileIndex tile)
 		str = STR_DEPOT_VIEW_MIXED_CONTENTS_TOOLTIP;
 	}
 
-	GuiShowTooltips(w, str, 0, nullptr, TCC_HOVER_VIEWPORT);
+	GuiShowTooltips(w, str, TCC_HOVER_VIEWPORT);
 }

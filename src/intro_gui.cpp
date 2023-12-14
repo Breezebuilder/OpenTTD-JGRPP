@@ -13,6 +13,7 @@
 #include "window_gui.h"
 #include "window_func.h"
 #include "textbuf_gui.h"
+#include "help_gui.h"
 #include "network/network.h"
 #include "genworld.h"
 #include "network/network_gui.h"
@@ -189,7 +190,7 @@ struct SelectGameWindow : public Window {
 		this->mouse_idle_pos = _cursor.pos;
 	}
 
-	void OnRealtimeTick(uint delta_ms) override
+	void OnRealtimeTick([[maybe_unused]] uint delta_ms) override
 	{
 		/* Move the main game viewport according to intro viewport commands. */
 
@@ -264,7 +265,7 @@ struct SelectGameWindow : public Window {
 	 * @param data Information about the changed data.
 	 * @param gui_scope Whether the call is done from GUI scope. You may not do everything when not in GUI scope. See #InvalidateWindowData() for details.
 	 */
-	void OnInvalidateData(int data = 0, bool gui_scope = true) override
+	void OnInvalidateData([[maybe_unused]] int data = 0, [[maybe_unused]] bool gui_scope = true) override
 	{
 		if (!gui_scope) return;
 		this->SetWidgetLoweredState(WID_SGI_TEMPERATE_LANDSCAPE, _settings_newgame.game_creation.landscape == LT_TEMPERATE);
@@ -297,7 +298,7 @@ struct SelectGameWindow : public Window {
 		}
 	}
 
-	void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize) override
+	void UpdateWidgetSize(int widget, Dimension *size, [[maybe_unused]] const Dimension &padding, [[maybe_unused]] Dimension *fill, [[maybe_unused]] Dimension *resize) override
 	{
 		StringID str = 0;
 		switch (widget) {
@@ -326,7 +327,7 @@ struct SelectGameWindow : public Window {
 		}
 	}
 
-	void OnClick(Point pt, int widget, int click_count) override
+	void OnClick([[maybe_unused]] Point pt, int widget, [[maybe_unused]] int click_count) override
 	{
 		/* Do not create a network server when you (just) have closed one of the game
 		 * creation/load windows for the network server. */
@@ -361,6 +362,7 @@ struct SelectGameWindow : public Window {
 
 			case WID_SGI_OPTIONS:         ShowGameOptions(); break;
 			case WID_SGI_HIGHSCORE:       ShowHighscoreTable(); break;
+			case WID_SGI_HELP:            ShowHelpWindow(); break;
 			case WID_SGI_SETTINGS_OPTIONS:ShowGameSettings(); break;
 			case WID_SGI_GRF_SETTINGS:    ShowNewGRFSettings(true, true, false, &_grfconfig_newgame); break;
 			case WID_SGI_CONTENT_DOWNLOAD:
@@ -471,10 +473,12 @@ static const NWidgetPart _nested_select_game_widgets[] = {
 
 	NWidget(NWID_SPACER), SetMinimalSize(0, 6),
 
-	/* 'Highscore Table' button */
-	NWidget(NWID_HORIZONTAL),
-		NWidget(WWT_PUSHTXTBTN, COLOUR_ORANGE, WID_SGI_HIGHSCORE), SetMinimalSize(316, 12),
-							SetDataTip(STR_INTRO_HIGHSCORE, STR_INTRO_TOOLTIP_HIGHSCORE), SetPadding(0, 10, 0, 10), SetFill(1, 0),
+	/* 'Help and Manuals' and 'Highscore Table' buttons */
+	NWidget(NWID_HORIZONTAL, NC_EQUALSIZE),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_ORANGE, WID_SGI_HELP), SetMinimalSize(158, 12),
+							SetDataTip(STR_INTRO_HELP, STR_INTRO_TOOLTIP_HELP), SetPadding(0, 0, 0, 10), SetFill(1, 0),
+		NWidget(WWT_PUSHTXTBTN, COLOUR_ORANGE, WID_SGI_HIGHSCORE), SetMinimalSize(158, 12),
+							SetDataTip(STR_INTRO_HIGHSCORE, STR_INTRO_TOOLTIP_HIGHSCORE), SetPadding(0, 10, 0, 0), SetFill(1, 0),
 	EndContainer(),
 
 	NWidget(NWID_SPACER), SetMinimalSize(0, 6),
@@ -492,11 +496,11 @@ static const NWidgetPart _nested_select_game_widgets[] = {
 	EndContainer(),
 };
 
-static WindowDesc _select_game_desc(
+static WindowDesc _select_game_desc(__FILE__, __LINE__,
 	WDP_CENTER, nullptr, 0, 0,
 	WC_SELECT_GAME, WC_NONE,
 	WDF_NO_CLOSE,
-	_nested_select_game_widgets, lengthof(_nested_select_game_widgets)
+	std::begin(_nested_select_game_widgets), std::end(_nested_select_game_widgets)
 );
 
 void ShowSelectGameWindow()
@@ -504,7 +508,7 @@ void ShowSelectGameWindow()
 	new SelectGameWindow(&_select_game_desc);
 }
 
-static void AskExitGameCallback(Window *w, bool confirmed)
+static void AskExitGameCallback(Window *, bool confirmed)
 {
 	if (confirmed) {
 		_survey.Transmit(NetworkSurveyHandler::Reason::EXIT, true);
@@ -518,12 +522,13 @@ void AskExitGame()
 		STR_QUIT_CAPTION,
 		STR_QUIT_ARE_YOU_SURE_YOU_WANT_TO_EXIT_OPENTTD,
 		nullptr,
-		AskExitGameCallback
+		AskExitGameCallback,
+		true
 	);
 }
 
 
-static void AskExitToGameMenuCallback(Window *w, bool confirmed)
+static void AskExitToGameMenuCallback(Window *, bool confirmed)
 {
 	if (confirmed) {
 		_switch_mode = SM_MENU;
@@ -537,6 +542,7 @@ void AskExitToGameMenu()
 		STR_ABANDON_GAME_CAPTION,
 		(_game_mode != GM_EDITOR) ? STR_ABANDON_GAME_QUERY : STR_ABANDON_SCENARIO_QUERY,
 		nullptr,
-		AskExitToGameMenuCallback
+		AskExitToGameMenuCallback,
+		true
 	);
 }

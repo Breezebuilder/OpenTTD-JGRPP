@@ -2,6 +2,37 @@
 
 * * *
 
+### v0.56.1 (2023-12-08)
+* Fix crash which could occur when using some languages (which use grammatical gender).
+* Fix crash which could occur when the config file is an older version or has missing sections.
+* Fix PBS reservation overlays of the wrong track type on dual rail-type tiles.
+* Fix profit/usage totals not being initially populated when opening the group/vehicle list window.
+* Fix depot ctrl-right-click tooltip with multiple cargoes.
+* Fix incorrect search path ordering in some cases when using the -c switch.
+* Fix false positive desync warning messages after custom signal styles are removed.
+* Fix incorrect title text in some query windows.
+* Fix ctrl-click signal cycling not checking custom signal style restrictions.
+* Routing restrictions: Slots are no longer considered "advanced".
+* Change the settings for using default signal graphics and restricted signal post recolouring.
+* Add unset hotkey to close order window.
+* Link graph: Take vehicle timetables into account when estimating the travel time for order-based link refreshing.
+* Scenario editor: Fix being able to remove towns referenced by waypoints.
+* Bump trunk base from commit 2d3fef31131c2d9981265664c1581ca11dc2c2d3 to commit ab535c0a8665e6380c5037d7b6f0a507fc91d36a.
+
+### v0.56.0 (2023-11-26)
+* Fix crash which could occur in the sprite aligner window.
+* Fix crash which could occur when laying out text in some cases.
+* Fix crash which could occur when loading some very old save games.
+* Fix vehicle lateness updates when using timetabled 0 wait times.
+* Fix temporary link graph issues after loading vanilla or old patch pack save games.
+* Improve train speed adaptation when used with realistic braking enabled.
+* Add long reserve (unless stopping) routing restriction action.
+* Add settings filter to only show non-vanilla settings.
+* Add setting for whether water floods from map edges.
+* Add setting for whether to hide default stop location.
+* Remove "show order management button" setting.
+* Bump trunk base from commit 3effb8931c36b8bbacae8fe77ad5b85406767d9f to commit 2d3fef31131c2d9981265664c1581ca11dc2c2d3.
+
 ### v0.55.3 (2023-09-24)
 * Fix crash which could occur when using the autoreplace button in depot windows to do template replacements.
 * Fix crash which could occur in the autoreplace window when clicking the right panel when no item is selected in the left panel.

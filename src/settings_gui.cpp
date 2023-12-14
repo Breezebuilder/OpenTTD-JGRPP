@@ -41,6 +41,7 @@
 #include "music/music_driver.hpp"
 #include "gui.h"
 #include "mixer.h"
+#include "newgrf_config.h"
 #include "scope.h"
 #include "network/core/config.h"
 #include "network/network_gui.h"
@@ -55,20 +56,25 @@
 
 #include "safeguards.h"
 
-uint GetSettingIndexByFullName(const char *name);
-const SettingDesc *GetSettingDescription(uint index);
-
 extern void FlushDeparturesWindowTextCaches();
 
 static const StringID _autosave_dropdown[] = {
 	STR_GAME_OPTIONS_AUTOSAVE_DROPDOWN_OFF,
-	STR_GAME_OPTIONS_AUTOSAVE_DROPDOWN_EVERY_1_MONTH,
-	STR_GAME_OPTIONS_AUTOSAVE_DROPDOWN_EVERY_3_MONTHS,
-	STR_GAME_OPTIONS_AUTOSAVE_DROPDOWN_EVERY_6_MONTHS,
-	STR_GAME_OPTIONS_AUTOSAVE_DROPDOWN_EVERY_12_MONTHS,
-	STR_GAME_OPTIONS_AUTOSAVE_DROPDOWN_EVERY_DAYS_CUSTOM_LABEL,
+	STR_GAME_OPTIONS_AUTOSAVE_DROPDOWN_EVERY_10_MINUTES,
+	STR_GAME_OPTIONS_AUTOSAVE_DROPDOWN_EVERY_30_MINUTES,
+	STR_GAME_OPTIONS_AUTOSAVE_DROPDOWN_EVERY_60_MINUTES,
+	STR_GAME_OPTIONS_AUTOSAVE_DROPDOWN_EVERY_120_MINUTES,
 	STR_GAME_OPTIONS_AUTOSAVE_DROPDOWN_EVERY_MINUTES_CUSTOM_LABEL,
 	INVALID_STRING_ID,
+};
+
+/** Available settings for autosave intervals. */
+static const uint32 _autosave_dropdown_to_minutes[] = {
+	0, ///< never
+	10,
+	30,
+	60,
+	120,
 };
 
 static Dimension _circle_size; ///< Dimension of the circle +/- icon. This is here as not all users are within the class of the settings window.
@@ -176,7 +182,6 @@ struct GameOptionsWindow : Window {
 
 	enum class QueryTextItem {
 		None,
-		AutosaveCustomDays,
 		AutosaveCustomRealTimeMinutes,
 	};
 	QueryTextItem current_query_text_item = QueryTextItem::None;
@@ -197,7 +202,7 @@ struct GameOptionsWindow : Window {
 		if constexpr (!NetworkSurveyHandler::IsSurveyPossible()) this->GetWidget<NWidgetStacked>(WID_GO_SURVEY_SEL)->SetDisplayedPlane(SZSP_NONE);
 	}
 
-	void Close() override
+	void Close([[maybe_unused]] int data = 0) override
 	{
 		CloseWindowById(WC_CUSTOM_CURRENCY, 0);
 		CloseWindowByClass(WC_TEXTFILE);
@@ -224,26 +229,35 @@ struct GameOptionsWindow : Window {
 					int i = &currency - _currency_specs;
 					if (i == CURRENCY_CUSTOM) continue;
 					if (currency.code.empty()) {
-						list.emplace_back(new DropDownListStringItem(currency.name, i, HasBit(disabled, i)));
+						list.push_back(std::make_unique<DropDownListStringItem>(currency.name, i, HasBit(disabled, i)));
 					} else {
 						SetDParam(0, currency.name);
 						SetDParamStr(1, currency.code);
-						list.emplace_back(new DropDownListStringItem(STR_GAME_OPTIONS_CURRENCY_CODE, i, HasBit(disabled, i)));
+						list.push_back(std::make_unique<DropDownListStringItem>(STR_GAME_OPTIONS_CURRENCY_CODE, i, HasBit(disabled, i)));
 					}
 				}
 				std::sort(list.begin(), list.end(), DropDownListStringItem::NatSortFunc);
 
 				/* Append custom currency at the end */
-				list.emplace_back(new DropDownListItem(-1, false)); // separator line
-				list.emplace_back(new DropDownListStringItem(STR_GAME_OPTIONS_CURRENCY_CUSTOM, CURRENCY_CUSTOM, HasBit(disabled, CURRENCY_CUSTOM)));
+				list.push_back(std::make_unique<DropDownListItem>(-1, false)); // separator line
+				list.push_back(std::make_unique<DropDownListStringItem>(STR_GAME_OPTIONS_CURRENCY_CUSTOM, CURRENCY_CUSTOM, HasBit(disabled, CURRENCY_CUSTOM)));
 				break;
 			}
 
 			case WID_GO_AUTOSAVE_DROPDOWN: { // Setup autosave dropdown
-				*selected_index = _settings_client.gui.autosave;
+				*selected_index = 5;
+				int index = 0;
+				for (auto &minutes : _autosave_dropdown_to_minutes) {
+					if (_settings_client.gui.autosave_interval == minutes) {
+						*selected_index = index;
+						break;
+					}
+					index++;
+				}
+
 				const StringID *items = _autosave_dropdown;
 				for (uint i = 0; *items != INVALID_STRING_ID; items++, i++) {
-					list.emplace_back(new DropDownListStringItem(*items, i, false));
+					list.push_back(std::make_unique<DropDownListStringItem>(*items, i, false));
 				}
 				break;
 			}
@@ -265,7 +279,7 @@ struct GameOptionsWindow : Window {
 						SetDParamStr(0, _languages[i].name);
 					}
 					SetDParam(1, (LANGUAGE_TOTAL_STRINGS - _languages[i].missing) * 100 / LANGUAGE_TOTAL_STRINGS);
-					list.emplace_back(new DropDownListStringItem(hide_percentage ? STR_JUST_RAW_STRING : STR_GAME_OPTIONS_LANGUAGE_PERCENTAGE, i, false));
+					list.push_back(std::make_unique<DropDownListStringItem>(hide_percentage ? STR_JUST_RAW_STRING : STR_GAME_OPTIONS_LANGUAGE_PERCENTAGE, i, false));
 				}
 				std::sort(list.begin(), list.end(), DropDownListStringItem::NatSortFunc);
 				break;
@@ -278,7 +292,7 @@ struct GameOptionsWindow : Window {
 				for (uint i = 0; i < _resolutions.size(); i++) {
 					SetDParam(0, _resolutions[i].width);
 					SetDParam(1, _resolutions[i].height);
-					list.emplace_back(new DropDownListStringItem(STR_GAME_OPTIONS_RESOLUTION_ITEM, i, false));
+					list.push_back(std::make_unique<DropDownListStringItem>(STR_GAME_OPTIONS_RESOLUTION_ITEM, i, false));
 				}
 				break;
 
@@ -287,7 +301,7 @@ struct GameOptionsWindow : Window {
 					auto i = std::distance(_refresh_rates.begin(), it);
 					if (*it == _settings_client.gui.refresh_rate) *selected_index = i;
 					SetDParam(0, *it);
-					list.emplace_back(new DropDownListStringItem(STR_GAME_OPTIONS_REFRESH_RATE_ITEM, i, false));
+					list.push_back(std::make_unique<DropDownListStringItem>(STR_GAME_OPTIONS_REFRESH_RATE_ITEM, i, false));
 				}
 				break;
 
@@ -322,14 +336,15 @@ struct GameOptionsWindow : Window {
 				break;
 			}
 			case WID_GO_AUTOSAVE_DROPDOWN: {
-				if (_settings_client.gui.autosave == 5) {
-					SetDParam(0, _settings_client.gui.autosave_custom_days == 1 ? STR_GAME_OPTIONS_AUTOSAVE_DROPDOWN_EVERY_DAYS_CUSTOM_SINGULAR : STR_GAME_OPTIONS_AUTOSAVE_DROPDOWN_EVERY_DAYS_CUSTOM);
-					SetDParam(1, _settings_client.gui.autosave_custom_days);
-				} else if (_settings_client.gui.autosave == 6) {
-					SetDParam(0, STR_GAME_OPTIONS_AUTOSAVE_DROPDOWN_EVERY_MINUTES_CUSTOM);
-					SetDParam(1, _settings_client.gui.autosave_custom_minutes);
-				} else {
-					SetDParam(0, _autosave_dropdown[_settings_client.gui.autosave]);
+				SetDParam(0, STR_GAME_OPTIONS_AUTOSAVE_DROPDOWN_EVERY_MINUTES_CUSTOM);
+				SetDParam(1, _settings_client.gui.autosave_interval);
+				int index = 0;
+				for (auto &minutes : _autosave_dropdown_to_minutes) {
+					if (_settings_client.gui.autosave_interval == minutes) {
+						SetDParam(0, _autosave_dropdown[index]);
+						break;
+					}
+					index++;
 				}
 				break;
 			}
@@ -394,7 +409,7 @@ struct GameOptionsWindow : Window {
 
 	void SetTab(int widget)
 	{
-		this->SetWidgetsLoweredState(false, WID_GO_TAB_GENERAL, WID_GO_TAB_GRAPHICS, WID_GO_TAB_SOUND, WIDGET_LIST_END);
+		this->SetWidgetsLoweredState(false, WID_GO_TAB_GENERAL, WID_GO_TAB_GRAPHICS, WID_GO_TAB_SOUND);
 		this->LowerWidget(widget);
 
 		int pane = 0;
@@ -440,7 +455,7 @@ struct GameOptionsWindow : Window {
 		if (changed) this->ReInit(0, 0, this->flags & WF_CENTERED);
 	}
 
-	void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize) override
+	void UpdateWidgetSize(int widget, Dimension *size, [[maybe_unused]] const Dimension &padding, [[maybe_unused]] Dimension *fill, [[maybe_unused]] Dimension *resize) override
 	{
 		switch (widget) {
 			case WID_GO_BASE_GRF_STATUS:
@@ -483,7 +498,7 @@ struct GameOptionsWindow : Window {
 						Dimension string_dim;
 						int width = ddli->Width();
 						string_dim.width = width + padding.width;
-						string_dim.height = ddli->Height(width) + padding.height;
+						string_dim.height = ddli->Height() + padding.height;
 						*size = maxdim(*size, string_dim);
 					}
 				}
@@ -491,7 +506,7 @@ struct GameOptionsWindow : Window {
 		}
 	}
 
-	void OnClick(Point pt, int widget, int click_count) override
+	void OnClick([[maybe_unused]] Point pt, int widget, [[maybe_unused]] int click_count) override
 	{
 		if (widget >= WID_GO_BASE_GRF_TEXTFILE && widget < WID_GO_BASE_GRF_TEXTFILE + TFT_CONTENT_END) {
 			if (BaseGraphics::GetUsedSet() == nullptr) return;
@@ -619,6 +634,16 @@ struct GameOptionsWindow : Window {
 				break;
 			}
 
+			case WID_GO_BASE_GRF_PARAMETERS: {
+				auto *used_set = BaseGraphics::GetUsedSet();
+				if (used_set == nullptr || !used_set->IsConfigurable()) break;
+				GRFConfig &extra_cfg = used_set->GetOrCreateExtraConfig();
+				if (extra_cfg.num_params == 0) extra_cfg.SetParameterDefaults();
+				OpenGRFParameterWindow(true, &extra_cfg, _game_mode == GM_MENU);
+				if (_game_mode == GM_MENU) this->reload = true;
+				break;
+			}
+
 			case WID_GO_BASE_SFX_VOLUME:
 			case WID_GO_BASE_MUSIC_VOLUME: {
 				byte &vol = (widget == WID_GO_BASE_MUSIC_VOLUME) ? _settings_client.music.music_vol : _settings_client.music.effect_vol;
@@ -667,25 +692,6 @@ struct GameOptionsWindow : Window {
 		}
 	}
 
-	/**
-	 * Set the base media set.
-	 * @param index the index of the media set
-	 * @tparam T class of media set
-	 */
-	template <class T>
-	void SetMediaSet(int index)
-	{
-		if (_game_mode == GM_MENU) {
-			auto name = T::GetSet(index)->name;
-
-			T::ini_set = name;
-
-			T::SetSet(name);
-			this->reload = true;
-			this->InvalidateData();
-		}
-	}
-
 	void OnDropdownSelect(int widget, int index) override
 	{
 		switch (widget) {
@@ -697,15 +703,12 @@ struct GameOptionsWindow : Window {
 
 			case WID_GO_AUTOSAVE_DROPDOWN: // Autosave options
 				if (index == 5) {
-					this->current_query_text_item = QueryTextItem::AutosaveCustomDays;
-					SetDParam(0, _settings_client.gui.autosave_custom_days);
-					ShowQueryString(STR_JUST_INT, STR_GAME_OPTIONS_AUTOSAVE_DAYS_QUERY_CAPT, 4, this, CS_NUMERAL, QSF_ACCEPT_UNCHANGED);
-				} else if (index == 6) {
 					this->current_query_text_item = QueryTextItem::AutosaveCustomRealTimeMinutes;
-					SetDParam(0, _settings_client.gui.autosave_custom_minutes);
+					SetDParam(0, _settings_client.gui.autosave_interval);
 					ShowQueryString(STR_JUST_INT, STR_GAME_OPTIONS_AUTOSAVE_MINUTES_QUERY_CAPT, 4, this, CS_NUMERAL, QSF_ACCEPT_UNCHANGED);
 				} else {
-					_settings_client.gui.autosave = index;
+					_settings_client.gui.autosave_interval = _autosave_dropdown_to_minutes[index];
+					ChangeAutosaveFrequency(false);
 					this->SetDirty();
 				}
 				break;
@@ -738,11 +741,23 @@ struct GameOptionsWindow : Window {
 			}
 
 			case WID_GO_BASE_GRF_DROPDOWN:
-				this->SetMediaSet<BaseGraphics>(index);
+				if (_game_mode == GM_MENU) {
+					CloseWindowByClass(WC_GRF_PARAMETERS);
+					auto* set = BaseGraphics::GetSet(index);
+					BaseGraphics::SetSet(set);
+					this->reload = true;
+					this->InvalidateData();
+				}
 				break;
 
 			case WID_GO_BASE_SFX_DROPDOWN:
-				this->SetMediaSet<BaseSounds>(index);
+				if (_game_mode == GM_MENU) {
+					auto* set = BaseSounds::GetSet(index);
+					BaseSounds::ini_set = set->name;
+					BaseSounds::SetSet(set);
+					this->reload = true;
+					this->InvalidateData();
+				}
 				break;
 
 			case WID_GO_BASE_MUSIC_DROPDOWN:
@@ -766,15 +781,9 @@ struct GameOptionsWindow : Window {
 				case QueryTextItem::None:
 					break;
 
-				case QueryTextItem::AutosaveCustomDays:
-					_settings_client.gui.autosave = 5;
-					_settings_client.gui.autosave_custom_days = Clamp(value, 1, 4000);
-					this->SetDirty();
-					break;
-
 				case QueryTextItem::AutosaveCustomRealTimeMinutes:
-					_settings_client.gui.autosave = 6;
-					_settings_client.gui.autosave_custom_minutes = Clamp(value, 1, 8000);
+					_settings_client.gui.autosave_interval = Clamp(value, 1, 8000);
+					ChangeAutosaveFrequency(false);
 					this->SetDirty();
 					break;
 			}
@@ -786,7 +795,7 @@ struct GameOptionsWindow : Window {
 	 * @param data Information about the changed data. @see GameOptionsInvalidationData
 	 * @param gui_scope Whether the call is done from GUI scope. You may not do everything when not in GUI scope. See #InvalidateWindowData() for details.
 	 */
-	void OnInvalidateData(int data = 0, bool gui_scope = true) override
+	void OnInvalidateData([[maybe_unused]] int data = 0, [[maybe_unused]] bool gui_scope = true) override
 	{
 		if (!gui_scope) return;
 		this->SetWidgetLoweredState(WID_GO_SURVEY_PARTICIPATE_BUTTON, _settings_client.network.participate_survey == PS_YES);
@@ -808,6 +817,8 @@ struct GameOptionsWindow : Window {
 
 		bool missing_files = BaseGraphics::GetUsedSet()->GetNumMissing() == 0;
 		this->GetWidget<NWidgetCore>(WID_GO_BASE_GRF_STATUS)->SetDataTip(missing_files ? STR_EMPTY : STR_GAME_OPTIONS_BASE_GRF_STATUS, STR_NULL);
+
+		this->SetWidgetDisabledState(WID_GO_BASE_GRF_PARAMETERS, BaseGraphics::GetUsedSet() == nullptr || !BaseGraphics::GetUsedSet()->IsConfigurable());
 
 		for (TextfileType tft = TFT_CONTENT_BEGIN; tft < TFT_CONTENT_END; tft++) {
 			this->SetWidgetDisabledState(WID_GO_BASE_GRF_TEXTFILE + tft, BaseGraphics::GetUsedSet() == nullptr || BaseGraphics::GetUsedSet()->GetTextfile(tft) == nullptr);
@@ -841,7 +852,7 @@ static const NWidgetPart _nested_game_options_widgets[] = {
 				EndContainer(),
 
 				NWidget(WWT_FRAME, COLOUR_GREY), SetDataTip(STR_GAME_OPTIONS_AUTOSAVE_FRAME, STR_NULL),
-					NWidget(WWT_DROPDOWN, COLOUR_GREY, WID_GO_AUTOSAVE_DROPDOWN), SetMinimalSize(100, 12), SetDataTip(STR_JUST_STRING, STR_GAME_OPTIONS_AUTOSAVE_DROPDOWN_TOOLTIP), SetFill(1, 0),
+					NWidget(WWT_DROPDOWN, COLOUR_GREY, WID_GO_AUTOSAVE_DROPDOWN), SetMinimalSize(100, 12), SetDataTip(STR_JUST_STRING2, STR_GAME_OPTIONS_AUTOSAVE_DROPDOWN_TOOLTIP), SetFill(1, 0),
 				EndContainer(),
 
 				NWidget(WWT_FRAME, COLOUR_GREY), SetDataTip(STR_GAME_OPTIONS_CURRENCY_UNITS_FRAME, STR_NULL),
@@ -925,6 +936,7 @@ static const NWidgetPart _nested_game_options_widgets[] = {
 					NWidget(NWID_HORIZONTAL), SetPIP(0, 30, 0),
 						NWidget(WWT_DROPDOWN, COLOUR_GREY, WID_GO_BASE_GRF_DROPDOWN), SetMinimalSize(100, 12), SetDataTip(STR_JUST_RAW_STRING, STR_GAME_OPTIONS_BASE_GRF_TOOLTIP),
 						NWidget(WWT_TEXT, COLOUR_GREY, WID_GO_BASE_GRF_STATUS), SetMinimalSize(100, 12), SetDataTip(STR_EMPTY, STR_NULL), SetFill(1, 0),
+						NWidget(WWT_PUSHTXTBTN, COLOUR_GREY, WID_GO_BASE_GRF_PARAMETERS), SetDataTip(STR_NEWGRF_SETTINGS_SET_PARAMETERS, STR_NULL),
 					EndContainer(),
 					NWidget(WWT_TEXT, COLOUR_GREY, WID_GO_BASE_GRF_DESCRIPTION), SetMinimalSize(200, 0), SetDataTip(STR_EMPTY, STR_GAME_OPTIONS_BASE_GRF_DESCRIPTION_TOOLTIP), SetFill(1, 0), SetPadding(6, 0, 6, 0),
 					NWidget(NWID_HORIZONTAL, NC_EQUALSIZE), SetPIP(7, 0, 7),
@@ -985,11 +997,11 @@ static const NWidgetPart _nested_game_options_widgets[] = {
 	EndContainer(),
 };
 
-static WindowDesc _game_options_desc(
-	WDP_CENTER, "settings_game", 0, 0,
+static WindowDesc _game_options_desc(__FILE__, __LINE__,
+	WDP_CENTER, nullptr, 0, 0,
 	WC_GAME_OPTIONS, WC_NONE,
 	0,
-	_nested_game_options_widgets, lengthof(_nested_game_options_widgets)
+	std::begin(_nested_game_options_widgets), std::end(_nested_game_options_widgets)
 );
 
 /** Open the game options window. */
@@ -1055,10 +1067,10 @@ struct BaseSettingEntry {
 	void SetLastField(bool last_field) { if (last_field) SETBITS(this->flags, SEF_LAST_FIELD); else CLRBITS(this->flags, SEF_LAST_FIELD); }
 
 	virtual uint Length() const = 0;
-	virtual void GetFoldingState(bool &all_folded, bool &all_unfolded) const {}
+	virtual void GetFoldingState([[maybe_unused]] bool &all_folded, [[maybe_unused]] bool &all_unfolded) const {}
 	virtual bool IsVisible(const BaseSettingEntry *item) const;
 	virtual BaseSettingEntry *FindEntry(uint row, uint *cur_row);
-	virtual uint GetMaxHelpHeight(int maxw) { return 0; }
+	virtual uint GetMaxHelpHeight([[maybe_unused]] int maxw) { return 0; }
 
 	/**
 	 * Check whether an entry is hidden due to filters
@@ -1081,11 +1093,11 @@ struct SettingEntry : BaseSettingEntry {
 
 	SettingEntry(const char *name);
 
-	virtual void Init(byte level = 0);
-	virtual void ResetAll();
-	virtual uint Length() const;
-	virtual uint GetMaxHelpHeight(int maxw);
-	virtual bool UpdateFilterState(SettingFilter &filter, bool force_visible);
+	void Init(byte level = 0) override;
+	void ResetAll() override;
+	uint Length() const override;
+	uint GetMaxHelpHeight(int maxw) override;
+	bool UpdateFilterState(SettingFilter &filter, bool force_visible) override;
 
 	void SetButtons(byte new_val);
 	StringID GetHelpText() const;
@@ -1098,7 +1110,7 @@ struct SettingEntry : BaseSettingEntry {
 
 protected:
 	SettingEntry(const IntSettingDesc *setting);
-	virtual void DrawSetting(GameSettings *settings_ptr, int left, int right, int y, bool highlight) const;
+	virtual void DrawSetting(GameSettings *settings_ptr, int left, int right, int y, bool highlight) const override;
 	virtual void DrawSettingString(uint left, uint right, int y, bool highlight, int32 value) const;
 
 private:
@@ -1128,11 +1140,11 @@ struct CargoDestPerCargoSettingEntry : SettingEntry {
 	CargoID cargo;
 
 	CargoDestPerCargoSettingEntry(CargoID cargo, const IntSettingDesc *setting);
-	virtual void Init(byte level = 0);
-	virtual bool UpdateFilterState(SettingFilter &filter, bool force_visible);
+	void Init(byte level = 0) override;
+	bool UpdateFilterState(SettingFilter &filter, bool force_visible) override;
 
 protected:
-	virtual void DrawSettingString(uint left, uint right, int y, bool highlight, int32 value) const;
+	void DrawSettingString(uint left, uint right, int y, bool highlight, int32 value) const override;
 };
 
 /** Conditionally hidden standard setting */
@@ -1142,7 +1154,7 @@ struct ConditionallyHiddenSettingEntry : SettingEntry {
 	ConditionallyHiddenSettingEntry(const char *name, std::function<bool()> hide_callback)
 		: SettingEntry(name), hide_callback(hide_callback) {}
 
-	virtual bool UpdateFilterState(SettingFilter &filter, bool force_visible);
+	bool UpdateFilterState(SettingFilter &filter, bool force_visible) override;
 };
 
 /** Containers for BaseSettingEntry */
@@ -1181,23 +1193,23 @@ struct SettingsPage : BaseSettingEntry, SettingsContainer {
 
 	SettingsPage(StringID title);
 
-	virtual void Init(byte level = 0);
-	virtual void ResetAll();
-	virtual void FoldAll();
-	virtual void UnFoldAll();
+	void Init(byte level = 0) override;
+	void ResetAll() override;
+	void FoldAll() override;
+	void UnFoldAll() override;
 
-	virtual uint Length() const;
-	virtual void GetFoldingState(bool &all_folded, bool &all_unfolded) const;
-	virtual bool IsVisible(const BaseSettingEntry *item) const;
-	virtual BaseSettingEntry *FindEntry(uint row, uint *cur_row);
-	virtual uint GetMaxHelpHeight(int maxw) { return SettingsContainer::GetMaxHelpHeight(maxw); }
+	uint Length() const override;
+	void GetFoldingState(bool &all_folded, bool &all_unfolded) const override;
+	bool IsVisible(const BaseSettingEntry *item) const override;
+	BaseSettingEntry *FindEntry(uint row, uint *cur_row) override;
+	uint GetMaxHelpHeight(int maxw) override { return SettingsContainer::GetMaxHelpHeight(maxw); }
 
-	virtual bool UpdateFilterState(SettingFilter &filter, bool force_visible);
+	bool UpdateFilterState(SettingFilter &filter, bool force_visible) override;
 
-	virtual uint Draw(GameSettings *settings_ptr, int left, int right, int y, uint first_row, uint max_row, BaseSettingEntry *selected, uint cur_row = 0, uint parent_last = 0) const;
+	uint Draw(GameSettings *settings_ptr, int left, int right, int y, uint first_row, uint max_row, BaseSettingEntry *selected, uint cur_row = 0, uint parent_last = 0) const override;
 
 protected:
-	virtual void DrawSetting(GameSettings *settings_ptr, int left, int right, int y, bool highlight) const;
+	void DrawSetting(GameSettings *settings_ptr, int left, int right, int y, bool highlight) const override;
 };
 
 /* == BaseSettingEntry methods == */
@@ -1377,7 +1389,7 @@ bool SettingEntry::IsVisibleByRestrictionMode(RestrictionMode mode) const
 
 	if (mode == RM_BASIC) return (this->setting->cat & SC_BASIC_LIST) != 0;
 	if (mode == RM_ADVANCED) return (this->setting->cat & SC_ADVANCED_LIST) != 0;
-	if (mode == RM_PATCH) return (this->setting->cat & SC_PATCH_LIST) != 0;
+	if (mode == RM_PATCH) return (this->setting->flags & SF_PATCH) != 0;
 
 	/* Read the current value. */
 	const void *object = ResolveObject(&GetGameSettings(), sd);
@@ -1473,9 +1485,8 @@ void SettingEntry::SetValueDParams(uint first_param, int32 value, std::unique_pt
 		double scale = std::exp2(((double)value) / 10);
 		int log = -std::min(0, (int)std::floor(std::log10(scale)) - 2);
 
-		int64 args_array[] = { value, (int64)(scale * std::pow(10.f, (float)log)), log };
-		StringParameters tmp_params(args_array);
-		GetStringWithArgs(tempdata->buffer, this->setting->str_val, &tmp_params, lastof(tempdata->buffer));
+		auto tmp_params = MakeParameters(value, (int64)(scale * std::pow(10.f, (float)log)), log);
+		GetStringWithArgs(tempdata->buffer, this->setting->str_val, tmp_params, lastof(tempdata->buffer));
 		SetDParam(first_param++, STR_JUST_RAW_STRING);
 		SetDParamStr(first_param++, tempdata->buffer);
 	} else {
@@ -1904,13 +1915,11 @@ uint SettingsPage::Draw(GameSettings *settings_ptr, int left, int right, int y, 
 
 /**
  * Function to draw setting value (button + text + current value)
- * @param settings_ptr Pointer to current values of all settings
  * @param left         Left-most position in window/panel to start drawing
  * @param right        Right-most position in window/panel to draw
  * @param y            Upper-most position in window/panel to start drawing
- * @param highlight    Highlight entry.
  */
-void SettingsPage::DrawSetting(GameSettings *settings_ptr, int left, int right, int y, bool highlight) const
+void SettingsPage::DrawSetting(GameSettings *, int left, int right, int y, bool) const
 {
 	bool rtl = _current_text_dir == TD_RTL;
 	DrawSprite((this->folded ? SPR_CIRCLE_FOLDED : SPR_CIRCLE_UNFOLDED), PAL_NONE, rtl ? right - _circle_size.width : left, y + (SETTING_HEIGHT - _circle_size.height) / 2);
@@ -1971,7 +1980,7 @@ static SettingsContainer &GetSettingsTree()
 				general->Add(new SettingEntry("gui.errmsg_duration"));
 				general->Add(new SettingEntry("gui.window_snap_radius"));
 				general->Add(new SettingEntry("gui.window_soft_limit"));
-				general->Add(new SettingEntry("gui.right_mouse_wnd_close"));
+				general->Add(new SettingEntry("gui.right_click_wnd_close"));
 			}
 
 			SettingsPage *tooltips = interface->Add(new SettingsPage(STR_CONFIG_SETTING_INTERFACE_TOOLTIPS));
@@ -1993,9 +2002,8 @@ static SettingsContainer &GetSettingsTree()
 
 			SettingsPage *save = interface->Add(new SettingsPage(STR_CONFIG_SETTING_INTERFACE_SAVE));
 			{
-				save->Add(new SettingEntry("gui.autosave"));
-				save->Add(new ConditionallyHiddenSettingEntry("gui.autosave_custom_days", []() -> bool { return _settings_client.gui.autosave != 5; }));
-				save->Add(new ConditionallyHiddenSettingEntry("gui.autosave_custom_minutes", []() -> bool { return _settings_client.gui.autosave != 6; }));
+				save->Add(new SettingEntry("gui.autosave_interval"));
+				save->Add(new SettingEntry("gui.autosave_realtime"));
 				save->Add(new SettingEntry("gui.autosave_on_network_disconnect"));
 				save->Add(new SettingEntry("gui.savegame_overwrite_confirm"));
 			}
@@ -2016,7 +2024,7 @@ static SettingsContainer &GetSettingsTree()
 				SettingsPage *viewport_signals = viewports->Add(new SettingsPage(STR_CONFIG_SETTING_VIEWPORT_SIGNALS));
 				{
 					viewport_signals->Add(new SettingEntry("construction.train_signal_side"));
-					viewport_signals->Add(new SettingEntry("gui.show_restricted_signal_default"));
+					viewport_signals->Add(new SettingEntry("gui.show_restricted_signal_recolour"));
 					viewport_signals->Add(new SettingEntry("gui.show_all_signal_default"));
 				}
 				SettingsPage *viewport_route_overlay = viewports->Add(new SettingsPage(STR_CONFIG_SETTING_VEHICLE_ROUTE_OVERLAY));
@@ -2077,11 +2085,11 @@ static SettingsContainer &GetSettingsTree()
 				vehicle_windows->Add(new SettingEntry("gui.dual_pane_train_purchase_window"));
 				vehicle_windows->Add(new ConditionallyHiddenSettingEntry("gui.dual_pane_train_purchase_window_dual_buttons", []() -> bool { return !_settings_client.gui.dual_pane_train_purchase_window; }));
 				vehicle_windows->Add(new SettingEntry("gui.show_order_occupancy_by_default"));
-				vehicle_windows->Add(new SettingEntry("gui.show_order_management_button"));
 				vehicle_windows->Add(new SettingEntry("gui.show_group_hierarchy_name"));
 				vehicle_windows->Add(new ConditionallyHiddenSettingEntry("gui.show_vehicle_group_hierarchy_name", []() -> bool { return !_settings_client.gui.show_group_hierarchy_name; }));
 				vehicle_windows->Add(new SettingEntry("gui.enable_single_veh_shared_order_gui"));
 				vehicle_windows->Add(new SettingEntry("gui.show_order_number_vehicle_view"));
+				vehicle_windows->Add(new SettingEntry("gui.hide_default_stop_location"));
 			}
 
 			SettingsPage *departureboards = interface->Add(new SettingsPage(STR_CONFIG_SETTING_INTERFACE_DEPARTUREBOARDS));
@@ -2191,6 +2199,7 @@ static SettingsContainer &GetSettingsTree()
 			company->Add(new SettingEntry("gui.new_nonstop"));
 			company->Add(new SettingEntry("gui.stop_location"));
 			company->Add(new SettingEntry("gui.starting_colour"));
+			company->Add(new SettingEntry("gui.starting_colour_secondary"));
 			company->Add(new SettingEntry("company.engine_renew"));
 			company->Add(new SettingEntry("company.engine_renew_months"));
 			company->Add(new SettingEntry("company.engine_renew_money"));
@@ -2298,6 +2307,7 @@ static SettingsContainer &GetSettingsTree()
 			limitations->Add(new SettingEntry("station.distant_join_stations"));
 			limitations->Add(new SettingEntry("construction.road_stop_on_town_road"));
 			limitations->Add(new SettingEntry("construction.road_stop_on_competitor_road"));
+			limitations->Add(new SettingEntry("construction.crossing_with_competitor"));
 			limitations->Add(new SettingEntry("construction.convert_town_road_no_houses"));
 			limitations->Add(new SettingEntry("vehicle.disable_elrails"));
 			limitations->Add(new SettingEntry("construction.maximum_signal_evaluations"));
@@ -2437,10 +2447,11 @@ static SettingsContainer &GetSettingsTree()
 				cdist->Add(new SettingEntry("linkgraph.distribution_default"));
 				SettingsPage *cdist_override = cdist->Add(new SettingsPage(STR_CONFIG_SETTING_ENVIRONMENT_CARGODIST_PER_CARGO_OVERRIDE));
 				{
-					uint base_index = GetSettingIndexByFullName("linkgraph.distribution_per_cargo[0]");
+					const SettingTable &linkgraph_table = GetLinkGraphSettingTable();
+					uint base_index = GetSettingIndexByFullName(linkgraph_table, "linkgraph.distribution_per_cargo[0]");
 					assert(base_index != UINT32_MAX);
 					for (CargoID c = 0; c < NUM_CARGO; c++) {
-						cdist_override->Add(new CargoDestPerCargoSettingEntry(c, GetSettingDescription(base_index + c)->AsIntSetting()));
+						cdist_override->Add(new CargoDestPerCargoSettingEntry(c, GetSettingDescription(linkgraph_table, base_index + c)->AsIntSetting()));
 					}
 				}
 				cdist->Add(new SettingEntry("linkgraph.accuracy"));
@@ -2609,7 +2620,7 @@ struct GameSettingsWindow : Window {
 		_circle_size = maxdim(GetSpriteSize(SPR_CIRCLE_FOLDED), GetSpriteSize(SPR_CIRCLE_UNFOLDED));
 	}
 
-	void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize) override
+	void UpdateWidgetSize(int widget, Dimension *size, [[maybe_unused]] const Dimension &padding, [[maybe_unused]] Dimension *fill, [[maybe_unused]] Dimension *resize) override
 	{
 		switch (widget) {
 			case WID_GS_OPTIONSPANEL:
@@ -2705,15 +2716,15 @@ struct GameSettingsWindow : Window {
 					 * we don't want to allow comparing with new game's settings. */
 					bool disabled = mode == RM_CHANGED_AGAINST_NEW && settings_ptr == &_settings_newgame;
 
-					list.emplace_back(new DropDownListStringItem(_game_settings_restrict_dropdown[mode], mode, disabled));
+					list.push_back(std::make_unique<DropDownListStringItem>(_game_settings_restrict_dropdown[mode], mode, disabled));
 				}
 				break;
 
 			case WID_GS_TYPE_DROPDOWN:
-				list.emplace_back(new DropDownListStringItem(STR_CONFIG_SETTING_TYPE_DROPDOWN_ALL, ST_ALL, false));
-				list.emplace_back(new DropDownListStringItem(_game_mode == GM_MENU ? STR_CONFIG_SETTING_TYPE_DROPDOWN_GAME_MENU : STR_CONFIG_SETTING_TYPE_DROPDOWN_GAME_INGAME, ST_GAME, false));
-				list.emplace_back(new DropDownListStringItem(_game_mode == GM_MENU ? STR_CONFIG_SETTING_TYPE_DROPDOWN_COMPANY_MENU : STR_CONFIG_SETTING_TYPE_DROPDOWN_COMPANY_INGAME, ST_COMPANY, false));
-				list.emplace_back(new DropDownListStringItem(STR_CONFIG_SETTING_TYPE_DROPDOWN_CLIENT, ST_CLIENT, false));
+				list.push_back(std::make_unique<DropDownListStringItem>(STR_CONFIG_SETTING_TYPE_DROPDOWN_ALL, ST_ALL, false));
+				list.push_back(std::make_unique<DropDownListStringItem>(_game_mode == GM_MENU ? STR_CONFIG_SETTING_TYPE_DROPDOWN_GAME_MENU : STR_CONFIG_SETTING_TYPE_DROPDOWN_GAME_INGAME, ST_GAME, false));
+				list.push_back(std::make_unique<DropDownListStringItem>(_game_mode == GM_MENU ? STR_CONFIG_SETTING_TYPE_DROPDOWN_COMPANY_MENU : STR_CONFIG_SETTING_TYPE_DROPDOWN_COMPANY_INGAME, ST_COMPANY, false));
+				list.push_back(std::make_unique<DropDownListStringItem>(STR_CONFIG_SETTING_TYPE_DROPDOWN_CLIENT, ST_CLIENT, false));
 				break;
 		}
 		return list;
@@ -2790,7 +2801,7 @@ struct GameSettingsWindow : Window {
 		this->last_clicked = pe;
 	}
 
-	void OnClick(Point pt, int widget, int click_count) override
+	void OnClick([[maybe_unused]] Point pt, int widget, [[maybe_unused]] int click_count) override
 	{
 		switch (widget) {
 			case WID_GS_EXPAND_ALL:
@@ -2909,15 +2920,15 @@ struct GameSettingsWindow : Window {
 								}
 							}
 							assert_msg(val >= sd->min && val <= (int)sd->max, "min: %d, max: %d, val: %d", sd->min, sd->max, val);
-							list.emplace_back(new DropDownListStringItem(sd->str_val + val - sd->min, val, false));
+							list.push_back(std::make_unique<DropDownListStringItem>(sd->str_val + val - sd->min, val, false));
 						}
 					} else if ((sd->flags & SF_ENUM)) {
 						for (const SettingDescEnumEntry *enumlist = sd->enumlist; enumlist != nullptr && enumlist->str != STR_NULL; enumlist++) {
-							list.emplace_back(new DropDownListStringItem(enumlist->str, enumlist->val, false));
+							list.push_back(std::make_unique<DropDownListStringItem>(enumlist->str, enumlist->val, false));
 						}
 					}
 
-					ShowDropDownListAt(this, std::move(list), value, -1, wi_rect, COLOUR_ORANGE);
+					ShowDropDownListAt(this, std::move(list), value, WID_GS_SETTING_DROPDOWN, wi_rect, COLOUR_ORANGE);
 				}
 			}
 			this->SetDirty();
@@ -3066,23 +3077,21 @@ struct GameSettingsWindow : Window {
 				this->InvalidateData();
 				break;
 
-			default:
-				if (widget < 0) {
-					/* Deal with drop down boxes on the panel. */
-					assert(this->valuedropdown_entry != nullptr);
-					const IntSettingDesc *sd = this->valuedropdown_entry->setting;
-					assert(sd->flags & (SF_GUI_DROPDOWN | SF_ENUM));
+			case WID_GS_SETTING_DROPDOWN:
+				/* Deal with drop down boxes on the panel. */
+				assert(this->valuedropdown_entry != nullptr);
+				const IntSettingDesc *sd = this->valuedropdown_entry->setting;
+				assert(sd->flags & (SF_GUI_DROPDOWN | SF_ENUM));
 
-					SetSettingValue(sd, index);
-					this->SetDirty();
-				}
+				SetSettingValue(sd, index);
+				this->SetDirty();
 				break;
 		}
 	}
 
 	void OnDropdownClose(Point pt, int widget, int index, bool instant_close) override
 	{
-		if (widget >= 0) {
+		if (widget != WID_GS_SETTING_DROPDOWN) {
 			/* Normally the default implementation of OnDropdownClose() takes care of
 			 * a few things. We want that behaviour here too, but only for
 			 * "normal" dropdown boxes. The special dropdown boxes added for every
@@ -3099,7 +3108,7 @@ struct GameSettingsWindow : Window {
 		}
 	}
 
-	void OnInvalidateData(int data = 0, bool gui_scope = true) override
+	void OnInvalidateData([[maybe_unused]] int data = 0, [[maybe_unused]] bool gui_scope = true) override
 	{
 		if (!gui_scope) return;
 
@@ -3190,11 +3199,11 @@ static const NWidgetPart _nested_settings_selection_widgets[] = {
 	EndContainer(),
 };
 
-static WindowDesc _settings_selection_desc(
+static WindowDesc _settings_selection_desc(__FILE__, __LINE__,
 	WDP_CENTER, "settings", 510, 450,
 	WC_GAME_OPTIONS, WC_NONE,
 	0,
-	_nested_settings_selection_widgets, lengthof(_nested_settings_selection_widgets)
+	std::begin(_nested_settings_selection_widgets), std::end(_nested_settings_selection_widgets)
 );
 
 /** Open advanced settings window. */
@@ -3310,7 +3319,7 @@ struct CustomCurrencyWindow : Window {
 		}
 	}
 
-	void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize) override
+	void UpdateWidgetSize(int widget, Dimension *size, [[maybe_unused]] const Dimension &padding, [[maybe_unused]] Dimension *fill, [[maybe_unused]] Dimension *resize) override
 	{
 		switch (widget) {
 			/* Set the appropriate width for the edit 'buttons' */
@@ -3329,7 +3338,7 @@ struct CustomCurrencyWindow : Window {
 		}
 	}
 
-	void OnClick(Point pt, int widget, int click_count) override
+	void OnClick([[maybe_unused]] Point pt, int widget, [[maybe_unused]] int click_count) override
 	{
 		int line = 0;
 		int len = 0;
@@ -3489,11 +3498,11 @@ static const NWidgetPart _nested_cust_currency_widgets[] = {
 	EndContainer(),
 };
 
-static WindowDesc _cust_currency_desc(
+static WindowDesc _cust_currency_desc(__FILE__, __LINE__,
 	WDP_CENTER, nullptr, 0, 0,
 	WC_CUSTOM_CURRENCY, WC_NONE,
 	0,
-	_nested_cust_currency_widgets, lengthof(_nested_cust_currency_widgets)
+	std::begin(_nested_cust_currency_widgets), std::end(_nested_cust_currency_widgets)
 );
 
 /** Open custom currency window. */

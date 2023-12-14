@@ -37,7 +37,7 @@
 
 static bool DrawScrollingStatusText(const NewsItem *ni, int scroll_pos, int left, int right, int top, int bottom)
 {
-	CopyInDParam(0, ni->params, lengthof(ni->params));
+	CopyInDParam(ni->params);
 
 	/* Replace newlines and the likes with spaces. */
 	std::string message = StrMakeValid(GetString(ni->string_id), SVS_REPLACE_TAB_CR_NL_WITH_SPACE);
@@ -83,12 +83,12 @@ struct StatusBarWindow : Window {
 		return pt;
 	}
 
-	void FindWindowPlacementAndResize(int def_width, int def_height) override
+	void FindWindowPlacementAndResize([[maybe_unused]] int def_width, [[maybe_unused]] int def_height) override
 	{
 		Window::FindWindowPlacementAndResize(_toolbar_width, def_height);
 	}
 
-	void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize) override
+	void UpdateWidgetSize(int widget, Dimension *size, [[maybe_unused]] const Dimension &padding, [[maybe_unused]] Dimension *fill, [[maybe_unused]] Dimension *resize) override
 	{
 		Dimension d;
 		switch (widget) {
@@ -179,7 +179,7 @@ struct StatusBarWindow : Window {
 	 * @param data Information about the changed data.
 	 * @param gui_scope Whether the call is done from GUI scope. You may not do everything when not in GUI scope. See #InvalidateWindowData() for details.
 	 */
-	void OnInvalidateData(int data = 0, bool gui_scope = true) override
+	void OnInvalidateData([[maybe_unused]] int data = 0, [[maybe_unused]] bool gui_scope = true) override
 	{
 		if (!gui_scope) return;
 		switch (data) {
@@ -198,7 +198,7 @@ struct StatusBarWindow : Window {
 		}
 	}
 
-	void OnClick(Point pt, int widget, int click_count) override
+	void OnClick([[maybe_unused]] Point pt, int widget, [[maybe_unused]] int click_count) override
 	{
 		switch (widget) {
 			case WID_S_MIDDLE: ShowLastNewsMessage(); break;
@@ -239,11 +239,11 @@ static const NWidgetPart _nested_main_status_widgets[] = {
 	EndContainer(),
 };
 
-static WindowDesc _main_status_desc(
+static WindowDesc _main_status_desc(__FILE__, __LINE__,
 	WDP_MANUAL, nullptr, 0, 0,
 	WC_STATUS_BAR, WC_NONE,
 	WDF_NO_FOCUS | WDF_NO_CLOSE,
-	_nested_main_status_widgets, lengthof(_nested_main_status_widgets)
+	std::begin(_nested_main_status_widgets), std::end(_nested_main_status_widgets)
 );
 
 /**

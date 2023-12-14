@@ -108,7 +108,7 @@ protected:
 	int zoom = 1;    ///< Zoom level. Bigger number means more zoom-out (further away).
 
 	GUITimer refresh; ///< Refresh timer.
-	LinkGraphOverlay *overlay;
+	std::unique_ptr<LinkGraphOverlay> overlay;
 
 	static void BreakIndustryChainLink();
 
@@ -200,19 +200,18 @@ public:
 	friend class NWidgetSmallmapDisplay;
 
 	SmallMapWindow(WindowDesc *desc, int window_number);
-	virtual ~SmallMapWindow();
 
 	static void RebuildColourIndexIfNecessary();
 
 	void SmallMapCenterOnCurrentPos();
 	Point GetStationMiddle(const Station *st) const;
 
-	void Close() override;
+	void Close([[maybe_unused]] int data = 0) override;
 	void SetStringParameters(int widget) const override;
 	void OnInit() override;
 	void OnPaint() override;
 	void DrawWidget(const Rect &r, int widget) const override;
-	void OnClick(Point pt, int widget, int click_count) override;
+	void OnClick([[maybe_unused]] Point pt, int widget, [[maybe_unused]] int click_count) override;
 	void OnInvalidateData(int data = 0, bool gui_scope = true) override;
 	bool OnRightClick(Point pt, int widget) override;
 	void OnMouseWheel(int wheel) override;

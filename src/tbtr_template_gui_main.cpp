@@ -177,14 +177,14 @@ static const NWidgetPart _widgets[] = {
 	EndContainer(),
 };
 
-static WindowDesc _replace_rail_vehicle_desc(
+static WindowDesc _replace_rail_vehicle_desc(__FILE__, __LINE__,
 	WDP_AUTO,
 	"template replace window",
 	456, 156,
 	WC_TEMPLATEGUI_MAIN,
 	WC_NONE,                     // parent window class
 	WDF_CONSTRUCTION,
-	_widgets, lengthof(_widgets)
+	std::begin(_widgets), std::end(_widgets)
 );
 
 enum {
@@ -255,7 +255,7 @@ public:
 		this->BuildTemplateGuiList();
 	}
 
-	void Close() override {
+	void Close(int data = 0) override {
 		CloseWindowById(WC_CREATE_TEMPLATE, this->window_number);
 		this->Window::Close();
 	}
@@ -292,7 +292,7 @@ public:
 			case TRW_WIDGET_TRAIN_RAILTYPE_DROPDOWN: {
 				Dimension d = GetStringBoundingBox(STR_REPLACE_ALL_RAILTYPE);
 				for (RailType rt = RAILTYPE_BEGIN; rt != RAILTYPE_END; rt++) {
-					const RailtypeInfo *rti = GetRailTypeInfo(rt);
+					const RailTypeInfo *rti = GetRailTypeInfo(rt);
 					// Skip rail type if it has no label
 					if (rti->label == 0) continue;
 					d = maxdim(d, GetStringBoundingBox(rti->strings.replace_text));
@@ -367,7 +367,7 @@ public:
 			this->SetWidgetsLoweredState(false,
 					TRW_WIDGET_TMPL_BUTTONS_CONFIGTMPL_REFIT_AS_TEMPLATE, TRW_WIDGET_TMPL_BUTTONS_CONFIGTMPL_REFIT_AS_INCOMING,
 					TRW_WIDGET_TMPL_BUTTONS_CONFIGTMPL_REUSE, TRW_WIDGET_TMPL_BUTTONS_CONFIGTMPL_KEEP,
-					TRW_WIDGET_TMPL_BUTTONS_CONFIGTMPL_OLD_ONLY, WIDGET_LIST_END);
+					TRW_WIDGET_TMPL_BUTTONS_CONFIGTMPL_OLD_ONLY);
 		} else {
 			const TemplateVehicle *tmp = this->templates[this->selected_template_index];
 			uint height = ScaleGUITrad(8) + (3 * FONT_HEIGHT_NORMAL);

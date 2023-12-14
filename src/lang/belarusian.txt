@@ -502,6 +502,9 @@ STR_COLOUR_GREY                                                 :Шэры
 STR_COLOUR_WHITE                                                :Белы
 STR_COLOUR_RANDOM                                               :Выпадковы
 
+###length 17
+
+
 # Units used in OpenTTD
 STR_UNITS_VELOCITY_IMPERIAL                                     :{DECIMAL}{NBSP}мiл{P я i яў}/г
 STR_UNITS_VELOCITY_METRIC                                       :{DECIMAL}{NBSP}км/г
@@ -789,7 +792,7 @@ STR_NEWS_MENU_MESSAGE_HISTORY_MENU                              :Гісторы�
 STR_NEWS_MENU_DELETE_ALL_MESSAGES                               :Выдаліць усе паведамленьні
 
 # About menu
-###length 10
+###length 12
 STR_ABOUT_MENU_LAND_BLOCK_INFO                                  :Зьвесткі аб зямлі
 STR_ABOUT_MENU_SEPARATOR                                        :
 STR_ABOUT_MENU_TOGGLE_CONSOLE                                   :Кансоль
@@ -1188,10 +1191,6 @@ STR_NEWS_NEW_VEHICLE_NOW_AVAILABLE_WITH_TYPE                    :{BLACK}З'яв�
 
 STR_NEWS_SHOW_VEHICLE_GROUP_TOOLTIP                             :{BLACK}Адчыніць акно групаў транспарта і абраць групу, да якой прыналежыць гэты транспартны сродак
 
-STR_NEWS_STATION_NO_LONGER_ACCEPTS_CARGO                        :{WHITE}{STATION} больш не прымае {STRING.acc}
-STR_NEWS_STATION_NO_LONGER_ACCEPTS_CARGO_OR_CARGO               :{WHITE}{STATION} больш не прымае {STRING.acc} ды {STRING.acc}
-STR_NEWS_STATION_NOW_ACCEPTS_CARGO                              :{WHITE}{STATION} цяпер прымае {STRING.acc}
-STR_NEWS_STATION_NOW_ACCEPTS_CARGO_AND_CARGO                    :{WHITE}{STATION} цяпер прымае {STRING.acc} ды {STRING.acc}
 
 STR_NEWS_OFFER_OF_SUBSIDY_EXPIRED                               :{BIG_FONT}{BLACK}Прапанова субсыдыі мінула:{}{}Перавозка {STRING.gen} па маршруце {STRING} — {STRING} субсыдыявацца больш ня будзе.
 STR_NEWS_SUBSIDY_WITHDRAWN_SERVICE                              :{BIG_FONT}{BLACK}Тэрмін субсыдыі сышоў:{}{}Перавозка {STRING.gen} па маршруце {STRING} — {STRING} больш не субсыдуецца.
@@ -1456,6 +1455,7 @@ STR_CONFIG_SETTING_HORIZONTAL_POS_LEFT                          :леваруч
 STR_CONFIG_SETTING_HORIZONTAL_POS_CENTER                        :ў цэнтры
 STR_CONFIG_SETTING_HORIZONTAL_POS_RIGHT                         :праваруч
 
+
 STR_CONFIG_SETTING_MAXIMUM_INITIAL_LOAN                         :Максымальная сума пазыкі: {STRING}
 STR_CONFIG_SETTING_MAXIMUM_INITIAL_LOAN_HELPTEXT                :Максымальная сума пазыкі для кампаніі (без уліку інфляцыі)
 ###setting-zero-is-special
@@ -1618,6 +1618,7 @@ STR_CONFIG_SETTING_PLANE_CRASHES_NONE                           :адсутні�
 STR_CONFIG_SETTING_PLANE_CRASHES_REDUCED                        :зьніжаная
 STR_CONFIG_SETTING_PLANE_CRASHES_NORMAL                         :звычайная
 
+
 STR_CONFIG_SETTING_STOP_ON_TOWN_ROAD                            :Дазволіць будаўніцтва прыпынкаў Ro-Ro на дарогах гарадзкой уласнасьці: {STRING}
 STR_CONFIG_SETTING_STOP_ON_TOWN_ROAD_HELPTEXT                   :Дазволіць пабудову на дарогах, якія належаць гораду, прыпынкаў, празь якія можна проста праехаць (не заязжаючы "унутар").
 STR_CONFIG_SETTING_STOP_ON_COMPETITOR_ROAD                      :Дазволіць будаўніцтва прыпынкаў Ro-Ro на дарогах канкурэнтаў: {STRING}
@@ -1628,6 +1629,7 @@ STR_CONFIG_SETTING_INFRASTRUCTURE_MAINTENANCE                   :Утрыман�
 STR_CONFIG_SETTING_INFRASTRUCTURE_MAINTENANCE_HELPTEXT          :Калі ўключана, інфраструктура патрабуе выдаткаў на ўтрыманьне. Кошт расьце прапарцыянальна памерам сеткі, таму гэта больш датычыць вялікіх кампаніяў, ніж малых.
 
 STR_CONFIG_SETTING_COMPANY_STARTING_COLOUR                      :Фірмовы колер кампаніі: {STRING}
+
 
 STR_CONFIG_SETTING_NEVER_EXPIRE_AIRPORTS                        :Малыя аэрапорты ніколі не састарэюць: {STRING}
 STR_CONFIG_SETTING_NEVER_EXPIRE_AIRPORTS_HELPTEXT               :Уключэньне гэтай наладкі робіць усе віды аэрапортаў даступнымі назаўжды.
@@ -1662,7 +1664,6 @@ STR_CONFIG_SETTING_AUTORENEW_MONEY_HELPTEXT                     :Мінімал�
 
 STR_CONFIG_SETTING_ERRMSG_DURATION                              :Працягласьць паведамленняў аб памылцы: {STRING}
 STR_CONFIG_SETTING_ERRMSG_DURATION_HELPTEXT                     :Працялегласьць паказваньня паведамленьняў аб памылках у чырвоным вакне. Зазначце, што некаторыя (крытычныя) паведамленьні ня будуць аўтаматычна зьнікаць пасьля гэтага часу, але мусяць быць закрытымі уручную.
-STR_CONFIG_SETTING_ERRMSG_DURATION_VALUE                        :{COMMA} сэкунд{P а ы аў}
 
 STR_CONFIG_SETTING_HOVER_DELAY                                  :Паказваць падказкi: {STRING}
 STR_CONFIG_SETTING_HOVER_DELAY_HELPTEXT                         :Затрымка паміж навядзеньнем паказальніка мышы на элемент інтэрфейсу і з'яўленьнем падказкі. Калі гэта значэнне роўна 0, падказкі з'яўляюцца па пстрычцы правай кнопкі мышы.
@@ -1812,9 +1813,7 @@ STR_CONFIG_SETTING_RIGHT_MOUSE_BTN_EMU_OFF                      :выключа�
 
 STR_CONFIG_SETTING_RIGHT_MOUSE_WND_CLOSE                        :Зачыняць вокны пстрычкай ПКМ: {STRING}
 STR_CONFIG_SETTING_RIGHT_MOUSE_WND_CLOSE_HELPTEXT               :Зачыняць акно пстрычкай правай кнопкай мышы ў яго межах. Пры гэтым адключаецца з'яўленне падказак па правай кнопцы.
-
-STR_CONFIG_SETTING_AUTOSAVE                                     :Аўтазахаваньні: {STRING}
-STR_CONFIG_SETTING_AUTOSAVE_HELPTEXT                            :Азначце інтэрвал паміж аўтаматычнымі захаваньнямі
+###length 3
 
 STR_CONFIG_SETTING_DATE_FORMAT_IN_SAVE_NAMES                    :Выкарыстоўваць {STRING} фармат даты для імёнаў захаваньняў
 STR_CONFIG_SETTING_DATE_FORMAT_IN_SAVE_NAMES_HELPTEXT           :Фармат даты ў назвах захаваных гульняў.
@@ -2291,6 +2290,8 @@ STR_ABANDON_GAME_CAPTION                                        :{WHITE}У га�
 STR_ABANDON_GAME_QUERY                                          :{YELLOW}Вы сапраўды жадаеце пакінуць гульню?
 STR_ABANDON_SCENARIO_QUERY                                      :{YELLOW}Вы ўпэўнены, што хочаце пакінуць гэты сцэнар?
 
+# Help window
+
 # Cheat window
 STR_CHEATS                                                      :{WHITE}Махлярства (чыты)
 STR_CHEATS_TOOLTIP                                              :{BLACK}Птушкі паказваюць, ці выкарыстоўвалі Вы гэты чыт раней
@@ -2718,7 +2719,6 @@ STR_TRANSPARENT_BUILDINGS_TOOLTIP                               :{BLACK}Пера
 STR_TRANSPARENT_BRIDGES_TOOLTIP                                 :{BLACK}Пераключыць празрыстасьць для мастоў. Ctrl+клік — заблякаваць.
 STR_TRANSPARENT_STRUCTURES_TOOLTIP                              :{BLACK}Пераключыць празрыстасьць для пабудоў кшталту маякоў і антэнаў. Ctrl+клік — заблякаваць.
 STR_TRANSPARENT_CATENARY_TOOLTIP                                :{BLACK}Пераключыць празрыстасьць для кантактнай сеткі. Ctrl+клік — заблякаваць.
-STR_TRANSPARENT_LOADING_TOOLTIP                                 :{BLACK}Пераключыць празрыстасьць для індыкатараў загрузкі. Ctrl+клік — заблякаваць.
 STR_TRANSPARENT_INVISIBLE_TOOLTIP                               :{BLACK}Зрабіць аб'екты не празрыстымі, а цалкам нябачнымі
 
 # Linkgraph legend window
@@ -4639,7 +4639,7 @@ STR_TEXTFILE_WRAP_TEXT_TOOLTIP                                  :{BLACK}Пера
 STR_TEXTFILE_VIEW_README                                        :{BLACK}Прагледзець iнструкцыю
 STR_TEXTFILE_VIEW_CHANGELOG                                     :{BLACK}Журнал зьменаў
 STR_TEXTFILE_VIEW_LICENCE                                       :{BLACK}Ліцэнзія
-###length 4
+###length 5
 STR_TEXTFILE_README_CAPTION                                     :{WHITE}{STRING} iнструкцыя {STRING}
 STR_TEXTFILE_CHANGELOG_CAPTION                                  :{WHITE}{STRING} сьпiс зьменаў {STRING}
 STR_TEXTFILE_LICENCE_CAPTION                                    :{WHITE}{STRING} ліцэнзія {STRING}
@@ -4774,7 +4774,6 @@ STR_ERROR_TOO_CLOSE_TO_EDGE_OF_MAP_SUB                          :{WHITE}... за
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_TOWN                             :{WHITE}... занадта блізка да іншага горада
 STR_ERROR_TOO_MANY_TOWNS                                        :{WHITE}... занадта шмат гарадоў
 STR_ERROR_NO_SPACE_FOR_TOWN                                     :{WHITE}... няма месца на мапе
-STR_ERROR_TOWN_EXPAND_WARN_NO_ROADS                             :{WHITE}Гарады ня будуць будаваць дарогі самі. Вы можаце ўключыць будаўніцтва дарог у раздзеле «Наладкі -> Навак.{NBSP}асяроддзе -> Гарады».
 STR_ERROR_ROAD_WORKS_IN_PROGRESS                                :{WHITE}Ідуць дарожныя работы...
 STR_ERROR_TOWN_CAN_T_DELETE                                     :{WHITE}Немагчыма зьнішчыць горад:{}да яго адносіцца станцыя або дэпо, альбо немагчыма ачысьціць адну з занятых ім клетак.
 STR_ERROR_STATUE_NO_SUITABLE_PLACE                              :{WHITE}... у цэнтры горада няма месца для статуі

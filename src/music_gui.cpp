@@ -175,7 +175,7 @@ void MusicSystem::ChangePlaylist(PlaylistChoices pl)
 void MusicSystem::ChangeMusicSet(const std::string &set_name)
 {
 	if (set_name != "NoMusic") InitMusicDriver(true);
-	BaseMusic::SetSet(set_name);
+	BaseMusic::SetSetByName(set_name);
 	BaseMusic::ini_set = set_name;
 
 	this->BuildPlaylists();
@@ -485,7 +485,7 @@ struct MusicTrackSelectionWindow : public Window {
 	 * @param data Information about the changed data.
 	 * @param gui_scope Whether the call is done from GUI scope. You may not do everything when not in GUI scope. See #InvalidateWindowData() for details.
 	 */
-	void OnInvalidateData(int data = 0, bool gui_scope = true) override
+	void OnInvalidateData([[maybe_unused]] int data = 0, [[maybe_unused]] bool gui_scope = true) override
 	{
 		if (!gui_scope) return;
 		for (int i = 0; i < 6; i++) {
@@ -500,7 +500,7 @@ struct MusicTrackSelectionWindow : public Window {
 		}
 	}
 
-	void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize) override
+	void UpdateWidgetSize(int widget, Dimension *size, [[maybe_unused]] const Dimension &padding, [[maybe_unused]] Dimension *fill, [[maybe_unused]] Dimension *resize) override
 	{
 		switch (widget) {
 			case WID_MTS_PLAYLIST: {
@@ -568,7 +568,7 @@ struct MusicTrackSelectionWindow : public Window {
 		}
 	}
 
-	void OnClick(Point pt, int widget, int click_count) override
+	void OnClick([[maybe_unused]] Point pt, int widget, [[maybe_unused]] int click_count) override
 	{
 		switch (widget) {
 			case WID_MTS_LIST_LEFT: { // add to playlist
@@ -649,11 +649,11 @@ static const NWidgetPart _nested_music_track_selection_widgets[] = {
 	EndContainer(),
 };
 
-static WindowDesc _music_track_selection_desc(
-	WDP_AUTO, "music_track", 0, 0,
+static WindowDesc _music_track_selection_desc(__FILE__, __LINE__,
+	WDP_AUTO, nullptr, 0, 0,
 	WC_MUSIC_TRACK_SELECTION, WC_NONE,
 	0,
-	_nested_music_track_selection_widgets, lengthof(_nested_music_track_selection_widgets)
+	std::begin(_nested_music_track_selection_widgets), std::end(_nested_music_track_selection_widgets)
 );
 
 static void ShowMusicTrackSelection()
@@ -678,12 +678,11 @@ struct MusicWindow : public Window {
 		this->SetWidgetsDisabledState(
 			BaseMusic::GetUsedSet()->num_available == 0,
 			WID_M_PREV, WID_M_NEXT, WID_M_STOP, WID_M_PLAY, WID_M_SHUFFLE,
-			WID_M_ALL, WID_M_OLD, WID_M_NEW, WID_M_EZY, WID_M_CUSTOM1, WID_M_CUSTOM2,
-			WIDGET_LIST_END
+			WID_M_ALL, WID_M_OLD, WID_M_NEW, WID_M_EZY, WID_M_CUSTOM1, WID_M_CUSTOM2
 			);
 	}
 
-	void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize) override
+	void UpdateWidgetSize(int widget, Dimension *size, [[maybe_unused]] const Dimension &padding, [[maybe_unused]] Dimension *fill, [[maybe_unused]] Dimension *resize) override
 	{
 		switch (widget) {
 			/* Make sure that WID_M_SHUFFLE and WID_M_PROGRAMME have the same size.
@@ -772,7 +771,7 @@ struct MusicWindow : public Window {
 	 * @param data Information about the changed data.
 	 * @param gui_scope Whether the call is done from GUI scope. You may not do everything when not in GUI scope. See #InvalidateWindowData() for details.
 	 */
-	void OnInvalidateData(int data = 0, bool gui_scope = true) override
+	void OnInvalidateData([[maybe_unused]] int data = 0, [[maybe_unused]] bool gui_scope = true) override
 	{
 		if (!gui_scope) return;
 		for (int i = 0; i < 6; i++) {
@@ -788,7 +787,7 @@ struct MusicWindow : public Window {
 		}
 	}
 
-	void OnClick(Point pt, int widget, int click_count) override
+	void OnClick([[maybe_unused]] Point pt, int widget, [[maybe_unused]] int click_count) override
 	{
 		switch (widget) {
 			case WID_M_PREV: // skip to prev
@@ -909,11 +908,11 @@ static const NWidgetPart _nested_music_window_widgets[] = {
 	EndContainer(),
 };
 
-static WindowDesc _music_window_desc(
+static WindowDesc _music_window_desc(__FILE__, __LINE__,
 	WDP_AUTO, "music", 0, 0,
 	WC_MUSIC_WINDOW, WC_NONE,
 	0,
-	_nested_music_window_widgets, lengthof(_nested_music_window_widgets)
+	std::begin(_nested_music_window_widgets), std::end(_nested_music_window_widgets)
 );
 
 void ShowMusicWindow()

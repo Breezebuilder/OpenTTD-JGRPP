@@ -63,6 +63,7 @@ enum SpriteGroupFlags : uint8 {
 	SGF_NONE                     = 0,
 	SGF_ACTION6                  = 1 << 0,
 	SGF_INLINING                 = 1 << 1,
+	SGF_SKIP_CB                  = 1 << 2,
 };
 DECLARE_ENUM_AS_BIT_SET(SpriteGroupFlags)
 
@@ -71,7 +72,7 @@ struct SpriteGroup : SpriteGroupPool::PoolItem<&_spritegroup_pool> {
 protected:
 	SpriteGroup(SpriteGroupType type) : nfo_line(0), type(type) {}
 	/** Base sprite group resolver */
-	virtual const SpriteGroup *Resolve(ResolverObject &object) const { return this; };
+	virtual const SpriteGroup *Resolve([[maybe_unused]] ResolverObject &object) const { return this; };
 
 public:
 	virtual ~SpriteGroup() = default;
@@ -593,8 +594,8 @@ struct ResultSpriteGroup : SpriteGroup {
 
 	SpriteID sprite;
 	byte num_sprites;
-	SpriteID GetResult() const { return this->sprite; }
-	byte GetNumResults() const { return this->num_sprites; }
+	SpriteID GetResult() const override { return this->sprite; }
+	byte GetNumResults() const override { return this->num_sprites; }
 };
 
 /**

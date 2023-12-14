@@ -72,11 +72,11 @@ static const NWidgetPart _nested_ai_config_widgets[] = {
 };
 
 /** Window definition for the configure AI window. */
-static WindowDesc _ai_config_desc(
-	WDP_CENTER, "settings_script_config", 0, 0,
+static WindowDesc _ai_config_desc(__FILE__, __LINE__,
+	WDP_CENTER, nullptr, 0, 0,
 	WC_GAME_OPTIONS, WC_NONE,
 	0,
-	_nested_ai_config_widgets, lengthof(_nested_ai_config_widgets)
+	std::begin(_nested_ai_config_widgets), std::end(_nested_ai_config_widgets)
 );
 
 /**
@@ -98,7 +98,7 @@ struct AIConfigWindow : public Window {
 		this->OnInvalidateData(0);
 	}
 
-	void Close() override
+	void Close([[maybe_unused]] int data = 0) override
 	{
 		CloseWindowByClass(WC_SCRIPT_LIST);
 		CloseWindowByClass(WC_SCRIPT_SETTINGS);
@@ -118,7 +118,7 @@ struct AIConfigWindow : public Window {
 		}
 	}
 
-	void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize) override
+	void UpdateWidgetSize(int widget, Dimension *size, [[maybe_unused]] const Dimension &padding, [[maybe_unused]] Dimension *fill, [[maybe_unused]] Dimension *resize) override
 	{
 		switch (widget) {
 			case WID_AIC_DECREASE_NUMBER:
@@ -180,7 +180,7 @@ struct AIConfigWindow : public Window {
 		}
 	}
 
-	void OnClick(Point pt, int widget, int click_count) override
+	void OnClick([[maybe_unused]] Point pt, int widget, [[maybe_unused]] int click_count) override
 	{
 		if (widget >= WID_AIC_TEXTFILE && widget < WID_AIC_TEXTFILE + TFT_CONTENT_END) {
 			if (this->selected_slot == INVALID_COMPANY || AIConfig::GetConfig(this->selected_slot) == nullptr) return;
@@ -199,6 +199,7 @@ struct AIConfigWindow : public Window {
 					new_value = std::min(MAX_COMPANIES - 1, GetGameSettings().difficulty.max_no_competitors + 1);
 				}
 				IConsoleSetSetting("difficulty.max_no_competitors", new_value);
+				this->InvalidateData();
 				break;
 			}
 
@@ -211,6 +212,7 @@ struct AIConfigWindow : public Window {
 					new_value = std::min(static_cast<int>(MAX_COMPETITORS_INTERVAL), GetGameSettings().difficulty.competitors_interval + 1);
 				}
 				IConsoleSetSetting("difficulty.competitors_interval", new_value);
+				this->InvalidateData();
 				break;
 			}
 
@@ -266,7 +268,7 @@ struct AIConfigWindow : public Window {
 	 * @param data Information about the changed data.
 	 * @param gui_scope Whether the call is done from GUI scope. You may not do everything when not in GUI scope. See #InvalidateWindowData() for details.
 	 */
-	void OnInvalidateData(int data = 0, bool gui_scope = true) override
+	void OnInvalidateData([[maybe_unused]] int data = 0, [[maybe_unused]] bool gui_scope = true) override
 	{
 		if (!IsEditable(this->selected_slot)) {
 			this->selected_slot = INVALID_COMPANY;
@@ -279,7 +281,7 @@ struct AIConfigWindow : public Window {
 		this->SetWidgetDisabledState(WID_AIC_DECREASE_INTERVAL, GetGameSettings().difficulty.competitors_interval == MIN_COMPETITORS_INTERVAL);
 		this->SetWidgetDisabledState(WID_AIC_INCREASE_INTERVAL, GetGameSettings().difficulty.competitors_interval == MAX_COMPETITORS_INTERVAL);
 		this->SetWidgetDisabledState(WID_AIC_CHANGE, this->selected_slot == INVALID_COMPANY);
-		this->SetWidgetDisabledState(WID_AIC_CONFIGURE, this->selected_slot == INVALID_COMPANY || AIConfig::GetConfig(this->selected_slot)->GetConfigList()->size() == 0);
+		this->SetWidgetDisabledState(WID_AIC_CONFIGURE, this->selected_slot == INVALID_COMPANY || AIConfig::GetConfig(this->selected_slot)->GetConfigList()->empty());
 		this->SetWidgetDisabledState(WID_AIC_MOVE_UP, this->selected_slot == INVALID_COMPANY || !IsEditable((CompanyID)(this->selected_slot - 1)));
 		this->SetWidgetDisabledState(WID_AIC_MOVE_DOWN, this->selected_slot == INVALID_COMPANY || !IsEditable((CompanyID)(this->selected_slot + 1)));
 

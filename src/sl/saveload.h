@@ -83,12 +83,14 @@ void SlUnreachablePlaceholder();
 enum ChunkSaveLoadSpecialOp {
 	CSLSO_PRE_LOAD,
 	CSLSO_PRE_LOADCHECK,
+	CSLSO_PRE_PTRS,
 	CSLSO_SHOULD_SAVE_CHUNK,
 };
 enum ChunkSaveLoadSpecialOpResult {
 	CSLSOR_NONE,
 	CSLSOR_LOAD_CHUNK_CONSUMED,
 	CSLSOR_DONT_SAVE_CHUNK,
+	CSLSOR_UPSTREAM_SAVE_CHUNK,
 };
 typedef ChunkSaveLoadSpecialOpResult ChunkSaveLoadSpecialProc(uint32, ChunkSaveLoadSpecialOp);
 
@@ -99,7 +101,7 @@ enum ChunkType {
 	CH_SPARSE_ARRAY = 2,
 	CH_EXT_HDR      = 15, ///< Extended chunk header
 
-	CH_UPSTREAM_SAVE = 0x80,
+	CH_UNUSED = 0x80,
 };
 
 /** Handlers and description of chunk. */
@@ -135,15 +137,11 @@ namespace upstream_sl {
 
 		ChunkHandler ch = {
 			id,
-			nullptr,
 			SlUnreachablePlaceholder,
-			[]() {
-				SlExecWithSlVersion(F::GetLoadVersion(), []() {
-					SlFixPointerChunkByID(id);
-				});
-			},
 			SlUnreachablePlaceholder,
-			CH_UPSTREAM_SAVE
+			SlUnreachablePlaceholder,
+			SlUnreachablePlaceholder,
+			CH_UNUSED
 		};
 		ch.special_proc = [](uint32 chunk_id, ChunkSaveLoadSpecialOp op) -> ChunkSaveLoadSpecialOpResult {
 			assert(id == chunk_id);
@@ -158,6 +156,58 @@ namespace upstream_sl {
 						SlLoadCheckChunkByID(id);
 					});
 					return CSLSOR_LOAD_CHUNK_CONSUMED;
+				case CSLSO_PRE_PTRS:
+					SlExecWithSlVersion(F::GetLoadVersion(), []() {
+						SlFixPointerChunkByID(id);
+					});
+					return CSLSOR_LOAD_CHUNK_CONSUMED;
+				case CSLSO_SHOULD_SAVE_CHUNK:
+					return CSLSOR_UPSTREAM_SAVE_CHUNK;
+				default:
+					return CSLSOR_NONE;
+			}
+		};
+		return ch;
+	}
+
+	template <uint32 id, typename F>
+	ChunkHandler MakeConditionallyUpstreamChunkHandler(ChunkSaveLoadProc *save_proc, ChunkSaveLoadProc *load_proc, ChunkSaveLoadProc *ptrs_proc, ChunkSaveLoadProc *load_check_proc, ChunkType type)
+	{
+		extern void SlLoadChunkByID(uint32);
+		extern void SlLoadCheckChunkByID(uint32);
+		extern void SlFixPointerChunkByID(uint32);
+
+		ChunkHandler ch = {
+			id,
+			save_proc,
+			load_proc,
+			ptrs_proc,
+			load_check_proc,
+			type
+		};
+		ch.special_proc = [](uint32 chunk_id, ChunkSaveLoadSpecialOp op) -> ChunkSaveLoadSpecialOpResult {
+			assert(id == chunk_id);
+			switch (op) {
+				case CSLSO_PRE_LOAD:
+					if (!F::LoadUpstream()) return CSLSOR_NONE;
+					SlExecWithSlVersion(F::GetLoadVersion(), []() {
+						SlLoadChunkByID(id);
+					});
+					return CSLSOR_LOAD_CHUNK_CONSUMED;
+				case CSLSO_PRE_LOADCHECK:
+					if (!F::LoadUpstream()) return CSLSOR_NONE;
+					SlExecWithSlVersion(F::GetLoadVersion(), []() {
+						SlLoadCheckChunkByID(id);
+					});
+					return CSLSOR_LOAD_CHUNK_CONSUMED;
+				case CSLSO_PRE_PTRS:
+					if (!F::LoadUpstream()) return CSLSOR_NONE;
+					SlExecWithSlVersion(F::GetLoadVersion(), []() {
+						SlFixPointerChunkByID(id);
+					});
+					return CSLSOR_LOAD_CHUNK_CONSUMED;
+				case CSLSO_SHOULD_SAVE_CHUNK:
+					return F::SaveUpstream() ? CSLSOR_UPSTREAM_SAVE_CHUNK : CSLSOR_NONE;
 				default:
 					return CSLSOR_NONE;
 			}
@@ -167,6 +217,7 @@ namespace upstream_sl {
 }
 
 using upstream_sl::MakeUpstreamChunkHandler;
+using upstream_sl::MakeConditionallyUpstreamChunkHandler;
 
 struct NullStruct {
 	byte null;

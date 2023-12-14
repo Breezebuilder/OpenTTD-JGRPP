@@ -85,16 +85,6 @@ class BuildObjectWindow : public Window {
 		return objclass->GetSpec(_selected_object_index)->IsAvailable();
 	}
 
-	/**
-	 * Calculate the number of columns of the #WID_BO_SELECT_MATRIX widget.
-	 * @return Number of columns in the matrix.
-	 */
-	uint GetMatrixColumnCount()
-	{
-		const NWidgetBase *matrix = this->GetWidget<NWidgetBase>(WID_BO_SELECT_MATRIX);
-		return 1 + (matrix->current_x - matrix->smallest_x) / matrix->resize_x;
-	}
-
 public:
 	BuildObjectWindow(WindowDesc *desc, WindowNumber number) : Window(desc), info_height(1), filter_editbox(EDITBOX_MAX_SIZE * MAX_CHAR_LENGTH, EDITBOX_MAX_SIZE)
 	{
@@ -220,7 +210,7 @@ public:
 		this->object_margin = ScaleGUITrad(4);
 	}
 
-	void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize) override
+	void UpdateWidgetSize(int widget, Dimension *size, [[maybe_unused]] const Dimension &padding, [[maybe_unused]] Dimension *fill, [[maybe_unused]] Dimension *resize) override
 	{
 		switch (widget) {
 			case WID_BO_CLASS_LIST: {
@@ -517,7 +507,7 @@ public:
 			object_number = -1;
 		} else {
 			view_number = sel_view;
-			ObjectClass *objclass = ObjectClass::Get(_selected_object_class);
+			ObjectClass *objclass = ObjectClass::Get(object_class);
 			object_number = objclass->GetUIFromIndex(sel_index);
 		}
 
@@ -527,7 +517,7 @@ public:
 		this->SetDirty();
 	}
 
-	void OnInvalidateData(int data = 0, bool gui_scope = true) override
+	void OnInvalidateData([[maybe_unused]] int data = 0, [[maybe_unused]] bool gui_scope = true) override
 	{
 		if (!gui_scope) return;
 
@@ -539,7 +529,7 @@ public:
 		this->vscroll->SetCapacityFromWidget(this, WID_BO_CLASS_LIST);
 	}
 
-	void OnClick(Point pt, int widget, int click_count) override
+	void OnClick([[maybe_unused]] Point pt, int widget, [[maybe_unused]] int click_count) override
 	{
 		switch (GB(widget, 0, 16)) {
 			case WID_BO_CLASS_LIST: {
@@ -567,7 +557,7 @@ public:
 		}
 	}
 
-	void OnPlaceObject(Point pt, TileIndex tile) override
+	void OnPlaceObject([[maybe_unused]] Point pt, TileIndex tile) override
 	{
 		const ObjectSpec *spec = ObjectClass::Get(_selected_object_class)->GetSpec(_selected_object_index);
 		if (spec == nullptr) return;
@@ -589,7 +579,7 @@ public:
 		VpSelectTilesWithMethod(pt.x, pt.y, select_method);
 	}
 
-	void OnPlaceMouseUp(ViewportPlaceMethod select_method, ViewportDragDropSelectionProcess select_proc, Point pt, TileIndex start_tile, TileIndex end_tile) override
+	void OnPlaceMouseUp([[maybe_unused]] ViewportPlaceMethod select_method, [[maybe_unused]] ViewportDragDropSelectionProcess select_proc, [[maybe_unused]] Point pt, TileIndex start_tile, TileIndex end_tile) override
 	{
 		if (pt.x != -1) {
 			switch (select_proc) {
@@ -624,12 +614,14 @@ public:
 		return ES_HANDLED;
 	}
 
-	void OnEditboxChanged(int wid) override
+	void OnEditboxChanged(int widget) override
 	{
-		string_filter.SetFilterTerm(this->filter_editbox.text.buf);
-		this->object_classes.SetFilterState(!string_filter.IsEmpty());
-		this->object_classes.ForceRebuild();
-		this->InvalidateData();
+		if (widget == WID_BO_FILTER) {
+			string_filter.SetFilterTerm(this->filter_editbox.text.buf);
+			this->object_classes.SetFilterState(!string_filter.IsEmpty());
+			this->object_classes.ForceRebuild();
+			this->InvalidateData();
+		}
 	}
 
 	/**
@@ -741,7 +733,7 @@ static const NWidgetPart _nested_build_object_widgets[] = {
 			EndContainer(),
 			NWidget(WWT_PANEL, COLOUR_DARK_GREEN), SetScrollbar(WID_BO_SELECT_SCROLL),
 				NWidget(NWID_HORIZONTAL),
-					NWidget(NWID_MATRIX, COLOUR_DARK_GREEN, WID_BO_SELECT_MATRIX), SetFill(0, 1), SetPIP(0, 2, 0),
+					NWidget(NWID_MATRIX, COLOUR_DARK_GREEN, WID_BO_SELECT_MATRIX), SetPIP(0, 2, 0),
 						NWidget(WWT_PANEL, COLOUR_DARK_GREEN, WID_BO_SELECT_IMAGE), SetMinimalSize(66, 60), SetDataTip(0x0, STR_OBJECT_BUILD_TOOLTIP),
 								SetFill(0, 0), SetResize(0, 0), SetScrollbar(WID_BO_SELECT_SCROLL),
 						EndContainer(),
@@ -760,11 +752,11 @@ static const NWidgetPart _nested_build_object_widgets[] = {
 	EndContainer(),
 };
 
-static WindowDesc _build_object_desc(
+static WindowDesc _build_object_desc(__FILE__, __LINE__,
 	WDP_AUTO, "build_object", 0, 0,
 	WC_BUILD_OBJECT, WC_BUILD_TOOLBAR,
 	WDF_CONSTRUCTION,
-	_nested_build_object_widgets, lengthof(_nested_build_object_widgets),
+	std::begin(_nested_build_object_widgets), std::end(_nested_build_object_widgets),
 	&BuildObjectWindow::hotkeys
 );
 

@@ -378,6 +378,9 @@ STR_COLOUR_GREY                                                 :Siva
 STR_COLOUR_WHITE                                                :Bela
 STR_COLOUR_RANDOM                                               :Nasumična
 
+###length 17
+
+
 # Units used in OpenTTD
 STR_UNITS_VELOCITY_IMPERIAL                                     :{DECIMAL} milja na sat
 STR_UNITS_VELOCITY_METRIC                                       :{DECIMAL} km/h
@@ -688,7 +691,7 @@ STR_NEWS_MENU_MESSAGE_HISTORY_MENU                              :Istorija Obave�
 STR_NEWS_MENU_DELETE_ALL_MESSAGES                               :Obriši sve poruke
 
 # About menu
-###length 10
+###length 12
 STR_ABOUT_MENU_LAND_BLOCK_INFO                                  :Podaci o zemljištu
 STR_ABOUT_MENU_SEPARATOR                                        :
 STR_ABOUT_MENU_TOGGLE_CONSOLE                                   :Uključi/isključi konzolu
@@ -1097,10 +1100,6 @@ STR_NEWS_NEW_VEHICLE_NOW_AVAILABLE_WITH_TYPE                    :{BLACK}Nov{G ""
 
 STR_NEWS_SHOW_VEHICLE_GROUP_TOOLTIP                             :{BLACK}Otvori grupni prozor fokusiran na grupu vozila
 
-STR_NEWS_STATION_NO_LONGER_ACCEPTS_CARGO                        :{WHITE}{STATION} više ne prihvata {STRING}
-STR_NEWS_STATION_NO_LONGER_ACCEPTS_CARGO_OR_CARGO               :{WHITE}{STATION} više ne prihvata ni {STRING} ni {STRING}
-STR_NEWS_STATION_NOW_ACCEPTS_CARGO                              :{WHITE}{STATION} od sada prihvata {STRING.aku}
-STR_NEWS_STATION_NOW_ACCEPTS_CARGO_AND_CARGO                    :{WHITE}{STATION} od sada prihvata {STRING.aku} i {STRING.aku}
 
 STR_NEWS_OFFER_OF_SUBSIDY_EXPIRED                               :{BIG_FONT}{BLACK}Ponuda subvencije istekla:{}{}Prevoz {STRING.gen} iz {STRING} u {STRING} se više neće stimulisati
 STR_NEWS_SUBSIDY_WITHDRAWN_SERVICE                              :{BIG_FONT}{BLACK}Subvencija povučena:{}{}Usluga prevoza {STRING.gen} između stanica {STRING} i {STRING} više nije u opticaju
@@ -1401,6 +1400,7 @@ STR_CONFIG_SETTING_HORIZONTAL_POS_LEFT                          :Levo
 STR_CONFIG_SETTING_HORIZONTAL_POS_CENTER                        :Sredina
 STR_CONFIG_SETTING_HORIZONTAL_POS_RIGHT                         :Desno
 
+
 STR_CONFIG_SETTING_MAXIMUM_INITIAL_LOAN                         :Najveći zajam na početku: {STRING}
 STR_CONFIG_SETTING_MAXIMUM_INITIAL_LOAN_HELPTEXT                :Najveći iznos koji preduzeće može da pozajmi (ne uzimajući u obzir inflaciju)
 ###setting-zero-is-special
@@ -1569,6 +1569,7 @@ STR_CONFIG_SETTING_PLANE_CRASHES_NONE                           :nikakav
 STR_CONFIG_SETTING_PLANE_CRASHES_REDUCED                        :umanjen
 STR_CONFIG_SETTING_PLANE_CRASHES_NORMAL                         :normalan
 
+
 STR_CONFIG_SETTING_STOP_ON_TOWN_ROAD                            :Dozvoljene ulične stanice na kolovozima u vlasništvu naselja: {STRING}
 STR_CONFIG_SETTING_STOP_ON_TOWN_ROAD_HELPTEXT                   :Dozvoljava izgradnju protočnih drumskih stanica na putevima čiji je vlasnik naselje
 STR_CONFIG_SETTING_STOP_ON_COMPETITOR_ROAD                      :Dozvoljene ulične stanice na kolovozima u vlasništvu drugih preduzeća: {STRING}
@@ -1580,6 +1581,7 @@ STR_CONFIG_SETTING_INFRASTRUCTURE_MAINTENANCE_HELPTEXT          :Ako je omoguće
 
 STR_CONFIG_SETTING_COMPANY_STARTING_COLOUR                      :Početna boja preduzeća: {STRING}
 STR_CONFIG_SETTING_COMPANY_STARTING_COLOUR_HELPTEXT             :Izaberi početnu boju za preduzeće
+
 
 STR_CONFIG_SETTING_NEVER_EXPIRE_AIRPORTS                        :Nezastarevanje aerodroma: {STRING}
 STR_CONFIG_SETTING_NEVER_EXPIRE_AIRPORTS_HELPTEXT               :Omogućavanje ovog podešavanja čini svaki tip aerodroma zauvek pristupan nakon njegovog uvođenja
@@ -1614,7 +1616,6 @@ STR_CONFIG_SETTING_AUTORENEW_MONEY_HELPTEXT                     :Najmanji iznos 
 
 STR_CONFIG_SETTING_ERRMSG_DURATION                              :Trajanje poruke o greški: {STRING}
 STR_CONFIG_SETTING_ERRMSG_DURATION_HELPTEXT                     :Trajanje prikazivanja poruka o greškama u crvenom prozoru. Neke (kritične) poruke o greškama se ne zatvaraju automatski posle ovog vremena nego moraju da se zatvore ručno
-STR_CONFIG_SETTING_ERRMSG_DURATION_VALUE                        :{COMMA} sekund{P a e i}
 
 STR_CONFIG_SETTING_HOVER_DELAY                                  :Prikaži poruke u ispod strelice miša: {STRING}
 STR_CONFIG_SETTING_HOVER_DELAY_HELPTEXT                         :Kašnjenje pre prikaza objašnjenja alata kada se miš postavi iznad nekog elementa interfejsa. Alternativno, objašnjenja alata se mogu vezati uz desnu dugmetom na mišu kada je ova vrednost postavljena na 0.
@@ -1782,9 +1783,7 @@ STR_CONFIG_SETTING_RIGHT_MOUSE_BTN_EMU_OFF                      :Nikakvo
 
 STR_CONFIG_SETTING_RIGHT_MOUSE_WND_CLOSE                        :Zatvori prozor pomoću desnog klika: {STRING}
 STR_CONFIG_SETTING_RIGHT_MOUSE_WND_CLOSE_HELPTEXT               :Zatvara prozor tako što klikne desnim klikom unutar nje. Onemogućava dodir sa desnim tasterom miša!
-
-STR_CONFIG_SETTING_AUTOSAVE                                     :Autočuvanje: {STRING}
-STR_CONFIG_SETTING_AUTOSAVE_HELPTEXT                            :Odabir vremenskog intervala između dve automatski sačuvane igre
+###length 3
 
 STR_CONFIG_SETTING_DATE_FORMAT_IN_SAVE_NAMES                    :Koristiti {STRING} oblik datuma u nazivima sačuvanih igara
 STR_CONFIG_SETTING_DATE_FORMAT_IN_SAVE_NAMES_HELPTEXT           :Format datuma u imenima fajlova sačuvanih igara
@@ -2296,6 +2295,8 @@ STR_ABANDON_GAME_CAPTION                                        :{WHITE}Napušta
 STR_ABANDON_GAME_QUERY                                          :{YELLOW}Da li zaista želiš da napustiš ovu igru?
 STR_ABANDON_SCENARIO_QUERY                                      :{YELLOW}Da li zaista želiš da napustiš ovaj scenario?
 
+# Help window
+
 # Cheat window
 STR_CHEATS                                                      :{WHITE}Varanja
 STR_CHEATS_TOOLTIP                                              :{BLACK}Štiklirano polje označava da ste i ranije koristili ovu opciju
@@ -2775,7 +2776,6 @@ STR_TRANSPARENT_BUILDINGS_TOOLTIP                               :{BLACK}Promena 
 STR_TRANSPARENT_BRIDGES_TOOLTIP                                 :{BLACK}Promena prozirnosti mostova. Sa Ctrl+klik se zaključava
 STR_TRANSPARENT_STRUCTURES_TOOLTIP                              :{BLACK}Promena prozirnosti građevina poput svetionika i repetitora. Sa Ctrl+klik se zaključava
 STR_TRANSPARENT_CATENARY_TOOLTIP                                :{BLACK}Promena prozirnosti kontaktnih mreža. Sa Ctrl+klik se zaključava
-STR_TRANSPARENT_LOADING_TOOLTIP                                 :{BLACK}Promena prozirnosti pokazatelja utovara. Sa Ctrl+klik se zaključava
 STR_TRANSPARENT_INVISIBLE_TOOLTIP                               :{BLACK}Čini objekte nevidljivim umesto prozirnim
 
 # Linkgraph legend window
@@ -4821,7 +4821,7 @@ STR_TEXTFILE_WRAP_TEXT_TOOLTIP                                  :{BLACK} Prelomi
 STR_TEXTFILE_VIEW_README                                        :{BLACK}Prikaži uputstvo
 STR_TEXTFILE_VIEW_CHANGELOG                                     :{BLACK}Izmene
 STR_TEXTFILE_VIEW_LICENCE                                       :{BLACK}Licenca
-###length 4
+###length 5
 STR_TEXTFILE_README_CAPTION                                     :{WHITE}{STRING} uputstvo za {STRING}
 STR_TEXTFILE_CHANGELOG_CAPTION                                  :{WHITE}{STRING} izmene od {STRING}
 STR_TEXTFILE_LICENCE_CAPTION                                    :{WHITE}{STRING} licenca od {STRING}
@@ -4959,7 +4959,6 @@ STR_ERROR_TOO_CLOSE_TO_EDGE_OF_MAP_SUB                          :{WHITE}... prev
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_TOWN                             :{WHITE}... drugo naselje je previše blizu
 STR_ERROR_TOO_MANY_TOWNS                                        :{WHITE}... ima previše naselja
 STR_ERROR_NO_SPACE_FOR_TOWN                                     :{WHITE}... više ne postoji slobodnog prostora na terenu
-STR_ERROR_TOWN_EXPAND_WARN_NO_ROADS                             :{WHITE}Naselje neće graditi kolovoze. Možete uključiti gradnju kolovoza preko Napredna Podešavanja->Okruženje->Naselja
 STR_ERROR_ROAD_WORKS_IN_PROGRESS                                :{WHITE}Putni radovi u toku
 STR_ERROR_TOWN_CAN_T_DELETE                                     :{WHITE}Nije moguće obrisati naselje...{}Stanica ili depo na zemljištvu naselja se ne može ukloniti
 STR_ERROR_STATUE_NO_SUITABLE_PLACE                              :{WHITE}... ne postoji odgovarajuće mesto za spomenik u centru ovog naselja

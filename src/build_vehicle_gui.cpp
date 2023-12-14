@@ -239,9 +239,9 @@ static bool EngineNumberSorter(const GUIEngineListItem &a, const GUIEngineListIt
  */
 static bool EngineIntroDateSorter(const GUIEngineListItem &a, const GUIEngineListItem &b)
 {
-	const int va = Engine::Get(a.engine_id)->intro_date;
-	const int vb = Engine::Get(b.engine_id)->intro_date;
-	const int r = va - vb;
+	const auto va = Engine::Get(a.engine_id)->intro_date;
+	const auto vb = Engine::Get(b.engine_id)->intro_date;
+	const auto r = va - vb;
 
 	/* Use EngineID to sort instead since we want consistent sorting */
 	if (r == 0) return EngineNumberSorter(a, b);
@@ -780,11 +780,12 @@ static uint GetCargoWeight(const CargoArray &cap, VehicleType vtype)
 
 static int DrawCargoCapacityInfo(int left, int right, int y, TestedEngineDetails &te, bool refittable)
 {
-	for (CargoID c = 0; c < NUM_CARGO; c++) {
-		if (te.all_capacities[c] == 0) continue;
+	for (const CargoSpec *cs : _sorted_cargo_specs) {
+		CargoID cid = cs->Index();
+		if (te.all_capacities[cid] == 0) continue;
 
-		SetDParam(0, c);
-		SetDParam(1, te.all_capacities[c]);
+		SetDParam(0, cid);
+		SetDParam(1, te.all_capacities[cid]);
 		SetDParam(2, refittable ? STR_PURCHASE_INFO_REFITTABLE : STR_EMPTY);
 		DrawString(left, right, y, STR_PURCHASE_INFO_CAPACITY);
 		y += FONT_HEIGHT_NORMAL;
@@ -1176,7 +1177,7 @@ int DrawVehiclePurchaseInfo(int left, int right, int y, EngineID engine_number, 
 	if (e->type != VEH_TRAIN || e->u.rail.railveh_type != RAILVEH_WAGON) {
 		/* Design date - Life length */
 		SetDParam(0, ymd.year);
-		SetDParam(1, e->GetLifeLengthInDays() / DAYS_IN_LEAP_YEAR);
+		SetDParam(1, DateToYear(e->GetLifeLengthInDays()));
 		DrawString(left, right, y, STR_PURCHASE_INFO_DESIGNED_LIFE);
 		y += FONT_HEIGHT_NORMAL;
 
@@ -1569,7 +1570,7 @@ struct BuildVehicleWindow : BuildVehicleWindowBase {
 	void SelectEngine(EngineID engine)
 	{
 		CargoID cargo = this->cargo_filter[this->cargo_filter_criteria];
-		if (cargo == CF_ANY) cargo = CF_NONE;
+		if (cargo == CF_ANY || cargo == CF_ENGINES || cargo == CF_NONE) cargo = CT_INVALID;
 
 		this->sel_engine = engine;
 		this->SetBuyVehicleText();
@@ -1694,7 +1695,14 @@ struct BuildVehicleWindow : BuildVehicleWindowBase {
 			list.emplace_back(eid, e->info.variant_id, e->display_flags, 0);
 
 			if (rvi->railveh_type != RAILVEH_WAGON) num_engines++;
-			if (e->info.variant_id != eid && e->info.variant_id != INVALID_ENGINE) variants.push_back(e->info.variant_id);
+
+			/* Add all parent variants of this engine to the variant list */
+			EngineID parent = e->info.variant_id;
+			while (parent != INVALID_ENGINE) {
+				variants.push_back(parent);
+				parent = Engine::Get(parent)->info.variant_id;
+			}
+
 			if (eid == this->sel_engine) sel_id = eid;
 		}
 
@@ -1835,8 +1843,13 @@ struct BuildVehicleWindow : BuildVehicleWindowBase {
 		/* ensure primary engine of variant group is in list after filtering */
 		std::vector<EngineID> variants;
 		for (const auto &item : this->eng_list) {
-			if (item.engine_id != item.variant_id && item.variant_id != INVALID_ENGINE) variants.push_back(item.variant_id);
+			EngineID parent = item.variant_id;
+			while (parent != INVALID_ENGINE) {
+				variants.push_back(parent);
+				parent = Engine::Get(parent)->info.variant_id;
+			}
 		}
+
 		for (const auto &variant : variants) {
 			if (std::find(this->eng_list.begin(), this->eng_list.end(), variant) == this->eng_list.end()) {
 				const Engine *e = Engine::Get(variant);
@@ -1853,7 +1866,7 @@ struct BuildVehicleWindow : BuildVehicleWindowBase {
 		this->eng_list.RebuildDone();
 	}
 
-	void OnClick(Point pt, int widget, int click_count) override
+	void OnClick([[maybe_unused]] Point pt, int widget, [[maybe_unused]] int click_count) override
 	{
 		switch (widget) {
 			case WID_BV_SORT_ASCENDING_DESCENDING:
@@ -1930,16 +1943,17 @@ struct BuildVehicleWindow : BuildVehicleWindowBase {
 						cmd = GetCmdBuildVeh(this->vehicle_type);
 					}
 					CargoID cargo = this->cargo_filter[this->cargo_filter_criteria];
-					if (cargo == CF_ANY || cargo == CF_ENGINES) cargo = CF_NONE;
+					if (cargo == CF_ANY || cargo == CF_ENGINES || cargo == CF_NONE) cargo = CT_INVALID;
 					DoCommandP(this->window_number, sel_eng | (cargo << 24), 0, cmd, callback);
 
-					/* Update last used variant and refresh if necessary. */
+					/* Update last used variant in hierarchy and refresh if necessary. */
 					bool refresh = false;
-					int recursion = 10; /* In case of infinite loop */
-					for (Engine *e = Engine::Get(sel_eng); recursion > 0; e = Engine::Get(e->info.variant_id), --recursion) {
+					EngineID parent = sel_eng;
+					while (parent != INVALID_ENGINE) {
+						Engine *e = Engine::Get(parent);
 						refresh |= (e->display_last_variant != sel_eng);
 						e->display_last_variant = sel_eng;
-						if (e->info.variant_id == INVALID_ENGINE) break;
+						parent = e->info.variant_id;
 					}
 					if (refresh) {
 						InvalidateWindowData(WC_REPLACE_VEHICLE, this->vehicle_type, 0); // Update the autoreplace window
@@ -1968,7 +1982,7 @@ struct BuildVehicleWindow : BuildVehicleWindowBase {
 	 * @param data Information about the changed data.
 	 * @param gui_scope Whether the call is done from GUI scope. You may not do everything when not in GUI scope. See #InvalidateWindowData() for details.
 	 */
-	void OnInvalidateData(int data = 0, bool gui_scope = true) override
+	void OnInvalidateData([[maybe_unused]] int data = 0, [[maybe_unused]] bool gui_scope = true) override
 	{
 		if (!gui_scope) return;
 		/* When switching to original acceleration model for road vehicles, clear the selected sort criteria if it is not available now. */
@@ -1986,7 +2000,7 @@ struct BuildVehicleWindow : BuildVehicleWindowBase {
 		switch (widget) {
 			case WID_BV_CAPTION:
 				if (this->vehicle_type == VEH_TRAIN && !this->listview_mode && !this->virtual_train_mode) {
-					const RailtypeInfo *rti = GetRailTypeInfo(this->filter.railtype);
+					const RailTypeInfo *rti = GetRailTypeInfo(this->filter.railtype);
 					SetDParam(0, rti->strings.build_caption);
 				} else if (this->vehicle_type == VEH_ROAD && !this->listview_mode) {
 					const RoadTypeInfo *rti = GetRoadTypeInfo(this->filter.roadtype);
@@ -2016,7 +2030,7 @@ struct BuildVehicleWindow : BuildVehicleWindowBase {
 		}
 	}
 
-	void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize) override
+	void UpdateWidgetSize(int widget, Dimension *size, [[maybe_unused]] const Dimension &padding, [[maybe_unused]] Dimension *fill, [[maybe_unused]] Dimension *resize) override
 	{
 		switch (widget) {
 			case WID_BV_LIST:
@@ -2080,7 +2094,7 @@ struct BuildVehicleWindow : BuildVehicleWindowBase {
 		this->GenerateBuildList();
 		this->vscroll->SetCount(this->eng_list.size());
 
-		this->SetWidgetsDisabledState(this->sel_engine == INVALID_ENGINE, WID_BV_SHOW_HIDE, WID_BV_BUILD, WIDGET_LIST_END);
+		this->SetWidgetsDisabledState(this->sel_engine == INVALID_ENGINE, WID_BV_SHOW_HIDE, WID_BV_BUILD);
 
 		/* Disable renaming engines in network games if you are not the server. */
 		this->SetWidgetDisabledState(WID_BV_RENAME, this->sel_engine == INVALID_ENGINE || (_networking && !_network_server));
@@ -2629,7 +2643,14 @@ struct BuildVehicleWindowTrainAdvanced final : BuildVehicleWindowBase {
 			if (!FilterByText(state, engine)) continue;
 
 			list.emplace_back(eid, engine->info.variant_id, engine->display_flags, 0);
-			if (engine->info.variant_id != eid && engine->info.variant_id != INVALID_ENGINE) variants.push_back(engine->info.variant_id);
+
+			/* Add all parent variants of this engine to the variant list */
+			EngineID parent = engine->info.variant_id;
+			while (parent != INVALID_ENGINE) {
+				variants.push_back(parent);
+				parent = Engine::Get(parent)->info.variant_id;
+			}
+
 			if (eid == state.sel_engine) sel_id = eid;
 		}
 
@@ -2695,13 +2716,14 @@ struct BuildVehicleWindowTrainAdvanced final : BuildVehicleWindowBase {
 			if (cargo == CF_ANY || cargo == CF_ENGINES) cargo = CF_NONE;
 			DoCommandP(this->window_number, selected | (cargo << 24), 0, cmd, callback);
 
-			/* Update last used variant and refresh if necessary. */
+			/* Update last used variant in hierarchy and refresh if necessary. */
 			bool refresh = false;
-			int recursion = 10; /* In case of infinite loop */
-			for (Engine *e = Engine::Get(selected); recursion > 0; e = Engine::Get(e->info.variant_id), --recursion) {
+			EngineID parent = selected;
+			while (parent != INVALID_ENGINE) {
+				Engine *e = Engine::Get(parent);
 				refresh |= (e->display_last_variant != selected);
 				e->display_last_variant = selected;
-				if (e->info.variant_id == INVALID_ENGINE) break;
+				parent = e->info.variant_id;
 			}
 			if (refresh) {
 				InvalidateWindowData(WC_REPLACE_VEHICLE, this->vehicle_type, 0); // Update the autoreplace window
@@ -2905,7 +2927,7 @@ struct BuildVehicleWindowTrainAdvanced final : BuildVehicleWindowBase {
 		switch (widget) {
 			case WID_BV_CAPTION: {
 				if (!this->listview_mode && !this->virtual_train_mode) {
-					const RailtypeInfo *rti = GetRailTypeInfo(this->railtype);
+					const RailTypeInfo *rti = GetRailTypeInfo(this->railtype);
 					SetDParam(0, rti->strings.build_caption);
 				} else {
 					SetDParam(0, (this->listview_mode ? STR_VEHICLE_LIST_AVAILABLE_TRAINS : STR_BUY_VEHICLE_TRAIN_ALL_CAPTION) + this->vehicle_type);
@@ -3241,35 +3263,35 @@ void CcMoveNewVirtualEngine(const CommandCost &result, TileIndex tile, uint32 p1
 	InvalidateWindowClassesData(WC_CREATE_TEMPLATE);
 }
 
-static WindowDesc _build_vehicle_desc(
+static WindowDesc _build_vehicle_desc(__FILE__, __LINE__,
 	WDP_AUTO, "build_vehicle", 240, 268,
 	WC_BUILD_VEHICLE, WC_NONE,
 	WDF_CONSTRUCTION,
-	_nested_build_vehicle_widgets, lengthof(_nested_build_vehicle_widgets),
+	std::begin(_nested_build_vehicle_widgets), std::end(_nested_build_vehicle_widgets),
 	&BuildVehicleWindow::hotkeys
 );
 
-static WindowDesc _build_template_vehicle_desc(
-	WDP_AUTO, nullptr, 240, 268,
+static WindowDesc _build_template_vehicle_desc(__FILE__, __LINE__,
+	WDP_AUTO, "build_template_vehicle", 240, 268,
 	WC_BUILD_VIRTUAL_TRAIN, WC_CREATE_TEMPLATE,
 	WDF_CONSTRUCTION,
-	_nested_build_vehicle_widgets, lengthof(_nested_build_vehicle_widgets),
+	std::begin(_nested_build_vehicle_widgets), std::end(_nested_build_vehicle_widgets),
 	&BuildVehicleWindow::hotkeys, &_build_vehicle_desc
 );
 
-static WindowDesc _build_vehicle_desc_train_advanced(
+static WindowDesc _build_vehicle_desc_train_advanced(__FILE__, __LINE__,
 	WDP_AUTO, "build_vehicle_dual", 480, 268,
 	WC_BUILD_VEHICLE, WC_NONE,
 	WDF_CONSTRUCTION,
-	_nested_build_vehicle_widgets_train_advanced, lengthof(_nested_build_vehicle_widgets_train_advanced),
+	std::begin(_nested_build_vehicle_widgets_train_advanced), std::end(_nested_build_vehicle_widgets_train_advanced),
 	&BuildVehicleWindow::hotkeys
 );
 
-static WindowDesc _build_template_vehicle_desc_advanced(
-	WDP_AUTO, nullptr, 480, 268,
+static WindowDesc _build_template_vehicle_desc_advanced(__FILE__, __LINE__,
+	WDP_AUTO, "build_template_vehicle_dual", 480, 268,
 	WC_BUILD_VIRTUAL_TRAIN, WC_CREATE_TEMPLATE,
 	WDF_CONSTRUCTION,
-	_nested_build_vehicle_widgets_train_advanced, lengthof(_nested_build_vehicle_widgets_train_advanced),
+	std::begin(_nested_build_vehicle_widgets_train_advanced), std::end(_nested_build_vehicle_widgets_train_advanced),
 	&BuildVehicleWindow::hotkeys, &_build_vehicle_desc_train_advanced
 );
 

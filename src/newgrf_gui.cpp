@@ -78,9 +78,8 @@ static void ShowNewGRFInfo(const GRFConfig *c, const Rect &r, bool show_params)
 		for (uint i = 0; i < c->error->param_value.size(); i++) {
 			SetDParam(3 + i, c->error->param_value[i]);
 		}
-		std::string message = GetString(c->error->message != STR_NULL ? c->error->message : STR_JUST_RAW_STRING);
 
-		SetDParamStr(0, message);
+		SetDParamStr(0, GetString(c->error->message != STR_NULL ? c->error->message : STR_JUST_RAW_STRING));
 		tr.top = DrawStringMultiLine(tr, c->error->severity);
 	}
 
@@ -112,11 +111,9 @@ static void ShowNewGRFInfo(const GRFConfig *c, const Rect &r, bool show_params)
 
 	/* Show GRF parameter list */
 	if (show_params) {
-		std::string params;
 		if (c->num_params > 0) {
-			params = GRFBuildParamList(c);
 			SetDParam(0, STR_JUST_RAW_STRING);
-			SetDParamStr(1, params);
+			SetDParamStr(1, GRFBuildParamList(c));
 		} else {
 			SetDParam(0, STR_NEWGRF_SETTINGS_PARAMETER_NONE);
 		}
@@ -163,7 +160,7 @@ struct NewGRFParametersWindow : public Window {
 	bool action14present;  ///< True if action14 information is present.
 	bool editable;         ///< Allow editing parameters.
 
-	NewGRFParametersWindow(WindowDesc *desc, GRFConfig *c, bool editable) : Window(desc),
+	NewGRFParametersWindow(WindowDesc *desc, bool is_baseset, GRFConfig *c, bool editable) : Window(desc),
 		grf_config(c),
 		clicked_button(UINT_MAX),
 		clicked_dropdown(false),
@@ -171,9 +168,10 @@ struct NewGRFParametersWindow : public Window {
 		clicked_row(UINT_MAX),
 		editable(editable)
 	{
-		this->action14present = (c->num_valid_params != c->param.size() || c->param_info.size() != 0);
+		this->action14present = (c->num_valid_params != c->param.size() || !c->param_info.empty());
 
 		this->CreateNestedTree();
+		this->GetWidget<NWidgetCore>(WID_NP_CAPTION)->SetDataTip(is_baseset ? STR_BASEGRF_PARAMETERS_CAPTION : STR_NEWGRF_PARAMETERS_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS);
 		this->vscroll = this->GetScrollbar(WID_NP_SCROLLBAR);
 		this->GetWidget<NWidgetStacked>(WID_NP_SHOW_NUMPAR)->SetDisplayedPlane(this->action14present ? SZSP_HORIZONTAL : 0);
 		this->GetWidget<NWidgetStacked>(WID_NP_SHOW_DESCRIPTION)->SetDisplayedPlane(this->action14present ? 0 : SZSP_HORIZONTAL);
@@ -184,7 +182,7 @@ struct NewGRFParametersWindow : public Window {
 		this->InvalidateData();
 	}
 
-	void Close() override
+	void Close(int data = 0) override
 	{
 		HideDropDownMenu(this);
 		this->Window::Close();
@@ -222,7 +220,7 @@ struct NewGRFParametersWindow : public Window {
 		return this->HasParameterInfo(nr) ? this->grf_config->param_info[nr].value() : GetDummyParameterInfo(nr);
 	}
 
-	void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize) override
+	void UpdateWidgetSize(int widget, Dimension *size, [[maybe_unused]] const Dimension &padding, [[maybe_unused]] Dimension *fill, [[maybe_unused]] Dimension *resize) override
 	{
 		switch (widget) {
 			case WID_NP_NUMPAR_DEC:
@@ -343,7 +341,7 @@ struct NewGRFParametersWindow : public Window {
 		this->DrawWidgets();
 	}
 
-	void OnClick(Point pt, int widget, int click_count) override
+	void OnClick([[maybe_unused]] Point pt, int widget, [[maybe_unused]] int click_count) override
 	{
 		switch (widget) {
 			case WID_NP_NUMPAR_DEC:
@@ -406,10 +404,10 @@ struct NewGRFParametersWindow : public Window {
 
 							DropDownList list;
 							for (uint32 i = par_info.min_value; i <= par_info.max_value; i++) {
-								list.emplace_back(new DropDownListStringItem(GetGRFStringFromGRFText(par_info.value_names.find(i)->second), i, false));
+								list.push_back(std::make_unique<DropDownListStringItem>(GetGRFStringFromGRFText(par_info.value_names.find(i)->second), i, false));
 							}
 
-							ShowDropDownListAt(this, std::move(list), old_val, -1, wi_rect, COLOUR_ORANGE);
+							ShowDropDownListAt(this, std::move(list), old_val, WID_NP_SETTING_DROPDOWN, wi_rect, COLOUR_ORANGE);
 						}
 					}
 				} else if (IsInsideMM(x, 0, SETTING_BUTTON_WIDTH)) {
@@ -467,14 +465,16 @@ struct NewGRFParametersWindow : public Window {
 
 	void OnDropdownSelect(int widget, int index) override
 	{
+		if (widget != WID_NP_SETTING_DROPDOWN) return;
 		assert(this->clicked_dropdown);
 		GRFParameterInfo &par_info = this->GetParameterInfo(this->clicked_row);
 		par_info.SetValue(this->grf_config, index);
 		this->SetDirty();
 	}
 
-	void OnDropdownClose(Point pt, int widget, int index, bool instant_close) override
+	void OnDropdownClose(Point, int widget, int, bool) override
 	{
+		if (widget != WID_NP_SETTING_DROPDOWN) return;
 		/* We cannot raise the dropdown button just yet. OnClick needs some hint, whether
 		 * the same dropdown button was clicked again, and then not open the dropdown again.
 		 * So, we only remember that it was closed, and process it on the next OnPaint, which is
@@ -494,7 +494,7 @@ struct NewGRFParametersWindow : public Window {
 	 * @param data Information about the changed data.
 	 * @param gui_scope Whether the call is done from GUI scope. You may not do everything when not in GUI scope. See #InvalidateWindowData() for details.
 	 */
-	void OnInvalidateData(int data = 0, bool gui_scope = true) override
+	void OnInvalidateData([[maybe_unused]] int data = 0, [[maybe_unused]] bool gui_scope = true) override
 	{
 		if (!gui_scope) return;
 		if (!this->action14present) {
@@ -523,7 +523,7 @@ GRFParameterInfo NewGRFParametersWindow::dummy_parameter_info(0);
 static const NWidgetPart _nested_newgrf_parameter_widgets[] = {
 	NWidget(NWID_HORIZONTAL),
 		NWidget(WWT_CLOSEBOX, COLOUR_MAUVE),
-		NWidget(WWT_CAPTION, COLOUR_MAUVE), SetDataTip(STR_NEWGRF_PARAMETERS_CAPTION, STR_TOOLTIP_WINDOW_TITLE_DRAG_THIS),
+		NWidget(WWT_CAPTION, COLOUR_MAUVE, WID_NP_CAPTION),
 		NWidget(WWT_DEFSIZEBOX, COLOUR_MAUVE),
 	EndContainer(),
 	NWidget(NWID_SELECTION, INVALID_COLOUR, WID_NP_SHOW_NUMPAR),
@@ -553,17 +553,17 @@ static const NWidgetPart _nested_newgrf_parameter_widgets[] = {
 };
 
 /** Window definition for the change grf parameters window */
-static WindowDesc _newgrf_parameters_desc(
+static WindowDesc _newgrf_parameters_desc(__FILE__, __LINE__,
 	WDP_CENTER, "settings_newgrf_config", 500, 208,
 	WC_GRF_PARAMETERS, WC_NONE,
 	0,
-	_nested_newgrf_parameter_widgets, lengthof(_nested_newgrf_parameter_widgets)
+	std::begin(_nested_newgrf_parameter_widgets), std::end(_nested_newgrf_parameter_widgets)
 );
 
-static void OpenGRFParameterWindow(GRFConfig *c, bool editable)
+void OpenGRFParameterWindow(bool is_baseset, GRFConfig *c, bool editable)
 {
 	CloseWindowByClass(WC_GRF_PARAMETERS);
-	new NewGRFParametersWindow(&_newgrf_parameters_desc, c, editable);
+	new NewGRFParametersWindow(&_newgrf_parameters_desc, is_baseset, c, editable);
 }
 
 /** Window for displaying the textfile of a NewGRF. */
@@ -687,7 +687,7 @@ struct NewGRFWindow : public Window, NewGRFScanCallback {
 		this->OnInvalidateData(GOID_NEWGRF_CURRENT_LOADED);
 	}
 
-	void Close() override
+	void Close([[maybe_unused]] int data = 0) override
 	{
 		CloseWindowByClass(WC_GRF_PARAMETERS);
 		CloseWindowByClass(WC_TEXTFILE);
@@ -739,7 +739,11 @@ struct NewGRFWindow : public Window, NewGRFScanCallback {
 			while (*c != iter->second) c = &(*c)->next;
 			GRFConfig *d = new GRFConfig(*a);
 			d->next = (*c)->next;
-			d->CopyParams(**c);
+			if (d->IsCompatible((*c)->version)) {
+				d->CopyParams(**c);
+			} else {
+				d->SetParameterDefaults();
+			}
 			if (this->active_sel == *c) {
 				CloseWindowByClass(WC_GRF_PARAMETERS);
 				CloseWindowByClass(WC_TEXTFILE);
@@ -751,7 +755,7 @@ struct NewGRFWindow : public Window, NewGRFScanCallback {
 		}
 	}
 
-	void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize) override
+	void UpdateWidgetSize(int widget, Dimension *size, [[maybe_unused]] const Dimension &padding, [[maybe_unused]] Dimension *fill, [[maybe_unused]] Dimension *resize) override
 	{
 		switch (widget) {
 			case WID_NS_FILE_LIST:
@@ -950,7 +954,7 @@ struct NewGRFWindow : public Window, NewGRFScanCallback {
 		}
 	}
 
-	void OnClick(Point pt, int widget, int click_count) override
+	void OnClick([[maybe_unused]] Point pt, int widget, [[maybe_unused]] int click_count) override
 	{
 		if (widget >= WID_NS_NEWGRF_TEXTFILE && widget < WID_NS_NEWGRF_TEXTFILE + TFT_CONTENT_END) {
 			if (this->active_sel == nullptr && this->avail_sel == nullptr) return;
@@ -964,10 +968,10 @@ struct NewGRFWindow : public Window, NewGRFScanCallback {
 				DropDownList list;
 
 				/* Add 'None' option for clearing list */
-				list.emplace_back(new DropDownListStringItem(STR_NONE, -1, false));
+				list.push_back(std::make_unique<DropDownListStringItem>(STR_NONE, -1, false));
 
 				for (uint i = 0; i < this->grf_presets.size(); i++) {
-					list.emplace_back(new DropDownListStringItem(this->grf_presets[i], i, false));
+					list.push_back(std::make_unique<DropDownListStringItem>(this->grf_presets[i], i, false));
 				}
 
 				this->CloseChildWindows(WC_QUERY_STRING); // Remove the parameter query window
@@ -1152,7 +1156,7 @@ struct NewGRFWindow : public Window, NewGRFScanCallback {
 			case WID_NS_SET_PARAMETERS: { // Edit parameters
 				if (this->active_sel == nullptr || !this->show_params || this->active_sel->num_valid_params == 0) break;
 
-				OpenGRFParameterWindow(this->active_sel, this->editable);
+				OpenGRFParameterWindow(false, this->active_sel, this->editable);
 				this->InvalidateData(GOID_NEWGRF_CHANGES_MADE);
 				break;
 			}
@@ -1194,6 +1198,7 @@ struct NewGRFWindow : public Window, NewGRFScanCallback {
 
 	void OnDropdownSelect(int widget, int index) override
 	{
+		if (widget != WID_NS_PRESET_LIST) return;
 		if (!this->editable) return;
 
 		ClearGRFConfigList(&this->actives);
@@ -1248,7 +1253,7 @@ struct NewGRFWindow : public Window, NewGRFScanCallback {
 	 * @param data Information about the changed data. @see GameOptionsInvalidationData
 	 * @param gui_scope Whether the call is done from GUI scope. You may not do everything when not in GUI scope. See #InvalidateWindowData() for details.
 	 */
-	void OnInvalidateData(int data = 0, bool gui_scope = true) override
+	void OnInvalidateData([[maybe_unused]] int data = 0, [[maybe_unused]] bool gui_scope = true) override
 	{
 		if (!gui_scope) return;
 		switch (data) {
@@ -1305,8 +1310,7 @@ struct NewGRFWindow : public Window, NewGRFScanCallback {
 		this->SetWidgetDisabledState(WID_NS_APPLY_CHANGES, !((this->editable && this->modified) || _settings_client.gui.newgrf_developer_tools));
 		this->SetWidgetsDisabledState(!this->editable,
 			WID_NS_PRESET_LIST,
-			WID_NS_TOGGLE_PALETTE,
-			WIDGET_LIST_END
+			WID_NS_TOGGLE_PALETTE
 		);
 		this->SetWidgetDisabledState(WID_NS_ADD, !this->editable || this->avail_sel == nullptr || HasBit(this->avail_sel->flags, GCF_INVALID));
 		this->SetWidgetDisabledState(WID_NS_UPGRADE, !this->editable || this->actives == nullptr || !this->CanUpgradeCurrent());
@@ -1315,8 +1319,7 @@ struct NewGRFWindow : public Window, NewGRFScanCallback {
 		this->SetWidgetsDisabledState(disable_all,
 			WID_NS_REMOVE,
 			WID_NS_MOVE_UP,
-			WID_NS_MOVE_DOWN,
-			WIDGET_LIST_END
+			WID_NS_MOVE_DOWN
 		);
 
 		const GRFConfig *selected_config = (this->avail_sel == nullptr) ? this->active_sel : this->avail_sel;
@@ -1379,14 +1382,16 @@ struct NewGRFWindow : public Window, NewGRFScanCallback {
 		return ES_HANDLED;
 	}
 
-	void OnEditboxChanged(int wid) override
+	void OnEditboxChanged(int widget) override
 	{
 		if (!this->editable) return;
 
-		string_filter.SetFilterTerm(this->filter_editbox.text.buf);
-		this->avails.SetFilterState(!string_filter.IsEmpty());
-		this->avails.ForceRebuild();
-		this->InvalidateData(0);
+		if (widget == WID_NS_FILTER) {
+			string_filter.SetFilterTerm(this->filter_editbox.text.buf);
+			this->avails.SetFilterState(!string_filter.IsEmpty());
+			this->avails.ForceRebuild();
+			this->InvalidateData(0);
+		}
 	}
 
 	void OnDragDrop(Point pt, int widget) override
@@ -1596,7 +1601,7 @@ void ShowMissingContentWindow(const GRFConfig *list)
 		ci->md5sum = HasBit(c->flags, GCF_COMPATIBLE) ? c->original_md5sum : c->ident.md5sum;
 		cv.push_back(ci);
 	}
-	ShowNetworkContentListWindow(cv.size() == 0 ? nullptr : &cv, CONTENT_TYPE_NEWGRF);
+	ShowNetworkContentListWindow(cv.empty() ? nullptr : &cv, CONTENT_TYPE_NEWGRF);
 }
 
 Listing NewGRFWindow::last_sorting     = {false, 0};
@@ -1684,7 +1689,7 @@ public:
 		this->smallest_y = ComputeMaxSize(min_acs_height, this->smallest_y + this->resize_y - 1, this->resize_y);
 	}
 
-	void AssignSizePosition(SizingType sizing, uint x, uint y, uint given_width, uint given_height, bool rtl) override
+	void AssignSizePosition(SizingType sizing, int x, int y, uint given_width, uint given_height, bool rtl) override
 	{
 		this->StoreSizePosition(sizing, x, y, given_width, given_height);
 
@@ -1962,13 +1967,13 @@ static const NWidgetPart _nested_newgrf_infopanel_widgets[] = {
 /** Construct nested container widget for managing the lists and the info panel of the NewGRF GUI. */
 NWidgetBase* NewGRFDisplay(int *biggest_index)
 {
-	NWidgetBase *avs = MakeNWidgets(_nested_newgrf_availables_widgets, lengthof(_nested_newgrf_availables_widgets), biggest_index, nullptr);
+	NWidgetBase *avs = MakeNWidgets(std::begin(_nested_newgrf_availables_widgets), std::end(_nested_newgrf_availables_widgets), biggest_index, nullptr);
 
 	int biggest2;
-	NWidgetBase *acs = MakeNWidgets(_nested_newgrf_actives_widgets, lengthof(_nested_newgrf_actives_widgets), &biggest2, nullptr);
+	NWidgetBase *acs = MakeNWidgets(std::begin(_nested_newgrf_actives_widgets), std::end(_nested_newgrf_actives_widgets), &biggest2, nullptr);
 	*biggest_index = std::max(*biggest_index, biggest2);
 
-	NWidgetBase *inf = MakeNWidgets(_nested_newgrf_infopanel_widgets, lengthof(_nested_newgrf_infopanel_widgets), &biggest2, nullptr);
+	NWidgetBase *inf = MakeNWidgets(std::begin(_nested_newgrf_infopanel_widgets), std::end(_nested_newgrf_infopanel_widgets), &biggest2, nullptr);
 	*biggest_index = std::max(*biggest_index, biggest2);
 
 	return new NWidgetNewGRFDisplay(avs, acs, inf);
@@ -1992,11 +1997,11 @@ static const NWidgetPart _nested_newgrf_widgets[] = {
 };
 
 /* Window definition of the manage newgrfs window */
-static WindowDesc _newgrf_desc(
+static WindowDesc _newgrf_desc(__FILE__, __LINE__,
 	WDP_CENTER, "settings_newgrf", 300, 263,
 	WC_GAME_OPTIONS, WC_NONE,
 	0,
-	_nested_newgrf_widgets, lengthof(_nested_newgrf_widgets)
+	std::begin(_nested_newgrf_widgets), std::end(_nested_newgrf_widgets)
 );
 
 /**
@@ -2083,11 +2088,11 @@ static const NWidgetPart _nested_save_preset_widgets[] = {
 };
 
 /** Window description of the preset save window. */
-static WindowDesc _save_preset_desc(
+static WindowDesc _save_preset_desc(__FILE__, __LINE__,
 	WDP_CENTER, "save_preset", 140, 110,
 	WC_SAVE_PRESET, WC_GAME_OPTIONS,
 	WDF_MODAL,
-	_nested_save_preset_widgets, lengthof(_nested_save_preset_widgets)
+	std::begin(_nested_save_preset_widgets), std::end(_nested_save_preset_widgets)
 );
 
 /** Class for the save preset window. */
@@ -2168,7 +2173,7 @@ struct SavePresetWindow : public Window {
 		}
 	}
 
-	void OnClick(Point pt, int widget, int click_count) override
+	void OnClick([[maybe_unused]] Point pt, int widget, [[maybe_unused]] int click_count) override
 	{
 		switch (widget) {
 			case WID_SVP_PRESET_LIST: {
@@ -2224,11 +2229,11 @@ static const NWidgetPart _nested_scan_progress_widgets[] = {
 };
 
 /** Description of the widgets and other settings of the window. */
-static WindowDesc _scan_progress_desc(
+static WindowDesc _scan_progress_desc(__FILE__, __LINE__,
 	WDP_CENTER, nullptr, 0, 0,
 	WC_MODAL_PROGRESS, WC_NONE,
 	0,
-	_nested_scan_progress_widgets, lengthof(_nested_scan_progress_widgets)
+	std::begin(_nested_scan_progress_widgets), std::end(_nested_scan_progress_widgets)
 );
 
 /** Window for showing the progress of NewGRF scanning. */
@@ -2242,7 +2247,7 @@ struct ScanProgressWindow : public Window {
 		this->InitNested(1);
 	}
 
-	void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize) override
+	void UpdateWidgetSize(int widget, Dimension *size, [[maybe_unused]] const Dimension &padding, [[maybe_unused]] Dimension *fill, [[maybe_unused]] Dimension *resize) override
 	{
 		switch (widget) {
 			case WID_SP_PROGRESS_BAR: {

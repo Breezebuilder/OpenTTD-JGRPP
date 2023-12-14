@@ -78,6 +78,13 @@ enum ParticipateSurvey {
 	PS_YES,
 };
 
+/** Right-click to close window actions. */
+enum RightClickClose : uint8_t {
+	RCC_NO = 0,
+	RCC_YES,
+	RCC_YES_EXCEPT_STICKY,
+};
+
 /** Settings related to the difficulty of the game */
 struct DifficultySettings {
 	byte   competitor_start_time;            ///< Unused value, used to load old savegames.
@@ -115,6 +122,12 @@ enum ViewportScrollMode {
 	VSM_MAP_RMB,            ///< Map moves with mouse movement on holding right mouse button, cursor moves.
 	VSM_MAP_LMB,            ///< Map moves with mouse movement on holding left mouse button, cursor moves.
 	VSM_END,                ///< Number of scroll mode settings.
+};
+
+enum ShowSignalDefaultMode {
+	SSDM_OFF,
+	SSDM_ON,
+	SSDM_RESTRICTED_RECOLOUR,
 };
 
 /** Settings related to time display. This may be loaded from the savegame and/or overriden by the client. */
@@ -169,9 +182,8 @@ struct GUISettings : public TimeSettings {
 	ZoomLevel zoom_min;                      ///< minimum zoom out level
 	ZoomLevel zoom_max;                      ///< maximum zoom out level
 	ZoomLevel sprite_zoom_min;               ///< maximum zoom level at which higher-resolution alternative sprites will be used (if available) instead of scaling a lower resolution sprite
-	byte   autosave;                         ///< how often should we do autosaves?
-	uint16 autosave_custom_days;             ///< custom autosave interval in days
-	uint16 autosave_custom_minutes;          ///< custom autosave interval in real-time minutes
+	uint32 autosave_interval;                ///< how often should we do autosaves?
+	bool   autosave_realtime;                ///< autosaves based on real elapsed time (with pause handling)
 	bool   threaded_saves;                   ///< should we do threaded saves?
 	bool   keep_all_autosave;                ///< name the autosave in a different way
 	bool   autosave_on_exit;                 ///< save an autosave when you quit the game, but do not ask "Do you really want to quit?"
@@ -211,7 +223,7 @@ struct GUISettings : public TimeSettings {
 	uint8  departure_conditionals;           ///< how to handle conditional orders
 	bool   departure_show_all_stops;         ///< whether to show stops regardless of loading/unloading done at them
 	bool   departure_merge_identical;        ///< whether to merge identical departures
-	bool   right_mouse_wnd_close;            ///< close window with right click
+	RightClickClose  right_click_wnd_close;  ///< close window with right click
 	bool   pause_on_newgame;                 ///< whether to start new games paused or not
 	SignalGUISettings signal_gui_mode;       ///< select which signal types are shown in the signal GUI
 	SignalCycleSettings cycle_signal_types;  ///< Which signal types to cycle with the build signal tool.
@@ -240,14 +252,15 @@ struct GUISettings : public TimeSettings {
 	bool   show_train_length_in_details;     ///< show train length in vehicle details window top widget
 	bool   show_train_weight_ratios_in_details;   ///< show train weight ratios in vehicle details window top widget
 	bool   show_vehicle_group_in_details;    ///< show vehicle group in vehicle details window top widget
-	bool   show_restricted_signal_default;   ///< Show restricted electric signals using the default sprite
-	bool   show_all_signal_default;          ///< Show all signals using the default sprite
+	bool   show_restricted_signal_recolour;  ///< Show restricted electric signals with recoloured signal post
+	uint8  show_all_signal_default;          ///< Show all signals using the default sprite
 	bool   show_adv_tracerestrict_features;  ///< Show advanced trace restrict features in UI
 	bool   show_progsig_ui;                  ///< Show programmable pre-signals feature in UI
 	bool   show_noentrysig_ui;               ///< Show no-entry signals feature in UI
 	bool   show_veh_list_cargo_filter;       ///< Show cargo list filter in UI
 	uint8  osk_activation;                   ///< Mouse gesture to trigger the OSK.
 	byte   starting_colour;                  ///< default color scheme for the company to start a new game with
+	byte   starting_colour_secondary;        ///< default secondary color scheme for the company to start a new game with
 	bool   show_newgrf_name;                 ///< Show the name of the NewGRF in the build vehicle window
 	bool   show_cargo_in_vehicle_lists;      ///< Show the cargoes the vehicles can carry in the list windows
 	bool   show_wagon_intro_year;            ///< Show the introduction year for wagons in the build vehicle window
@@ -275,10 +288,10 @@ struct GUISettings : public TimeSettings {
 	bool   allow_hiding_waypoint_labels;     ///< Allow hiding waypoint viewport labels
 	uint8  disable_water_animation;          ///< Disable water animation depending on zoom level
 	bool   show_order_occupancy_by_default;  ///< Show order occupancy by default in vehicle order window
-	bool   show_order_management_button;     ///< Show order management button in vehicle order window
 	bool   show_group_hierarchy_name;        ///< Show the full hierarchy in group names
 	bool   show_vehicle_group_hierarchy_name;///< Show the full group hierarchy in vehicle names
 	bool   show_order_number_vehicle_view;   ///< Show order number in vehicle view window
+	bool   hide_default_stop_location;       ///< Hide default stop location for orders
 
 	uint16 console_backlog_timeout;          ///< the minimum amount of time items should be in the console backlog before they will be removed in ~3 seconds granularity.
 	uint16 console_backlog_length;           ///< the minimum amount of items in the console backlog before items will be removed.
@@ -474,6 +487,7 @@ struct ConstructionSettings {
 	bool   extra_dynamite;                   ///< extra dynamite
 	bool   road_stop_on_town_road;           ///< allow building of drive-through road stops on town owned roads
 	bool   road_stop_on_competitor_road;     ///< allow building of drive-through road stops on roads owned by competitors
+	bool   crossing_with_competitor;         ///< allow building of level crossings with competitor roads or rails
 	uint8  raw_industry_construction;        ///< type of (raw) industry construction (none, "normal", prospecting)
 	uint8  industry_platform;                ///< the amount of flat land around an industry
 	bool   freeform_edges;                   ///< allow terraforming the tiles at the map edges

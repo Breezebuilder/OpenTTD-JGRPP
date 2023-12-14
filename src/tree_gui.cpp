@@ -138,7 +138,7 @@ public:
 		}
 	}
 
-	void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize) override
+	void UpdateWidgetSize(int widget, Dimension *size, [[maybe_unused]] const Dimension &padding, [[maybe_unused]] Dimension *fill, [[maybe_unused]] Dimension *resize) override
 	{
 		if (widget >= WID_BT_TYPE_BUTTON_FIRST) {
 			/* Ensure tree type buttons are sized after the largest tree type */
@@ -157,7 +157,7 @@ public:
 		}
 	}
 
-	void OnClick(Point pt, int widget, int click_count) override
+	void OnClick([[maybe_unused]] Point pt, int widget, [[maybe_unused]] int click_count) override
 	{
 		switch (widget) {
 			case WID_BT_TYPE_RANDOM: // tree of random type.
@@ -204,7 +204,7 @@ public:
 		}
 	}
 
-	void OnPlaceObject(Point pt, TileIndex tile) override
+	void OnPlaceObject([[maybe_unused]] Point pt, TileIndex tile) override
 	{
 		if (_game_mode != GM_EDITOR && this->mode == PM_NORMAL) {
 			VpStartPlaceSizing(tile, VPM_X_AND_Y, DDSP_PLANT_TREES);
@@ -213,7 +213,7 @@ public:
 		}
 	}
 
-	void OnPlaceDrag(ViewportPlaceMethod select_method, ViewportDragDropSelectionProcess select_proc, Point pt) override
+	void OnPlaceDrag(ViewportPlaceMethod select_method, [[maybe_unused]] ViewportDragDropSelectionProcess select_proc, [[maybe_unused]] Point pt) override
 	{
 		if (_game_mode != GM_EDITOR && this->mode == PM_NORMAL) {
 			VpSelectTilesWithMethod(pt.x, pt.y, select_method);
@@ -228,7 +228,7 @@ public:
 		}
 	}
 
-	void OnPlaceMouseUp(ViewportPlaceMethod select_method, ViewportDragDropSelectionProcess select_proc, Point pt, TileIndex start_tile, TileIndex end_tile) override
+	void OnPlaceMouseUp([[maybe_unused]] ViewportPlaceMethod select_method, ViewportDragDropSelectionProcess select_proc, [[maybe_unused]] Point pt, TileIndex start_tile, TileIndex end_tile) override
 	{
 		if (_game_mode != GM_EDITOR && this->mode == PM_NORMAL && pt.x != -1 && select_proc == DDSP_PLANT_TREES) {
 			DoCommandP(end_tile, this->tree_to_plant | ((_ctrl_pressed ? 1 : 0) << 8), start_tile, CMD_PLANT_TREE | CMD_MSG(STR_ERROR_CAN_T_PLANT_TREE_HERE));
@@ -308,11 +308,11 @@ static const NWidgetPart _nested_build_trees_widgets[] = {
 	EndContainer(),
 };
 
-static WindowDesc _build_trees_desc(
+static WindowDesc _build_trees_desc(__FILE__, __LINE__,
 	WDP_AUTO, "build_tree", 0, 0,
 	WC_BUILD_TREES, WC_NONE,
 	WDF_CONSTRUCTION,
-	_nested_build_trees_widgets, lengthof(_nested_build_trees_widgets)
+	std::begin(_nested_build_trees_widgets), std::end(_nested_build_trees_widgets)
 );
 
 void ShowBuildTreesToolbar()

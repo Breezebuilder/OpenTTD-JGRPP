@@ -90,6 +90,7 @@
 #include "scope_info.h"
 #include "network/network_survey.h"
 #include "timer/timer.h"
+#include "timer/timer_game_realtime.h"
 #include "timer/timer_game_tick.h"
 #include "network/network_sync.h"
 
@@ -100,9 +101,6 @@
 
 #include <atomic>
 #include <mutex>
-#if defined(__MINGW32__)
-#include "3rdparty/mingw-std-threads/mingw.mutex.h"
-#endif
 
 #include <stdarg.h>
 #include <system_error>
@@ -163,11 +161,10 @@ void CDECL usererror(const char *s, ...)
 	/* In effect, the game ends here. As emscripten_set_main_loop() caused
 	 * the stack to be unwound, the code after MainLoop() in
 	 * openttd_main() is never executed. */
-	EM_ASM(if (window["openttd_syncfs"]) openttd_syncfs());
 	EM_ASM(if (window["openttd_abort"]) openttd_abort());
 #endif
 
-	exit(1);
+	_exit(1);
 }
 
 /**
@@ -266,11 +263,11 @@ static void ShowHelp()
 		"  -e                  = Start Editor\n"
 		"  -g [savegame]       = Start new/save game immediately\n"
 		"  -G seed             = Set random seed\n"
-		"  -n [ip:port#company]= Join network game\n"
+		"  -n host[:port][#company]= Join network game\n"
 		"  -p password         = Password to join server\n"
 		"  -P password         = Password to join company\n"
-		"  -D [ip][:port]      = Start dedicated server\n"
-		"  -l ip[:port]        = Redirect DEBUG()\n"
+		"  -D [host][:port]    = Start dedicated server\n"
+		"  -l host[:port]      = Redirect DEBUG()\n"
 #if !defined(_WIN32)
 		"  -f                  = Fork into the background (dedicated only)\n"
 #endif
@@ -622,7 +619,7 @@ struct AfterNewGRFScan : NewGRFScanCallback {
 		static_assert(sizeof(generation_seed) == sizeof(_settings_game.game_creation.generation_seed));
 	}
 
-	virtual void OnNewGRFsScanned()
+	void OnNewGRFsScanned() override
 	{
 		ResetGRFConfig(false);
 
@@ -681,6 +678,22 @@ struct AfterNewGRFScan : NewGRFScanCallback {
 	}
 };
 
+void PostMainLoop()
+{
+	WaitTillSaved();
+
+	/* only save config if we have to */
+	if (_save_config) {
+		SaveToConfig(STCF_ALL);
+		SaveHotkeysToConfig();
+		WindowDesc::SaveToConfig();
+		SaveToHighScore();
+	}
+
+	/* Reset windowing system, stop drivers, free used memory, ... */
+	ShutdownGame();
+}
+
 #if defined(UNIX)
 extern void DedicatedFork();
 #endif
@@ -695,7 +708,7 @@ static const OptionData _options[] = {
 	 GETOPT_SHORT_VALUE('v'),
 	 GETOPT_SHORT_VALUE('b'),
 	GETOPT_SHORT_OPTVAL('D'),
-	GETOPT_SHORT_OPTVAL('n'),
+	 GETOPT_SHORT_VALUE('n'),
 	 GETOPT_SHORT_VALUE('l'),
 	 GETOPT_SHORT_VALUE('p'),
 	 GETOPT_SHORT_VALUE('P'),
@@ -776,7 +789,7 @@ int openttd_main(int argc, char *argv[])
 			break;
 		case 'f': _dedicated_forks = true; break;
 		case 'n':
-			scanner->connection_string = mgo.opt; // optional IP:port#company parameter
+			scanner->connection_string = mgo.opt; // host:port#company parameter
 			break;
 		case 'l':
 			debuglog_conn = mgo.opt;
@@ -929,15 +942,31 @@ int openttd_main(int argc, char *argv[])
 	InitWindowSystem();
 
 	BaseGraphics::FindSets();
-	if (graphics_set.empty() && !BaseGraphics::ini_set.empty()) graphics_set = BaseGraphics::ini_set;
-	if (!BaseGraphics::SetSet(graphics_set)) {
-		if (!graphics_set.empty()) {
-			BaseGraphics::SetSet({});
-
-			ErrorMessageData msg(STR_CONFIG_ERROR, STR_CONFIG_ERROR_INVALID_BASE_GRAPHICS_NOT_FOUND);
-			msg.SetDParamStr(0, graphics_set);
-			ScheduleErrorMessage(msg);
+	bool valid_graphics_set;
+	if (!graphics_set.empty()) {
+		valid_graphics_set = BaseGraphics::SetSetByName(graphics_set);
+	} else if (BaseGraphics::ini_data.shortname != 0) {
+		graphics_set = BaseGraphics::ini_data.name;
+		valid_graphics_set = BaseGraphics::SetSetByShortname(BaseGraphics::ini_data.shortname);
+		if (valid_graphics_set && !BaseGraphics::ini_data.extra_params.empty()) {
+			GRFConfig &extra_cfg = BaseGraphics::GetUsedSet()->GetOrCreateExtraConfig();
+			if (extra_cfg.IsCompatible(BaseGraphics::ini_data.extra_version)) {
+				extra_cfg.SetParams(BaseGraphics::ini_data.extra_params);
+			}
 		}
+	} else if (!BaseGraphics::ini_data.name.empty()) {
+		graphics_set = BaseGraphics::ini_data.name;
+		valid_graphics_set = BaseGraphics::SetSetByName(BaseGraphics::ini_data.name);
+	} else {
+		valid_graphics_set = true;
+		BaseGraphics::SetSet(nullptr); // ignore error, continue to bootstrap GUI
+	}
+	if (!valid_graphics_set) {
+		BaseGraphics::SetSet(nullptr);
+
+		ErrorMessageData msg(STR_CONFIG_ERROR, STR_CONFIG_ERROR_INVALID_BASE_GRAPHICS_NOT_FOUND);
+		msg.SetDParamStr(0, graphics_set);
+		ScheduleErrorMessage(msg);
 	}
 
 	/* Initialize game palette */
@@ -991,7 +1020,7 @@ int openttd_main(int argc, char *argv[])
 
 	BaseSounds::FindSets();
 	if (sounds_set.empty() && !BaseSounds::ini_set.empty()) sounds_set = BaseSounds::ini_set;
-	if (!BaseSounds::SetSet(sounds_set)) {
+	if (!BaseSounds::SetSetByName(sounds_set)) {
 		if (sounds_set.empty() || !BaseSounds::SetSet({})) {
 			usererror("Failed to find a sounds set. Please acquire a sounds set for OpenTTD. See section 1.4 of README.md.");
 		} else {
@@ -1003,7 +1032,7 @@ int openttd_main(int argc, char *argv[])
 
 	BaseMusic::FindSets();
 	if (music_set.empty() && !BaseMusic::ini_set.empty()) music_set = BaseMusic::ini_set;
-	if (!BaseMusic::SetSet(music_set)) {
+	if (!BaseMusic::SetSetByName(music_set)) {
 		if (music_set.empty() || !BaseMusic::SetSet({})) {
 			usererror("Failed to find a music set. Please acquire a music set for OpenTTD. See section 1.4 of README.md.");
 		} else {
@@ -1039,18 +1068,7 @@ int openttd_main(int argc, char *argv[])
 
 	_general_worker_pool.Stop();
 
-	WaitTillSaved();
-
-	/* only save config if we have to */
-	if (_save_config) {
-		SaveToConfig(STCF_ALL);
-		SaveHotkeysToConfig();
-		WindowDesc::SaveToConfig();
-		SaveToHighScore();
-	}
-
-	/* Reset windowing system, stop drivers, free used memory, ... */
-	ShutdownGame();
+	PostMainLoop();
 	return ret;
 }
 
@@ -1141,11 +1159,16 @@ static void MakeNewGameDone()
 
 	/* Overwrite color from settings if needed
 	 * COLOUR_END corresponds to Random colour */
+
 	if (_settings_client.gui.starting_colour != COLOUR_END) {
 		c->colour = _settings_client.gui.starting_colour;
 		ResetCompanyLivery(c);
 		_company_colours[c->index] = (Colours)c->colour;
 		BuildOwnerLegend();
+	}
+
+	if (_settings_client.gui.starting_colour_secondary != COLOUR_END && HasBit(_loaded_newgrf_features.used_liveries, LS_DEFAULT)) {
+		DoCommandP(0, LS_DEFAULT | 1 << 8, _settings_client.gui.starting_colour_secondary, CMD_SET_COMPANY_COLOUR);
 	}
 
 	OnStartGame(false);
@@ -1324,6 +1347,9 @@ void SwitchToMode(SwitchMode new_mode)
 
 	/* Make sure all AI controllers are gone at quitting game */
 	if (new_mode != SM_SAVE_GAME) AI::KillAll();
+
+	/* When we change mode, reset the autosave. */
+	if (new_mode != SM_SAVE_GAME) ChangeAutosaveFrequency(true);
 
 	/* Transmit the survey if we were in normal-mode and not saving. It always means we leaving the current game. */
 	if (_game_mode == GM_NORMAL && new_mode != SM_SAVE_GAME) _survey.Transmit(NetworkSurveyHandler::Reason::LEAVE);
@@ -2097,8 +2123,8 @@ void StateGameLoop()
 			_scaled_date_ticks++;   // This must update in lock-step with _tick_skip_counter, such that it always matches what SetScaledTickVariables would return.
 		}
 
-		if (_settings_client.gui.autosave == 6 && !(_game_mode == GM_MENU || _game_mode == GM_BOOTSTRAP) &&
-				(_scaled_date_ticks % (_settings_client.gui.autosave_custom_minutes * (_settings_game.economy.tick_rate == TRM_MODERN ? (60000 / 27) : (60000 / 30)))) == 0) {
+		if (!(_game_mode == GM_MENU || _game_mode == GM_BOOTSTRAP) && !_settings_client.gui.autosave_realtime &&
+				(_scaled_date_ticks % (_settings_client.gui.autosave_interval * (_settings_game.economy.tick_rate == TRM_MODERN ? (60000 / 27) : (60000 / 30)))) == 0) {
 			_do_autosave = true;
 			_check_special_modes = true;
 			SetWindowDirty(WC_STATUS_BAR, 0);
@@ -2195,6 +2221,34 @@ static void DoAutosave()
 	DoAutoOrNetsave(GetAutoSaveFiosNumberedSaveName(), true, lt_counter);
 }
 
+/** Interval for regular autosaves. Initialized at zero to disable till settings are loaded. */
+static IntervalTimer<TimerGameRealtime> _autosave_interval({std::chrono::milliseconds::zero(), TimerGameRealtime::AUTOSAVE}, [](auto)
+{
+	/* We reset the command-during-pause mode here, so we don't continue
+	 * to make auto-saves when nothing more is changing. */
+	_pause_mode &= ~PM_COMMAND_DURING_PAUSE;
+
+	_do_autosave = true;
+	DoAutosave();
+	_do_autosave = false;
+	SetWindowDirty(WC_STATUS_BAR, 0);
+});
+
+/**
+ * Reset the interval of the autosave.
+ *
+ * If reset is not set, this does not set the elapsed time on the timer,
+ * so if the interval is smaller, it might result in an autosave being done
+ * immediately.
+ *
+ * @param reset Whether to reset the timer back to zero, or to continue.
+ */
+void ChangeAutosaveFrequency(bool reset)
+{
+	std::chrono::minutes interval = _settings_client.gui.autosave_realtime ? std::chrono::minutes(_settings_client.gui.autosave_interval) : std::chrono::minutes::zero();
+	_autosave_interval.SetInterval({interval, TimerGameRealtime::AUTOSAVE}, reset);
+}
+
 /**
  * Request a new NewGRF scan. This will be executed on the next game-tick.
  * This is mostly needed to ensure NewGRF scans (which are blocking) are
@@ -2224,7 +2278,7 @@ void GameLoopSpecial()
 	extern std::string _switch_baseset;
 	if (!_switch_baseset.empty()) {
 		if (BaseGraphics::GetUsedSet()->name != _switch_baseset) {
-			BaseGraphics::SetSet(_switch_baseset);
+			BaseGraphics::SetSetByName(_switch_baseset);
 
 			ReloadNewGRFData();
 		}
@@ -2253,6 +2307,16 @@ void GameLoop()
 	ProcessAsyncSaveFinish();
 
 	if (unlikely(_check_special_modes)) GameLoopSpecial();
+
+	if (_game_mode == GM_NORMAL) {
+		static auto last_time = std::chrono::steady_clock::now();
+		auto now = std::chrono::steady_clock::now();
+		auto delta_ms = std::chrono::duration_cast<std::chrono::milliseconds>(now - last_time);
+		if (delta_ms.count() != 0) {
+			TimerManager<TimerGameRealtime>::Elapsed(delta_ms);
+			last_time = now;
+		}
+	}
 
 	/* switch game mode? */
 	if (_switch_mode != SM_NONE && !HasModalProgress()) {

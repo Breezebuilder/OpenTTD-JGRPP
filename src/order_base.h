@@ -939,16 +939,13 @@ public:
 	 */
 	inline uint GetNumVehicles() const { return this->num_vehicles; }
 
-	bool IsVehicleInSharedOrdersList(const Vehicle *v) const;
-	int GetPositionInSharedOrderList(const Vehicle *v) const;
-
 	/**
 	 * Adds the given vehicle to this shared order list.
 	 * @note This is supposed to be called after the vehicle has been inserted
 	 *       into the shared vehicle chain.
 	 * @param v vehicle to add to the list
 	 */
-	inline void AddVehicle(Vehicle *v) { ++this->num_vehicles; }
+	inline void AddVehicle([[maybe_unused]] Vehicle *v) { ++this->num_vehicles; }
 
 	void RemoveVehicle(Vehicle *v);
 

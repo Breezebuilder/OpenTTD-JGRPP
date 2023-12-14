@@ -1396,9 +1396,10 @@ static void TriggerIndustryProduction(Industry *i)
 	} else {
 		for (uint ci_in = 0; ci_in < lengthof(i->incoming_cargo_waiting); ci_in++) {
 			uint cargo_waiting = i->incoming_cargo_waiting[ci_in];
-			if (cargo_waiting == 0) continue;
+			if (cargo_waiting == 0 || i->accepts_cargo[ci_in] == CT_INVALID) continue;
 
 			for (uint ci_out = 0; ci_out < lengthof(i->produced_cargo_waiting); ci_out++) {
+				if (i->produced_cargo[ci_out] == CT_INVALID) continue;
 				i->produced_cargo_waiting[ci_out] = ClampTo<uint16_t>(i->produced_cargo_waiting[ci_out] + (cargo_waiting * indspec->input_cargo_multiplier[ci_in][ci_out] / 256));
 			}
 
@@ -1415,8 +1416,8 @@ static void TriggerIndustryProduction(Industry *i)
  * @param front The front of the train
  */
 CargoPayment::CargoPayment(Vehicle *front) :
-	front(front),
-	current_station(front->last_station_visited)
+	current_station(front->last_station_visited),
+	front(front)
 {
 }
 
@@ -2394,8 +2395,8 @@ static void LoadUnloadVehicle(Vehicle *front)
 	}
 	if (dirty_station) {
 		st->MarkTilesDirty(true);
-		SetWindowDirty(WC_STATION_VIEW, last_visited);
-		InvalidateWindowData(WC_STATION_LIST, last_visited);
+		SetWindowDirty(WC_STATION_VIEW, st->index);
+		InvalidateWindowData(WC_STATION_LIST, st->owner);
 	}
 }
 

@@ -52,11 +52,6 @@
 #endif
 
 #if defined(__APPLE__)
-#	if defined(WITH_SDL)
-		/* the mac implementation needs this file included in the same file as main() */
-#		include <SDL.h>
-#	endif
-
 #	include "../macosx/macos.h"
 #endif
 
@@ -67,7 +62,7 @@ bool FiosIsRoot(const char *path)
 	return path[1] == '\0';
 }
 
-void FiosGetDrives(FileList &file_list)
+void FiosGetDrives(FileList &)
 {
 	return;
 }
@@ -213,7 +208,7 @@ void ShowInfo(const char *str)
 }
 
 #if !defined(__APPLE__)
-void ShowOSErrorBox(const char *buf, bool system)
+void ShowOSErrorBox(const char *buf, bool)
 {
 	/* All unix systems, except OSX. Only use escape codes on a TTY. */
 	if (isatty(fileno(stderr))) {
@@ -228,40 +223,6 @@ void NORETURN DoOSAbort()
 	abort();
 }
 #endif
-
-#ifdef WITH_COCOA
-void CocoaSetupAutoreleasePool();
-void CocoaReleaseAutoreleasePool();
-#endif
-
-int CDECL main(int argc, char *argv[])
-{
-	/* Make sure our arguments contain only valid UTF-8 characters. */
-	for (int i = 0; i < argc; i++) StrMakeValidInPlace(argv[i]);
-
-#ifdef WITH_COCOA
-	CocoaSetupAutoreleasePool();
-	/* This is passed if we are launched by double-clicking */
-	if (argc >= 2 && strncmp(argv[1], "-psn", 4) == 0) {
-		argv[1] = nullptr;
-		argc = 1;
-	}
-#endif
-	PerThreadSetupInit();
-	CrashLog::InitialiseCrashLog();
-
-	SetRandomSeed(time(nullptr));
-
-	signal(SIGPIPE, SIG_IGN);
-
-	int ret = openttd_main(argc, argv);
-
-#ifdef WITH_COCOA
-	CocoaReleaseAutoreleasePool();
-#endif
-
-	return ret;
-}
 
 #ifndef WITH_COCOA
 std::optional<std::string> GetClipboardContents()
@@ -304,7 +265,7 @@ void OSOpenBrowser(const char *url)
 }
 #endif /* __APPLE__ */
 
-void SetCurrentThreadName(const char *threadName) {
+void SetCurrentThreadName([[maybe_unused]] const char *threadName) {
 #if defined(__GLIBC__)
 	if (threadName) pthread_setname_np(pthread_self(), threadName);
 #endif /* defined(__GLIBC__) */

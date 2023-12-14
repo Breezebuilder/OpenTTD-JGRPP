@@ -157,7 +157,7 @@ const SlxiSubChunkInfo _sl_xv_sub_chunk_infos[] = {
 	{ XSLFI_ANIMATED_TILE_EXTRA,              XSCF_NULL,                1,   1, "animated_tile_extra",              nullptr, nullptr, nullptr          },
 	{ XSLFI_NEWGRF_INFO_EXTRA,                XSCF_NULL,                1,   1, "newgrf_info_extra",                nullptr, nullptr, nullptr          },
 	{ XSLFI_INDUSTRY_CARGO_ADJ,               XSCF_IGNORABLE_UNKNOWN,   1,   1, "industry_cargo_adj",               nullptr, nullptr, nullptr          },
-	{ XSLFI_REALISTIC_TRAIN_BRAKING,          XSCF_NULL,                9,   9, "realistic_train_braking",          nullptr, nullptr, "VLKA"           },
+	{ XSLFI_REALISTIC_TRAIN_BRAKING,          XSCF_NULL,               10,  10, "realistic_train_braking",          nullptr, nullptr, "VLKA"           },
 	{ XSLFI_INFLATION_FIXED_DATES,            XSCF_IGNORABLE_ALL,       1,   1, "inflation_fixed_dates",            nullptr, nullptr, nullptr          },
 	{ XSLFI_WATER_FLOODING,                   XSCF_NULL,                2,   2, "water_flooding",                   nullptr, nullptr, nullptr          },
 	{ XSLFI_MORE_HOUSES,                      XSCF_NULL,                2,   2, "more_houses",                      nullptr, nullptr, nullptr          },
@@ -193,6 +193,7 @@ const SlxiSubChunkInfo _sl_xv_sub_chunk_infos[] = {
 	{ XSLFI_VARIABLE_TICK_RATE,               XSCF_IGNORABLE_ALL,       1,   1, "variable_tick_rate",               nullptr, nullptr, nullptr          },
 	{ XSLFI_ROAD_VEH_FLAGS,                   XSCF_NULL,                1,   1, "road_veh_flags",                   nullptr, nullptr, nullptr          },
 	{ XSLFI_STATION_TILE_CACHE_FLAGS,         XSCF_IGNORABLE_ALL,       1,   1, "station_tile_cache_flags",         saveSTC, loadSTC, nullptr          },
+
 	{ XSLFI_SCRIPT_INT64,                     XSCF_NULL,                1,   1, "script_int64",                     nullptr, nullptr, nullptr          },
 	{ XSLFI_U64_TICK_COUNTER,                 XSCF_NULL,                1,   1, "u64_tick_counter",                 nullptr, nullptr, nullptr          },
 	{ XSLFI_LINKGRAPH_TRAVEL_TIME,            XSCF_NULL,                1,   1, "linkgraph_travel_time",            nullptr, nullptr, nullptr          },
@@ -207,7 +208,10 @@ const SlxiSubChunkInfo _sl_xv_sub_chunk_infos[] = {
 	{ XSLFI_SAVEGAME_ID,                      XSCF_NULL,                1,   1, "slv_savegame_id",                  nullptr, nullptr, nullptr          },
 	{ XSLFI_NEWGRF_LAST_SERVICE,              XSCF_NULL,                1,   1, "slv_newgrf_last_service",          nullptr, nullptr, nullptr          },
 	{ XSLFI_CARGO_TRAVELLED,                  XSCF_NULL,                1,   1, "slv_cargo_travelled",              nullptr, nullptr, nullptr          },
-	{ XSLFI_NULL, XSCF_NULL, 0, 0, nullptr, nullptr, nullptr, nullptr },// This is the end marker
+
+	{ XSLFI_TABLE_PATS,                       XSCF_NULL,                1,   1, "table_pats",                       nullptr, nullptr, nullptr          },
+
+	{ XSLFI_NULL, XSCF_NULL, 0, 0, nullptr, nullptr, nullptr, nullptr }, // This is the end marker
 };
 
 /**
@@ -591,13 +595,13 @@ static void Save_SLXI()
 
 			if (extra_data_length > 0) {
 				SlWriteUint32(extra_data_length);
-				size_t written = SlGetBytesWritten();
+				[[maybe_unused]] size_t written = SlGetBytesWritten();
 				info->save_proc(info, false);
 				assert(SlGetBytesWritten() == written + extra_data_length);
 			}
 			if (chunk_count > 0) {
 				SlWriteUint32(chunk_count);
-				size_t written = SlGetBytesWritten();
+				[[maybe_unused]] size_t written = SlGetBytesWritten();
 				WriteChunkIdList(info->chunk_list, false);
 				assert(SlGetBytesWritten() == written + (chunk_count * 4));
 			}
@@ -628,9 +632,8 @@ static void Load_SLXI()
 
 	auto version_error = [](StringID str, const char *feature, int64 p1, int64 p2) {
 		char buf[256];
-		int64 args_array[] = { _sl_xv_version_label.empty() ? STR_EMPTY : STR_GAME_SAVELOAD_FROM_VERSION, (int64)(size_t)_sl_xv_version_label.c_str(), (int64)(size_t)feature, p1, p2 };
-		StringParameters tmp_params(args_array);
-		GetStringWithArgs(buf, str, &tmp_params, lastof(buf));
+		auto tmp_params = MakeParameters(_sl_xv_version_label.empty() ? STR_EMPTY : STR_GAME_SAVELOAD_FROM_VERSION, _sl_xv_version_label, feature, p1, p2);
+		GetStringWithArgs(buf, str, tmp_params, lastof(buf));
 		SlError(STR_JUST_RAW_STRING, buf);
 	};
 

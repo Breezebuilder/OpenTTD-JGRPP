@@ -42,11 +42,9 @@
  * does not have stdint.h.
  * For OSX the inclusion is already done in osx_stdafx.h. */
 #if !defined(__APPLE__) && (!defined(_MSC_VER) || _MSC_VER >= 1600)
-#	if !defined(SUNOS)
-#		define __STDC_LIMIT_MACROS
-#		define __STDC_FORMAT_MACROS
-#		include <stdint.h>
-#	endif
+#	define __STDC_LIMIT_MACROS
+#	define __STDC_FORMAT_MACROS
+#	include <stdint.h>
 #endif
 
 #include <algorithm>
@@ -65,7 +63,7 @@
 #	include <sys/types.h>
 #endif
 
-#if defined(SUNOS) || defined(HPUX) || defined(__CYGWIN__)
+#if defined(__CYGWIN__)
 #	include <alloca.h>
 #endif
 
@@ -465,6 +463,10 @@ const char *assert_tile_info(uint32 tile);
 #	define dbg_assert_msg_tile(expression, tile, ...)
 #	define dbg_assert_tile(expression, tile)
 #endif
+
+/* Define JSON_ASSERT, which is used by nlohmann-json. Otherwise the header-file
+ * will re-include assert.h, and reset the assert macro. */
+#define JSON_ASSERT(x) assert(x)
 
 #if defined(MAX_PATH)
 	/* It's already defined, no need to override */

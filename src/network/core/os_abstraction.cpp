@@ -20,9 +20,6 @@
 #include "os_abstraction.h"
 #include "../../string_func.h"
 #include <mutex>
-#if defined(__MINGW32__)
-#include "../../3rdparty/mingw-std-threads/mingw.mutex.h"
-#endif
 
 #include "../../safeguards.h"
 
@@ -131,7 +128,7 @@ bool NetworkError::HasError() const
  * @param d The socket to set the non-blocking more for.
  * @return True if setting the non-blocking mode succeeded, otherwise false.
  */
-bool SetNonBlocking(SOCKET d)
+bool SetNonBlocking([[maybe_unused]] SOCKET d)
 {
 #if defined(_WIN32)
 	u_long nonblocking = 1;
@@ -167,7 +164,7 @@ bool SetBlocking(SOCKET d)
  * @param d The socket to disable the delaying for.
  * @return True if disabling the delaying succeeded, otherwise false.
  */
-bool SetNoDelay(SOCKET d)
+bool SetNoDelay([[maybe_unused]] SOCKET d)
 {
 #ifdef __EMSCRIPTEN__
 	return true;

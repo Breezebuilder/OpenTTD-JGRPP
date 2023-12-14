@@ -79,7 +79,7 @@ struct GraphLegendWindow : Window {
 		DrawString(tr.left, tr.right, CenterBounds(tr.top, tr.bottom, FONT_HEIGHT_NORMAL), STR_COMPANY_NAME_COMPANY_NUM, HasBit(_legend_excluded_companies, cid) ? TC_BLACK : TC_WHITE);
 	}
 
-	void OnClick(Point pt, int widget, int click_count) override
+	void OnClick([[maybe_unused]] Point pt, int widget, [[maybe_unused]] int click_count) override
 	{
 		if (!IsInsideMM(widget, WID_GL_FIRST_COMPANY, MAX_COMPANIES + WID_GL_FIRST_COMPANY)) return;
 
@@ -98,7 +98,7 @@ struct GraphLegendWindow : Window {
 	 * @param data Information about the changed data.
 	 * @param gui_scope Whether the call is done from GUI scope. You may not do everything when not in GUI scope. See #InvalidateWindowData() for details.
 	 */
-	void OnInvalidateData(int data = 0, bool gui_scope = true) override
+	void OnInvalidateData([[maybe_unused]] int data = 0, [[maybe_unused]] bool gui_scope = true) override
 	{
 		if (!gui_scope) return;
 		if (Company::IsValidID(data)) return;
@@ -144,11 +144,11 @@ static const NWidgetPart _nested_graph_legend_widgets[] = {
 	EndContainer(),
 };
 
-static WindowDesc _graph_legend_desc(
+static WindowDesc _graph_legend_desc(__FILE__, __LINE__,
 	WDP_AUTO, "graph_legend", 0, 0,
 	WC_GRAPH_LEGEND, WC_NONE,
 	0,
-	_nested_graph_legend_widgets, lengthof(_nested_graph_legend_widgets)
+	std::begin(_nested_graph_legend_widgets), std::end(_nested_graph_legend_widgets)
 );
 
 static void ShowGraphLegend()
@@ -378,7 +378,6 @@ protected:
 		if (this->num_on_x_axis == 0) return;
 
 		assert(this->num_on_x_axis > 0);
-		assert(this->num_dataset > 0);
 
 		/* draw text strings on the y axis */
 		int64 y_label = interval.highest;
@@ -514,7 +513,7 @@ protected:
 	}
 
 public:
-	void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize) override
+	void UpdateWidgetSize(int widget, Dimension *size, [[maybe_unused]] const Dimension &padding, [[maybe_unused]] Dimension *fill, [[maybe_unused]] Dimension *resize) override
 	{
 		if (widget != this->graph_widget) return;
 
@@ -557,12 +556,12 @@ public:
 		DrawGraph(r);
 	}
 
-	virtual OverflowSafeInt64 GetGraphData(const Company *c, int j)
+	virtual OverflowSafeInt64 GetGraphData(const Company *, int)
 	{
 		return INVALID_DATAPOINT;
 	}
 
-	void OnClick(Point pt, int widget, int click_count) override
+	void OnClick([[maybe_unused]] Point pt, int widget, [[maybe_unused]] int click_count) override
 	{
 		/* Clicked on legend? */
 		if (widget == WID_CV_KEY_BUTTON) ShowGraphLegend();
@@ -578,7 +577,7 @@ public:
 	 * @param data Information about the changed data.
 	 * @param gui_scope Whether the call is done from GUI scope. You may not do everything when not in GUI scope. See #InvalidateWindowData() for details.
 	 */
-	void OnInvalidateData(int data = 0, bool gui_scope = true) override
+	void OnInvalidateData([[maybe_unused]] int data = 0, [[maybe_unused]] bool gui_scope = true) override
 	{
 		if (!gui_scope) return;
 		this->UpdateStatistics(true);
@@ -675,11 +674,11 @@ static const NWidgetPart _nested_operating_profit_widgets[] = {
 	EndContainer(),
 };
 
-static WindowDesc _operating_profit_desc(
+static WindowDesc _operating_profit_desc(__FILE__, __LINE__,
 	WDP_AUTO, "graph_operating_profit", 0, 0,
 	WC_OPERATING_PROFIT, WC_NONE,
 	0,
-	_nested_operating_profit_widgets, lengthof(_nested_operating_profit_widgets)
+	std::begin(_nested_operating_profit_widgets), std::end(_nested_operating_profit_widgets)
 );
 
 
@@ -726,11 +725,11 @@ static const NWidgetPart _nested_income_graph_widgets[] = {
 	EndContainer(),
 };
 
-static WindowDesc _income_graph_desc(
+static WindowDesc _income_graph_desc(__FILE__, __LINE__,
 	WDP_AUTO, "graph_income", 0, 0,
 	WC_INCOME_GRAPH, WC_NONE,
 	0,
-	_nested_income_graph_widgets, lengthof(_nested_income_graph_widgets)
+	std::begin(_nested_income_graph_widgets), std::end(_nested_income_graph_widgets)
 );
 
 void ShowIncomeGraph()
@@ -1033,11 +1032,11 @@ static const NWidgetPart _nested_delivered_cargo_graph_widgets[] = {
 	EndContainer(),
 };
 
-static WindowDesc _delivered_cargo_graph_desc(
+static WindowDesc _delivered_cargo_graph_desc(__FILE__, __LINE__,
 	WDP_AUTO, "graph_delivered_cargo", 0, 0,
 	WC_DELIVERED_CARGO, WC_NONE,
 	0,
-	_nested_delivered_cargo_graph_widgets, lengthof(_nested_delivered_cargo_graph_widgets)
+	std::begin(_nested_delivered_cargo_graph_widgets), std::end(_nested_delivered_cargo_graph_widgets)
 );
 
 void ShowDeliveredCargoGraph()
@@ -1061,7 +1060,7 @@ struct PerformanceHistoryGraphWindow : BaseGraphWindow {
 		return c->old_economy[j].performance_history;
 	}
 
-	void OnClick(Point pt, int widget, int click_count) override
+	void OnClick([[maybe_unused]] Point pt, int widget, [[maybe_unused]] int click_count) override
 	{
 		if (widget == WID_PHG_DETAILED_PERFORMANCE) ShowPerformanceRatingDetail();
 		this->BaseGraphWindow::OnClick(pt, widget, click_count);
@@ -1089,11 +1088,11 @@ static const NWidgetPart _nested_performance_history_widgets[] = {
 	EndContainer(),
 };
 
-static WindowDesc _performance_history_desc(
+static WindowDesc _performance_history_desc(__FILE__, __LINE__,
 	WDP_AUTO, "graph_performance", 0, 0,
 	WC_PERFORMANCE_HISTORY, WC_NONE,
 	0,
-	_nested_performance_history_widgets, lengthof(_nested_performance_history_widgets)
+	std::begin(_nested_performance_history_widgets), std::end(_nested_performance_history_widgets)
 );
 
 void ShowPerformanceHistoryGraph()
@@ -1138,11 +1137,11 @@ static const NWidgetPart _nested_company_value_graph_widgets[] = {
 	EndContainer(),
 };
 
-static WindowDesc _company_value_graph_desc(
+static WindowDesc _company_value_graph_desc(__FILE__, __LINE__,
 	WDP_AUTO, "graph_company_value", 0, 0,
 	WC_COMPANY_VALUE, WC_NONE,
 	0,
-	_nested_company_value_graph_widgets, lengthof(_nested_company_value_graph_widgets)
+	std::begin(_nested_company_value_graph_widgets), std::end(_nested_company_value_graph_widgets)
 );
 
 void ShowCompanyValueGraph()
@@ -1267,12 +1266,14 @@ struct PaymentRatesGraphWindow : BaseGraphWindow {
 		}
 	}
 
-	void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize) override
+	void UpdateWidgetSize(int widget, Dimension *size, [[maybe_unused]] const Dimension &padding, [[maybe_unused]] Dimension *fill, [[maybe_unused]] Dimension *resize) override
 	{
 		if (widget != WID_CPR_MATRIX) {
 			BaseGraphWindow::UpdateWidgetSize(widget, size, padding, fill, resize);
 			return;
 		}
+
+		size->height = FONT_HEIGHT_SMALL + WidgetDimensions::scaled.framerect.Vertical();
 
 		for (const CargoSpec *cs : _sorted_standard_cargo_specs) {
 			SetDParam(0, cs->name);
@@ -1326,7 +1327,7 @@ struct PaymentRatesGraphWindow : BaseGraphWindow {
 		}
 	}
 
-	void OnClick(Point pt, int widget, int click_count) override
+	void OnClick([[maybe_unused]] Point pt, int widget, [[maybe_unused]] int click_count) override
 	{
 		switch (widget) {
 			case WID_CPR_ENABLE_CARGOES:
@@ -1386,7 +1387,7 @@ struct PaymentRatesGraphWindow : BaseGraphWindow {
 	 * @param data Information about the changed data.
 	 * @param gui_scope Whether the call is done from GUI scope. You may not do everything when not in GUI scope. See #InvalidateWindowData() for details.
 	 */
-	void OnInvalidateData(int data = 0, bool gui_scope = true) override
+	void OnInvalidateData([[maybe_unused]] int data = 0, [[maybe_unused]] bool gui_scope = true) override
 	{
 		if (!gui_scope) return;
 		this->SetXAxis();
@@ -1469,7 +1470,7 @@ static const NWidgetPart _nested_cargo_payment_rates_widgets[] = {
 				NWidget(WWT_PUSHTXTBTN, COLOUR_BROWN, WID_CPR_DISABLE_CARGOES), SetDataTip(STR_GRAPH_CARGO_DISABLE_ALL, STR_GRAPH_CARGO_TOOLTIP_DISABLE_ALL), SetFill(1, 0),
 				NWidget(NWID_SPACER), SetMinimalSize(0, 4),
 				NWidget(NWID_HORIZONTAL),
-					NWidget(WWT_MATRIX, COLOUR_BROWN, WID_CPR_MATRIX), SetResize(0, 2), SetMatrixDataTip(1, 0, STR_GRAPH_CARGO_PAYMENT_TOGGLE_CARGO), SetScrollbar(WID_CPR_MATRIX_SCROLLBAR),
+					NWidget(WWT_MATRIX, COLOUR_BROWN, WID_CPR_MATRIX), SetFill(1, 0), SetResize(0, 2), SetMatrixDataTip(1, 0, STR_GRAPH_CARGO_PAYMENT_TOGGLE_CARGO), SetScrollbar(WID_CPR_MATRIX_SCROLLBAR),
 					NWidget(NWID_VSCROLLBAR, COLOUR_BROWN, WID_CPR_MATRIX_SCROLLBAR),
 				EndContainer(),
 				NWidget(NWID_SPACER), SetMinimalSize(0, 24), SetFill(0, 1),
@@ -1484,11 +1485,11 @@ static const NWidgetPart _nested_cargo_payment_rates_widgets[] = {
 	EndContainer(),
 };
 
-static WindowDesc _cargo_payment_rates_desc(
+static WindowDesc _cargo_payment_rates_desc(__FILE__, __LINE__,
 	WDP_AUTO, "graph_cargo_payment_rates", 0, 0,
 	WC_PAYMENT_RATES, WC_NONE,
 	0,
-	_nested_cargo_payment_rates_widgets, lengthof(_nested_cargo_payment_rates_widgets)
+	std::begin(_nested_cargo_payment_rates_widgets), std::end(_nested_cargo_payment_rates_widgets)
 );
 
 
@@ -1533,7 +1534,7 @@ struct PerformanceRatingDetailWindow : Window {
 	uint score_detail_left;
 	uint score_detail_right;
 
-	void UpdateWidgetSize(int widget, Dimension *size, const Dimension &padding, Dimension *fill, Dimension *resize) override
+	void UpdateWidgetSize(int widget, Dimension *size, [[maybe_unused]] const Dimension &padding, [[maybe_unused]] Dimension *fill, [[maybe_unused]] Dimension *resize) override
 	{
 		switch (widget) {
 			case WID_PRD_SCORE_FIRST:
@@ -1670,7 +1671,7 @@ struct PerformanceRatingDetailWindow : Window {
 		}
 	}
 
-	void OnClick(Point pt, int widget, int click_count) override
+	void OnClick([[maybe_unused]] Point pt, int widget, [[maybe_unused]] int click_count) override
 	{
 		/* Check which button is clicked */
 		if (IsInsideMM(widget, WID_PRD_COMPANY_FIRST, WID_PRD_COMPANY_LAST + 1)) {
@@ -1698,7 +1699,7 @@ struct PerformanceRatingDetailWindow : Window {
 	 * @param data the company ID of the company that is going to be removed
 	 * @param gui_scope Whether the call is done from GUI scope. You may not do everything when not in GUI scope. See #InvalidateWindowData() for details.
 	 */
-	void OnInvalidateData(int data = 0, bool gui_scope = true) override
+	void OnInvalidateData([[maybe_unused]] int data = 0, [[maybe_unused]] bool gui_scope = true) override
 	{
 		if (!gui_scope) return;
 		/* Disable the companies who are not active */
@@ -1780,11 +1781,11 @@ static const NWidgetPart _nested_performance_rating_detail_widgets[] = {
 	NWidgetFunction(MakePerformanceDetailPanels),
 };
 
-static WindowDesc _performance_rating_detail_desc(
+static WindowDesc _performance_rating_detail_desc(__FILE__, __LINE__,
 	WDP_AUTO, "league_details", 0, 0,
 	WC_PERFORMANCE_DETAIL, WC_NONE,
 	0,
-	_nested_performance_rating_detail_widgets, lengthof(_nested_performance_rating_detail_widgets)
+	std::begin(_nested_performance_rating_detail_widgets), std::end(_nested_performance_rating_detail_widgets)
 );
 
 void ShowPerformanceRatingDetail()
@@ -2054,11 +2055,11 @@ static const NWidgetPart _nested_station_cargo_widgets[] = {
 	EndContainer(),
 };
 
-static WindowDesc _station_cargo_desc(
+static WindowDesc _station_cargo_desc(__FILE__, __LINE__,
 	WDP_AUTO, "graph_station_cargo", 0, 0,
 	WC_STATION_CARGO, WC_NONE,
 	0,
-	_nested_station_cargo_widgets, lengthof(_nested_station_cargo_widgets)
+	std::begin(_nested_station_cargo_widgets), std::end(_nested_station_cargo_widgets)
 );
 
 

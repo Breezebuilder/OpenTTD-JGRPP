@@ -965,11 +965,11 @@ static const NWidgetPart _nested_program_widgets[] = {
 	EndContainer(),
 };
 
-static WindowDesc _program_desc(
+static WindowDesc _program_desc(__FILE__, __LINE__,
 	WDP_AUTO, "signal_program", 384, 100,
 	WC_SIGNAL_PROGRAM, WC_BUILD_SIGNAL,
 	WDF_CONSTRUCTION,
-	_nested_program_widgets, lengthof(_nested_program_widgets)
+	std::begin(_nested_program_widgets), std::end(_nested_program_widgets)
 );
 
 void ShowSignalProgramWindow(SignalReference ref)

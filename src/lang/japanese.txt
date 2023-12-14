@@ -190,6 +190,9 @@ STR_COLOUR_GREY                                                 :灰
 STR_COLOUR_WHITE                                                :白
 STR_COLOUR_RANDOM                                               :ランダム
 
+###length 17
+
+
 # Units used in OpenTTD
 STR_UNITS_VELOCITY_IMPERIAL                                     :{DECIMAL}mph
 STR_UNITS_VELOCITY_METRIC                                       :{DECIMAL}km/h
@@ -501,7 +504,7 @@ STR_NEWS_MENU_MESSAGE_HISTORY_MENU                              :メッセージ
 STR_NEWS_MENU_DELETE_ALL_MESSAGES                               :メッセージをすべて削除
 
 # About menu
-###length 10
+###length 12
 STR_ABOUT_MENU_LAND_BLOCK_INFO                                  :地域情報
 STR_ABOUT_MENU_SEPARATOR                                        :―――――――――――――――――
 STR_ABOUT_MENU_TOGGLE_CONSOLE                                   :コンソールの表示切替
@@ -903,10 +906,6 @@ STR_NEWS_NEW_VEHICLE_NOW_AVAILABLE_WITH_TYPE                    :{BLACK}{STRING}
 
 STR_NEWS_SHOW_VEHICLE_GROUP_TOOLTIP                             :{BLACK}車両のグループに焦点を合わせたグループウィンドウを開きます
 
-STR_NEWS_STATION_NO_LONGER_ACCEPTS_CARGO                        :{WHITE}{STATION}は今後{STRING}を受入れません
-STR_NEWS_STATION_NO_LONGER_ACCEPTS_CARGO_OR_CARGO               :{WHITE}{STATION}は今後{STRING}と{STRING}を受入れません
-STR_NEWS_STATION_NOW_ACCEPTS_CARGO                              :{WHITE}{STATION}は今後{STRING}を受入れます
-STR_NEWS_STATION_NOW_ACCEPTS_CARGO_AND_CARGO                    :{WHITE}{STATION}は今後{STRING}と{STRING}を受入れます
 
 STR_NEWS_OFFER_OF_SUBSIDY_EXPIRED                               :{BIG_FONT}{BLACK}助成金交付案失効:{}{1:STRING}から{2:STRING}に{0:STRING}を運ぶ便の{}助成金交付案は失効しました
 STR_NEWS_SUBSIDY_WITHDRAWN_SERVICE                              :{BIG_FONT}{BLACK}助成金支払満了:{}{1:STRING}から{2:STRING}に{0:STRING}を運ぶ便の{}助成金は終了しました
@@ -1225,6 +1224,7 @@ STR_CONFIG_SETTING_HORIZONTAL_POS_LEFT                          :左
 STR_CONFIG_SETTING_HORIZONTAL_POS_CENTER                        :中央
 STR_CONFIG_SETTING_HORIZONTAL_POS_RIGHT                         :右
 
+
 STR_CONFIG_SETTING_MAXIMUM_INITIAL_LOAN                         :初期の借入最大額: {STRING}
 STR_CONFIG_SETTING_MAXIMUM_INITIAL_LOAN_HELPTEXT                :初期の借入限度額を設定します (インフレは考慮されません)
 STR_CONFIG_SETTING_MAXIMUM_INITIAL_LOAN_VALUE                   :{CURRENCY_LONG}
@@ -1395,6 +1395,7 @@ STR_CONFIG_SETTING_PLANE_CRASHES_NONE                           :なし
 STR_CONFIG_SETTING_PLANE_CRASHES_REDUCED                        :軽減
 STR_CONFIG_SETTING_PLANE_CRASHES_NORMAL                         :普通
 
+
 STR_CONFIG_SETTING_STOP_ON_TOWN_ROAD                            :街有道路での路側型バス停/荷役所建設: {STRING}
 STR_CONFIG_SETTING_STOP_ON_TOWN_ROAD_HELPTEXT                   :路側型バス停/荷役所を街が所有する道路上に建設できるようにします
 STR_CONFIG_SETTING_STOP_ON_COMPETITOR_ROAD                      :他社の道路上での路側型バス停/荷役所設置: {STRING}
@@ -1406,6 +1407,7 @@ STR_CONFIG_SETTING_INFRASTRUCTURE_MAINTENANCE_HELPTEXT          :有効にする
 
 STR_CONFIG_SETTING_COMPANY_STARTING_COLOUR                      :始めの会社の色: {STRING}
 STR_CONFIG_SETTING_COMPANY_STARTING_COLOUR_HELPTEXT             :開始する前に会社の色を選択してください
+
 
 STR_CONFIG_SETTING_NEVER_EXPIRE_AIRPORTS                        :空港の旧式化撤廃: {STRING}
 STR_CONFIG_SETTING_NEVER_EXPIRE_AIRPORTS_HELPTEXT               :有効にすると、いずれの種類の空港であっても、その開発後であれば永久に建設が可能になります
@@ -1440,7 +1442,6 @@ STR_CONFIG_SETTING_AUTORENEW_MONEY_HELPTEXT                     :輸送機器の
 
 STR_CONFIG_SETTING_ERRMSG_DURATION                              :エラーメッセージの表示時間: {STRING}
 STR_CONFIG_SETTING_ERRMSG_DURATION_HELPTEXT                     :赤地のエラーメッセージが表示されている時間を設定します。注: 致命的なエラーの場合はこの時間を経過しても自動では閉じません。
-STR_CONFIG_SETTING_ERRMSG_DURATION_VALUE                        :{COMMA}秒
 
 STR_CONFIG_SETTING_HOVER_DELAY                                  :ツールチップ表示: {STRING}
 STR_CONFIG_SETTING_HOVER_DELAY_HELPTEXT                         :カーソルをインターフェイス要素に乗せた場合にツールチップが表示されるまでの時間を決定します。"0"に設定するとツールチップは右クリックで表示されるようになります
@@ -1608,9 +1609,7 @@ STR_CONFIG_SETTING_RIGHT_MOUSE_BTN_EMU_OFF                      :切
 
 STR_CONFIG_SETTING_RIGHT_MOUSE_WND_CLOSE                        :右クリックでウィンドウを閉じる: {STRING}
 STR_CONFIG_SETTING_RIGHT_MOUSE_WND_CLOSE_HELPTEXT               :ウィンドウ内で右クリックしてウィンドウを閉じられます。右クリックでツールチップも無効にできます。
-
-STR_CONFIG_SETTING_AUTOSAVE                                     :オートセーブ: {STRING}
-STR_CONFIG_SETTING_AUTOSAVE_HELPTEXT                            :オートセーブの間隔を設定します
+###length 3
 
 STR_CONFIG_SETTING_DATE_FORMAT_IN_SAVE_NAMES                    :セーブ時の日付フォーマット: {STRING}
 STR_CONFIG_SETTING_DATE_FORMAT_IN_SAVE_NAMES_HELPTEXT           :セーブデータ名にデフォルトで付けられる日付の表記法を指定します。注: 日本の場合、「短」と「ISO標準」に違いはありません
@@ -2128,6 +2127,8 @@ STR_ABANDON_GAME_CAPTION                                        :{WHITE}ゲー�
 STR_ABANDON_GAME_QUERY                                          :{YELLOW}このゲームを終了してもよろしいですか?
 STR_ABANDON_SCENARIO_QUERY                                      :{YELLOW}このシナリオを終了してもよろしいですか?
 
+# Help window
+
 # Cheat window
 STR_CHEATS                                                      :{WHITE}チート
 STR_CHEATS_TOOLTIP                                              :{BLACK}以前にこのチートを使用したことがあることを示します
@@ -2609,7 +2610,6 @@ STR_TRANSPARENT_BUILDINGS_TOOLTIP                               :{BLACK}社有�
 STR_TRANSPARENT_BRIDGES_TOOLTIP                                 :{BLACK}橋の透過表示を切り替えます。{}Ctrl+クリックでロックします
 STR_TRANSPARENT_STRUCTURES_TOOLTIP                              :{BLACK}灯台、電波塔などの透過表示を切り替えます。{}Ctrl+クリックでロックします
 STR_TRANSPARENT_CATENARY_TOOLTIP                                :{BLACK}架線の透過表示を切り替えます。{}Ctrl+クリックでロックします
-STR_TRANSPARENT_LOADING_TOOLTIP                                 :{BLACK}積み降ろしインジケーターの透過表示を切り替えます。{}Ctrl+クリックでロックします
 STR_TRANSPARENT_INVISIBLE_TOOLTIP                               :{BLACK}透過表示でなく表示オフにする
 
 # Linkgraph legend window
@@ -4649,7 +4649,7 @@ STR_TEXTFILE_WRAP_TEXT_TOOLTIP                                  :{BLACK}ウィ�
 STR_TEXTFILE_VIEW_README                                        :{BLACK}Readmeを見る
 STR_TEXTFILE_VIEW_CHANGELOG                                     :{BLACK}変更履歴を見る
 STR_TEXTFILE_VIEW_LICENCE                                       :{BLACK}ライセンス
-###length 4
+###length 5
 STR_TEXTFILE_README_CAPTION                                     :{WHITE}{STRING} {STRING}のReadme
 STR_TEXTFILE_CHANGELOG_CAPTION                                  :{WHITE}{STRING} {STRING}の変更履歴
 STR_TEXTFILE_LICENCE_CAPTION                                    :{WHITE}{STRING} {STRING}のライセンス
@@ -4787,7 +4787,6 @@ STR_ERROR_TOO_CLOSE_TO_EDGE_OF_MAP_SUB                          :{WHITE}マッ�
 STR_ERROR_TOO_CLOSE_TO_ANOTHER_TOWN                             :{WHITE}他の街に近すぎます
 STR_ERROR_TOO_MANY_TOWNS                                        :{WHITE}街数の制限を超えています
 STR_ERROR_NO_SPACE_FOR_TOWN                                     :{WHITE}マップに空きスペースがありません
-STR_ERROR_TOWN_EXPAND_WARN_NO_ROADS                             :{WHITE}この街は自動では道路を敷設しません。「設定→環境→街」から道路の敷設を許可できます
 STR_ERROR_ROAD_WORKS_IN_PROGRESS                                :{WHITE}道路補修工事中です
 STR_ERROR_TOWN_CAN_T_DELETE                                     :{WHITE}街を削除できません{}この街名を参照する停留施設・車庫か、街が所有するタイルが除去できません
 STR_ERROR_STATUE_NO_SUITABLE_PLACE                              :{WHITE}街の中心部に像を建てるのに適した場所がありません

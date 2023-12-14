@@ -141,6 +141,9 @@ STR_COLOUR_BROWN                                                :Kannella
 STR_COLOUR_GREY                                                 :Griż
 STR_COLOUR_WHITE                                                :Abjad
 
+###length 17
+
+
 # Units used in OpenTTD
 STR_UNITS_VELOCITY_IMPERIAL                                     :{DECIMAL} mph
 STR_UNITS_VELOCITY_METRIC                                       :{DECIMAL} km/h
@@ -312,7 +315,7 @@ STR_FILE_MENU_SEPARATOR                                         :
 ###length 3
 
 # About menu
-###length 10
+###length 12
 
 # Place in highscore window
 ###length 15
@@ -472,6 +475,7 @@ STR_GAME_OPTIONS_RESOLUTION_OTHER                               :oħrajn
 
 ###length 3
 
+
 ###setting-zero-is-special
 
 
@@ -547,6 +551,8 @@ STR_CONFIG_SETTING_CITY_APPROVAL_HELPTEXT                       :Iddeċiedi kemm
 
 
 
+
+
 STR_CONFIG_SETTING_WARN_LOST_VEHICLE                            :Avza jekk jintilef il-vehikolu: {STRING}
 
 ###length 3
@@ -608,7 +614,7 @@ STR_CONFIG_SETTING_WARN_LOST_VEHICLE                            :Avza jekk jinti
 
 ###length 3
 
-
+###length 3
 
 ###length 3
 
@@ -745,6 +751,8 @@ STR_INTRO_CAPTION                                               :{WHITE}OpenTTD 
 # Quit window
 
 # Abandon game
+
+# Help window
 
 # Cheat window
 STR_CHEAT_CHANGE_DATE_QUERY_CAPT                                :{WHITE}Ibdel is-sena
@@ -1334,7 +1342,7 @@ STR_TIMETABLE_CLEAR_SPEED_TOOLTIP                               :{BLACK}Исчи
 STR_TEXTFILE_VIEW_README                                        :{BLACK}Прикажи ги чита-ми
 STR_TEXTFILE_VIEW_CHANGELOG                                     :{BLACK}Промени се најавите
 STR_TEXTFILE_VIEW_LICENCE                                       :{BLACK}Лиценца
-###length 4
+###length 5
 STR_TEXTFILE_LICENCE_CAPTION                                    :{WHITE}{STRING} лиценца за {STRING}
 
 
